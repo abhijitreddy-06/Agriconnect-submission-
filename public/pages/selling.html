@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Set character encoding and responsive viewport -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Page title -->
+    <title>Sell </title>
+
+    <link rel="stylesheet" href="/css/selling.css">
+</head>
+
+<body>
+    <div id="global-loader">
+        <div class="loader-spinner"></div>
+    </div>
+    <!-- Background styling element -->
+    <div class="body-bg"></div>
+    <header>
+        <!-- Navigation bar -->
+        <nav class="navbar">
+            <!-- Site logo -->
+            <div class="logo">AgriConnect</div>
+            <!-- Navigation links -->
+            <ul class="nav-links">
+                <li><a href="/home">🏠Home</a></li>
+                <li><a href="/upload">🌿Check Plant Health </a></li>
+                <li><a href="/market">🛒Farmers’ Market</a></li>
+                <li><a href="/sell">🛍️Sell Product</a></li>
+                <li><a href="/">Log-out</a></li>
+            </ul>
+            <!-- Dropdown for language selection -->
+            <div class="dropdown">
+                <!-- Button that triggers the language dropdown -->
+                <button class="dropbtn" onclick="toggleDropdown(this)">Language</button>
+                <!-- Dropdown content with available languages -->
+                <div class="dropdown-content">
+                    <a href="">English</a>
+                    <a href="">Kannada</a>
+                </div>
+            </div>
+
+            <!-- Profile button -->
+            <div class="dropdown dropdown1">
+                <button class="dropbtn " onclick="toggleDropdown(this)">Profile</button>
+                <div class="dropdown-content">
+                    <a href="">My Details</a>
+                    <a href="">My Cart</a>
+                    <a href="">My Health</a>
+                    <a href="">My Products</a>
+                </div>
+            </div>
+
+            <!-- Hamburger menu for mobile devices -->
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="form-header">
+            <h1>Sell Farm Products</h1>
+            <p>Reach buyers directly with your agricultural produce</p>
+        </div>
+
+        <form id="productForm" action="/api/products" method="POST" enctype="multipart/form-data">
+            <div class="form-grid">
+                <!-- Product Details -->
+                <div class="form-group">
+                    <label for="productName">Product Name</label>
+                    <input type="text" id="productName" name="productName" class="input-field" required>
+                </div>
+
+                <!-- Price Section -->
+                <div class="form-group">
+                    <label for="productPrice">Price</label>
+                    <div class="input-group">
+                        <input type="number" id="productPrice" name="productPrice" class="input-field" step="0.01"
+                            required>
+                        <div class="unit-toggle">
+                            <button type="button" class="toggle-btn active" data-unit="₹">₹ Rupees</button>
+                            <button type="button" class="toggle-btn" data-unit="$">$ USD</button>
+                        </div>
+                    </div>
+                    <!-- Hidden input to store price currency -->
+                    <input type="hidden" id="priceCurrency" name="priceCurrency" value="₹">
+                </div>
+
+                <!-- Quantity Section -->
+                <div class="form-group">
+                    <label for="productQuantity">Quantity</label>
+                    <div class="input-group">
+                        <input type="number" id="productQuantity" name="productQuantity" class="input-field" step="0.01"
+                            required>
+                        <div class="unit-toggle">
+                            <button type="button" class="toggle-btn active" data-unit="kilogram">Kilograms</button>
+                            <button type="button" class="toggle-btn" data-unit="gram">Grams</button>
+                        </div>
+                    </div>
+                    <!-- Hidden input to store quantity unit -->
+                    <input type="hidden" id="quantityUnit" name="quantityUnit" value="kilogram">
+                </div>
+
+                <!-- Quality Selector -->
+                <div class="form-group">
+                    <label for="productQuality">Quality Grade</label>
+                    <select id="productQuality" name="productQuality" class="input-field" required>
+                        <option value="Premium">Premium Grade</option>
+                        <option value="Standard">Standard Grade</option>
+                        <option value="Economy">Economy Grade</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Image Upload Section -->
+            <div class="form-group">
+                <label>Add Product Photos</label>
+                <div class="image-source">
+                    <div class="source-btn active" data-source="gallery">📁 From Gallery</div>
+                    <div class="source-btn" data-source="camera">📸 Take Photo</div>
+                </div>
+                <input type="file" id="productImage" name="productImage" class="input-field" accept="image/*" multiple
+                    style="margin-top: 1rem;" required>
+            </div>
+
+            <!-- Additional Info -->
+            <div class="form-group">
+                <label for="productDescription">Product Description</label>
+                <textarea id="productDescription" name="productDescription" class="input-field" rows="4"
+                    placeholder="Describe your product..." required></textarea>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="form-group">
+                <label for="contactNumber">Contact Number</label>
+                <input type="tel" id="contactNumber" name="contactNumber" class="input-field" required>
+            </div>
+
+            <button type="submit" class="submit-btn">List Product →</button>
+        </form>
+    </div>
+
+    <!-- Footer section -->
+    <footer class="footer">
+        <p>&copy; 2025 AgriConnect. All rights reserved.</p>
+    </footer>
+
+<script src="/js/selling.js"></script>
+</body>
+
+</html>

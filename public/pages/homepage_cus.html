@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Meta tags for character set and responsive design -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Page title -->
+    <title>Customer Home</title>
+
+
+    <!-- Link to Google Fonts (Nunito) and external loading CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600&display=swap" rel="stylesheet" />
+    <link href="/css/homepage-cus.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Global loader element -->
+    <div id="global-loader">
+        <div class="loader-spinner"></div>
+    </div>
+    <!-- Background element -->
+    <div class="body-bg"></div>
+    <!-- Header section with navigation -->
+    <header>
+        <nav class="navbar">
+            <!-- Logo -->
+            <div class="logo">AgriConnect</div>
+
+            <!-- Navigation links -->
+            <ul class="nav-links">
+                <li><a href="/homecus">🏠Home</a></li>
+                <li><a href="/marketcus">🛒Farmers’ Market</a></li>
+                <li><a href="/">Log-out</a></li>
+            </ul>
+
+            <!-- Dropdown for language selection -->
+            <div class="dropdown">
+                <!-- Button triggers the language dropdown -->
+                <button class="dropbtn" onclick="toggleDropdown(this)">
+                    Language
+                </button>
+                <!-- Dropdown content with available languages -->
+                <div class="dropdown-content">
+                    <a href="">English</a>
+                    <a href="">Kannada</a>
+                </div>
+            </div>
+
+            <!-- Profile dropdown -->
+            <div class="dropdown dropdown1">
+                <button class="dropbtn" onclick="toggleDropdown(this)">
+                    Profile
+                </button>
+                <div class="dropdown-content">
+                    <a href="">My Details</a>
+                    <a href="">My Cart</a>
+                </div>
+            </div>
+
+            <!-- Hamburger menu for mobile devices -->
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </nav>
+    </header>
+    <!-- Main content section -->
+    <main>
+        <!-- Main container for welcome message and call-to-action -->
+        <div class="main-container">
+            <h1>Welcome to AgriConnect!</h1>
+            <p>
+                Discover the world of agriculture with our powerful and user-friendly
+                platform.
+            </p>
+            <!-- Button to navigate to the Farmers’ Market page -->
+            <button class="main-button" onclick="window.location.href='/marketcus'">
+                Farmer market
+            </button>
+        </div>
+    </main>
+
+    <!-- Footer section -->
+    <footer class="footer">
+        <p>&copy; 2025 AgriConnect. All rights reserved.</p>
+    </footer>
+<script src="/js/homepage-cus.js"></script>
+</body>
+
+</html>

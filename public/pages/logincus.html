@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Meta and title information -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Login</title>
+
+
+
+    <!-- Link to Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+        integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Google Fonts: Nunito -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/login-cus.css">
+
+
+
+
+
+
+</head>
+
+<body>
+    <!-- Global loader element -->
+    <div id="global-loader">
+        <div class="loader-spinner"></div>
+    </div>
+
+    <!-- Background element for styling purposes -->
+    <div class="body-bg"></div>
+
+    <!-- Header with Navigation Bar -->
+    <header>
+        <nav class="navbar">
+            <!-- Site Logo -->
+            <div class="logo">AgriConnect</div>
+            <!-- Navigation Links -->
+            <ul class="nav-links">
+                <li><a href="/" data-translate>Home</a></li>
+            </ul>
+            <!-- Button to redirect to Farmer Signup -->
+            <button class="login-btn" onclick="window.location.href='/signup'">Sign Up as Farmer</button>
+            <!-- Hamburger menu for mobile navigation -->
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main content: Login Form -->
+    <main>
+        <!-- Login form container -->
+        <div class="logincontainer">
+            <div class="login-container">
+                <!-- Login form for Customer -->
+                <form class="login-form" action="/logincus" method="post">
+                    <h2>Login as Customer</h2>
+                    <!-- Phone number input -->
+                    <div class="input-group">
+                        <label for="phone">Phone number</label>
+                        <input type="tel" id="phone" name="phone" placeholder="Enter your Phone number"
+                            pattern="[0-9]{10}" required>
+                    </div>
+                    <!-- Password input -->
+                    <div class="input-group">
+                        <label for="password">Password</label>
+                        <div class="password-container">
+                            <input type="password" id="password" name="password" placeholder="Enter Password" required>
+                        </div>
+                    </div>
+                    <!-- Submit button -->
+                    <button type="submit" class="login-btnn">Login</button>
+                    <!-- Signup link -->
+                    <p class="signup-link">Don't have an account? <a href="/signupcus">Sign up</a></p>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="footer">
+        <p>&copy; 2025 AgriConnect. All rights reserved.</p>
+    </footer>
+
+<script src="/js/login-cus.js"></script>
+</body>
+
+</html>

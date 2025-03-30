@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Meta tags and title -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Customer Market</title>
+
+    <!-- External CSS: Font Awesome and Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+        integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600&display=swap" rel="stylesheet" />
+<link href="/css/farmer-market-cus.css" rel="stylesheet">
+
+</head>
+
+<body>
+    <!-- Global loader shown while content is loading -->
+    <div id="global-loader">
+        <div class="loader-spinner"></div>
+    </div>
+
+    <!-- Header section with navigation -->
+    <header>
+        <nav class="navbar">
+            <!-- Logo for AgriConnect -->
+            <div class="logo">AgriConnect</div>
+
+            <!-- Navigation links -->
+            <ul class="nav-links">
+                <li><a href="/homecus">🏠Home</a></li>
+                <li><a href="/marketcus">🛒Farmers’ Market</a></li>
+                <li><a href="/">Log-out</a></li>
+            </ul>
+
+            <!-- Dropdown for language selection -->
+            <div class="dropdown">
+                <!-- Button that triggers the language dropdown -->
+                <button class="dropbtn" onclick="toggleDropdown(this)">Language</button>
+                <!-- Dropdown content with available languages -->
+                <div class="dropdown-content">
+                    <a href="">English</a>
+                    <a href="">Kannada</a>
+                </div>
+            </div>
+
+            <!-- Profile dropdown -->
+            <div class="dropdown dropdown1">
+                <button class="dropbtn" onclick="toggleDropdown(this)">Profile</button>
+                <div class="dropdown-content">
+                    <a href="">My Details</a>
+                    <a href="">My Cart</a>
+                </div>
+            </div>
+
+            <!-- Hamburger menu for mobile devices -->
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+
+            <!-- Search container (uncomment if needed) -->
+            <!-- <div class="search-container">
+          <input type="text" placeholder="Search here..." class="search-input">
+        </div> -->
+
+            <!-- Active search container -->
+            <div class="search-container">
+                <div class="input-group">
+                    <input type="text" class="search-input" id="searchInput" placeholder="Search..." />
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero section with banner image and text -->
+    <div class="hero-section">
+        <div class="hero-text">
+            <h1>Farmer Bazaar is One of India’s Largest Marketplace.</h1>
+            <p>User Can BUY, SELL & RENT Agriculture.</p>
+        </div>
+        <!-- Replace /images/farmer-bazaar.jpg with your actual banner image path -->
+        <img src="/farmer-bg" alt="Farmer Bazaar" class="hero-image" />
+    </div>
+
+    <!-- Main container for marketplace content -->
+    <div class="container">
+        <!-- Marketplace section where product cards will be dynamically injected -->
+        <div class="marketplace" id="marketplace">
+            <!-- Product cards will be injected here -->
+        </div>
+    </div>
+
+    <!-- Modal for detailed product view -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <!-- Close button for the modal -->
+            <span class="close" onclick="closeModal()">&times;</span>
+            <!-- Product image -->
+            <img id="modalImage" src="" alt="Product Image" />
+            <!-- Product name -->
+            <h3 id="modalName"></h3>
+            <!-- Product price -->
+            <p id="modalPrice"></p>
+            <!-- Product quantity -->
+            <p id="modalQuantity"></p>
+            <!-- Product quality -->
+            <p id="modalQuality"></p>
+            <!-- Product description -->
+            <p id="modalDescription"></p>
+            <!-- Contact details for the product -->
+            <p id="modalContact"></p>
+        </div>
+    </div>
+
+    <!-- Footer section -->
+    <footer class="footer">
+        <p>&copy; 2025 AgriConnect. All rights reserved.</p>
+    </footer>
+
+<script src="/js/farmer-market-cus.js"></script>
+</body>
+
+</html>

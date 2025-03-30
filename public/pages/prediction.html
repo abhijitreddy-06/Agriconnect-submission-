@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Basic Meta Tags -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Leaf Disease Analyzer - Prediction Details</title>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js"></script>
+  <!-- Main CSS & Reset -->
+
+    <link rel="stylesheet" href="/css/prediction.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css">
+        
+</head>
+
+<body>
+
+  <!-- Header / Navbar -->
+  <header>
+    <nav class="navbar">
+      <div class="logo">AgriConnect</div>
+      <ul class="nav-links">
+        <li><a href="/home">🏠Home</a></li>
+        <li><a href="/upload">🌿Check Plant Health</a></li>
+        <li><a href="/market">🛒Farmers’ Market</a></li>
+        <li><a href="/sell">🛍️Sell Product</a></li>
+        <li><a href="/">Log-out</a></li>
+      </ul>
+      <!-- Language Dropdown -->
+      <div class="dropdown">
+        <button class="dropbtn" onclick="toggleDropdown(this)">Language</button>
+        <div class="dropdown-content">
+          <a href="#">English</a>
+          <a href="#">Kannada</a>
+        </div>
+      </div>
+      <!-- Profile Dropdown -->
+      <div class="dropdown">
+        <button class="dropbtn" onclick="toggleDropdown(this)">Profile</button>
+        <div class="dropdown-content">
+          <a href="#">My Details</a>
+          <a href="#">My Cart</a>
+          <a href="#">My Health</a>
+          <a href="#">My Products</a>
+        </div>
+      </div>
+      <!-- Hamburger for Mobile -->
+      <div class="hamburger" id="hamburger">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </div>
+    </nav>
+  </header>
+
+<!-- Loading Overlay -->
+<!-- <div id="loadingOverlay">
+  <svg class="leaf-spinner" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+    <path
+      d="M17 8C8 10 5.9 16.8 3 22c5-3 8-6.3 10-9 2.7 2.7 5 5 8 8-1-2-3-6-10-11zm-5-6c-2 2-3 5-3 8l3 3c1-1 1-2 2-2s1 1 2 2c3-3 3-7 1-10-1-1-4-1-5-1z" />
+  </svg>
+  <div class="loading-text">Analyzing Leaf Structure...</div>
+</div> -->
+
+<!-- Main Content -->
+<body>
+  <!-- Loading Overlay -->
+<div id="global-loader">
+  <div class="loader-spinner"></div>
+</div>
+
+  <!-- Prediction Content -->
+<main>
+  <!-- Replace existing prediction-card with this -->
+  <div class="prediction-card">
+    <div id="analysisResults">
+      <!-- Content will be injected here -->
+    </div>
+    <button id="newPrediction" class="action-button" href="/upload">
+      🍃 Start New Analysis
+    </button>
+  </div>
+</main>
+    <!-- Footer section -->
+    <footer class="footer">
+        <p>&copy; 2025 AgriConnect. All rights reserved.</p>
+    </footer>
+
+
+
+
+  <!-- Place these in your <head> or just before your </body> -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.6/dist/purify.min.js"></script>
+<script src="/js/prediction.js"></script>
+</body>
+
+</html>
