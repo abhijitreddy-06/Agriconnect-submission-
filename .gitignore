@@ -4,6 +4,10 @@ node_modules/
 # Environment variables (keep your secrets safe)
 .env
 
+# Uploaded files (keep .gitkeep)
+public/uploads/*
+!public/uploads/.gitkeep
+
 # Logs
 *.log
 npm-debug.log*
@@ -30,5 +34,3 @@ temp/
 
 # Coverage directory for tests
 coverage/
-
-# Other local configuration files (if any)
