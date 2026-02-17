@@ -1,4 +1,8 @@
 import pg from "pg";
+import dns from "dns";
+
+// Force IPv4 DNS resolution — Render free-tier can't reach Supabase over IPv6
+dns.setDefaultResultOrder("ipv4first");
 
 const { Pool } = pg;
 

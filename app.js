@@ -20,6 +20,9 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Trust first proxy (Render, Railway, etc.) — required for express-rate-limit
+app.set("trust proxy", 1);
+
 // Security headers
 app.use(
   helmet({
