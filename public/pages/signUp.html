@@ -19,39 +19,40 @@
 
     <header></header>
 
-    <!-- Main content area with sign-up form -->
     <main>
-        <div class="signup-container">
-            <div class="signup-box">
-                <form class="signup-form" method="post" action="#" onsubmit="return false;">
-                    <h2>Sign up as Farmer</h2>
-                    <!-- Input for user's name -->
-                    <div class="input-group">
-                        <label for="username">Your Name</label>
-                        <input type="text" id="username" name="username" placeholder="Enter your Name..." required>
-                    </div>
-                    <!-- Input for phone number -->
-                    <div class="input-group">
-                        <label for="phone">Phone number</label>
-                        <input type="tel" id="phone" name="phone" placeholder="Enter your Phone number..." required>
-                    </div>
-                    <!-- Input for creating a password -->
-                    <div class="input-group">
-                        <label for="password">Create Password</label>
-                        <input type="password" id="password" name="password" placeholder="Create a Password..."
-                            required>
-                    </div>
-                    <!-- Submit button -->
-                    <button type="submit" class="signup-btn">Sign Up</button>
-                    <!-- Link to login page for existing users -->
-                    <p>Already have an account? <a href="/login/farmer" class="signup-link">Login</a></p>
-                </form>
+        <div class="auth-wrapper">
+            <div class="auth-brand">
+                <div class="brand-content">
+                    <i class="fas fa-seedling brand-icon"></i>
+                    <h2>Join AgriConnect</h2>
+                    <p>Start selling your produce directly to customers. AI crop diagnostics included free.</p>
+                </div>
+            </div>
+            <div class="auth-form-side">
+                <div class="signup-box">
+                    <form class="signup-form" method="post" action="#" onsubmit="return false;">
+                        <h2>Sign up as Farmer</h2>
+                        <div class="input-group">
+                            <label for="username">Your Name</label>
+                            <input type="text" id="username" name="username" placeholder="Enter your Name..." required>
+                        </div>
+                        <div class="input-group">
+                            <label for="phone">Phone number</label>
+                            <input type="tel" id="phone" name="phone" placeholder="Enter your Phone number..." required>
+                        </div>
+                        <div class="input-group">
+                            <label for="password">Create Password</label>
+                            <input type="password" id="password" name="password" placeholder="Create a Password..." required>
+                        </div>
+                        <button type="submit" class="signup-btn">Sign Up</button>
+                        <p>Already have an account? <a href="/login/farmer" class="signup-link">Login</a></p>
+                    </form>
+                </div>
             </div>
         </div>
     </main>
 
-    <!-- Footer section -->
-<footer class="footer"></footer>
+    <footer class="footer"></footer>
 
     <script src="/js/auth.js"></script>
     <script src="/js/components.js"></script>

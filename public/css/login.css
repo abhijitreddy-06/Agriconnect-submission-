@@ -3,26 +3,92 @@
    Global styles handled by global.css
    ═══════════════════════════════════════════════════ */
 
-/* ── Outer wrapper: vertically & horizontally centered ── */
-.logincontainer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: calc(100vh - 160px);
-  padding: 2rem 1rem;
+/* ── Two-Panel Auth Layout ── */
+.auth-wrapper {
+  max-width: 900px;
+  margin: 3rem auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-xl);
+  opacity: 0;
+  animation: fadeIn 0.8s ease forwards;
 }
 
-/* ── Glassmorphism card ── */
+/* ── Brand Panel (Left) ── */
+.auth-brand {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 60%, var(--color-accent) 100%);
+  padding: 3rem 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-brand::before {
+  content: '';
+  position: absolute;
+  top: -60px;
+  right: -60px;
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.auth-brand::after {
+  content: '';
+  position: absolute;
+  bottom: -40px;
+  left: -40px;
+  width: 150px;
+  height: 150px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.brand-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+
+.brand-icon {
+  font-size: 2.5rem;
+  color: var(--color-secondary);
+  margin-bottom: 1.25rem;
+  display: block;
+}
+
+.brand-content h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 0.75rem;
+}
+
+.brand-content p {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.6;
+}
+
+/* ── Form Panel (Right) ── */
+.auth-form-side {
+  background: var(--color-surface-solid);
+  padding: 3rem 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .login-container {
-  background: var(--color-surface);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  padding: 2.5rem 2rem;
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg);
-  border: 1px solid var(--color-border);
   width: 100%;
-  max-width: 440px;
+  max-width: 380px;
   text-align: center;
 }
 
@@ -31,7 +97,7 @@
   margin-bottom: 1.5rem;
   color: var(--color-primary);
   font-family: "Nunito", sans-serif;
-  font-size: 1.75rem;
+  font-size: 1.65rem;
   font-weight: 800;
 }
 
@@ -174,8 +240,30 @@
 
 /* ── Responsive: tablets ── */
 @media (max-width: 768px) {
-  .login-container {
-    max-width: 400px;
+  .auth-wrapper {
+    grid-template-columns: 1fr;
+    margin: 1.5rem 1rem;
+    border-radius: var(--radius-lg);
+  }
+
+  .auth-brand {
+    padding: 2rem 1.5rem;
+  }
+
+  .brand-icon {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .brand-content h2 {
+    font-size: 1.4rem;
+  }
+
+  .brand-content p {
+    font-size: 0.88rem;
+  }
+
+  .auth-form-side {
     padding: 2rem 1.5rem;
   }
 
@@ -186,15 +274,21 @@
 
 /* ── Responsive: phones ── */
 @media (max-width: 480px) {
-  .logincontainer {
-    padding: 1.5rem 0.75rem;
-    min-height: calc(100vh - 120px);
+  .auth-wrapper {
+    margin: 1rem 0.5rem;
+    border-radius: var(--radius-md);
   }
 
-  .login-container {
-    width: 92%;
+  .auth-brand {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .brand-content p {
+    display: none;
+  }
+
+  .auth-form-side {
     padding: 1.75rem 1.25rem;
-    border-radius: var(--radius-lg);
   }
 
   .login-form h2 {

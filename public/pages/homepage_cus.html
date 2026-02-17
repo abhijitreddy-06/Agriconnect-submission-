@@ -19,26 +19,40 @@
 
     <header></header>
 
-    <!-- Main content section -->
     <main>
-        <!-- Main container for welcome message and call-to-action -->
-        <div class="main-container">
-            <h1>Welcome to AgriConnect!</h1>
-            <p>
-                Discover the world of agriculture with our powerful and user-friendly
-                platform.
-            </p>
-            <!-- Button to navigate to the Farmers’ Market page -->
-            <button class="main-button" onclick="window.location.href='/marketplace/customer'">
-                Farmer market
-            </button>
-        </div>
+        <section class="welcome-banner">
+            <h1>Welcome back!</h1>
+            <p>Browse fresh products from local farmers and get them delivered to your door.</p>
+        </section>
+
+        <section class="dashboard-grid">
+            <a href="/marketplace/customer" class="dash-card">
+                <div class="dash-icon warm-icon">
+                    <i class="fas fa-store"></i>
+                </div>
+                <h3>Farmer Bazaar</h3>
+                <p>Explore fresh produce direct from farmers</p>
+            </a>
+            <a href="/cart" class="dash-card">
+                <div class="dash-icon accent-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <h3>My Cart</h3>
+                <p>Review items and proceed to checkout</p>
+            </a>
+            <a href="/orders" class="dash-card">
+                <div class="dash-icon primary-icon">
+                    <i class="fas fa-box"></i>
+                </div>
+                <h3>Orders</h3>
+                <p>Track all your current and past orders</p>
+            </a>
+        </section>
     </main>
 
-    <!-- Footer section -->
-<footer class="footer"></footer>
+    <footer class="footer"></footer>
 
-<script src="/js/auth.js"></script>
+    <script src="/js/auth.js"></script>
     <script src="/js/components.js"></script>
     <script src="/js/homepage-cus.js"></script>
 </body>

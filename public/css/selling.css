@@ -3,6 +3,44 @@
    Global styles handled by global.css
    ═══════════════════════════════════════════════════ */
 
+/* ── Page Banner ── */
+.page-banner {
+  max-width: 600px;
+  margin: 2.5rem auto 0;
+  padding: 2.5rem 2rem;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 60%, var(--color-accent) 100%);
+  border-radius: var(--radius-xl);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  animation: fadeIn 0.8s ease forwards;
+}
+
+.page-banner::before {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 160px;
+  height: 160px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.page-banner h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 0.4rem;
+}
+
+.page-banner p {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
 /* ── Form Container (Glassmorphism Card) ── */
 .container {
   max-width: 600px;
@@ -208,6 +246,16 @@ label {
 
 /* ── Responsive: 768px ── */
 @media (max-width: 768px) {
+  .page-banner {
+    margin: 1.5rem 1rem 0;
+    padding: 2rem 1.5rem;
+    border-radius: var(--radius-lg);
+  }
+
+  .page-banner h1 {
+    font-size: 1.5rem;
+  }
+
   .form-grid {
     grid-template-columns: 1fr;
   }
@@ -229,6 +277,20 @@ label {
 
 /* ── Responsive: 480px ── */
 @media (max-width: 480px) {
+  .page-banner {
+    margin: 1rem 0.5rem 0;
+    padding: 1.5rem 1.25rem;
+    border-radius: var(--radius-md);
+  }
+
+  .page-banner h1 {
+    font-size: 1.3rem;
+  }
+
+  .page-banner p {
+    font-size: 0.85rem;
+  }
+
   .container {
     padding: 1.25rem;
     margin: 0.5rem;

@@ -19,41 +19,42 @@
 
     <header></header>
 
-    <!-- Main content section -->
     <main>
-        <!-- Container for the login form -->
-        <div class="logincontainer">
-            <div class="login-container">
-                <!-- Login form for Farmer login -->
-                <form class="login-form" action="#" method="post" onsubmit="return false;">
-                    <h2>Login as Farmer</h2>
+        <div class="auth-wrapper">
+            <div class="auth-brand">
+                <div class="brand-content">
+                    <i class="fas fa-seedling brand-icon"></i>
+                    <h2>AgriConnect</h2>
+                    <p>Empowering farmers with AI-powered crop health diagnosis and a direct-to-consumer marketplace.</p>
+                </div>
+            </div>
+            <div class="auth-form-side">
+                <div class="login-container">
+                    <form class="login-form" action="#" method="post" onsubmit="return false;">
+                        <h2>Login as Farmer</h2>
 
-                    <!-- Input group for phone number -->
-                    <div class="input-group">
-                        <label for="phone">Phone number</label>
-                        <input type="tel" id="phone" name="phone" placeholder="Enter your Phone number" required>
-                    </div>
-
-                    <!-- Input group for password -->
-                    <div class="input-group">
-                        <label for="password">Password</label>
-                        <div class="password-container">
-                            <input type="password" id="password" name="password" placeholder="Enter Password">
+                        <div class="input-group">
+                            <label for="phone">Phone number</label>
+                            <input type="tel" id="phone" name="phone" placeholder="Enter your Phone number" required>
                         </div>
-                    </div>
 
-                    <!-- Login submission button -->
-                    <button type="submit" class="login-btnn">Login</button>
+                        <div class="input-group">
+                            <label for="password">Password</label>
+                            <div class="password-container">
+                                <input type="password" id="password" name="password" placeholder="Enter Password">
+                            </div>
+                        </div>
 
-                    <!-- Link to the sign-up page -->
-                    <p class="signup-link">Don't have an account? <a href="/signup/farmer">Sign up</a></p>
-                </form>
+                        <button type="submit" class="login-btnn">Login</button>
+
+                        <p class="signup-link">Don't have an account? <a href="/signup/farmer">Sign up</a></p>
+                    </form>
+                </div>
             </div>
         </div>
     </main>
 
-    <!-- Footer Section -->
-<footer class="footer"></footer>
+    <footer class="footer"></footer>
 
     <script src="/js/auth.js"></script>
     <script src="/js/components.js"></script>

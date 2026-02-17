@@ -19,28 +19,45 @@
 
     <header></header>
 
-    <!-- Main content section -->
     <main>
-        <!-- Main container for welcome message and call-to-action -->
-        <div class="main-container">
-            <h1>Welcome to AgriConnect!</h1>
-            <p>
-                Discover the world of agriculture with our powerful and user-friendly
-                platform.
-            </p>
-            <!-- Button to navigate to the Check Plant Health page -->
-            <button class="main-button" onclick="window.location.href='/plant-health'">
-                Get Solution for your Plants Problem
-            </button>
-            <!-- Button to navigate to the Farmers’ Market page -->
-            <button class="main-button" onclick="window.location.href='/marketplace/farmer'">
-                Farmer market
-            </button>
-        </div>
+        <section class="welcome-banner">
+            <h1>Welcome back, Farmer!</h1>
+            <p>Manage your crops, sell at the marketplace, and grow your business.</p>
+        </section>
+
+        <section class="dashboard-grid">
+            <a href="/plant-health" class="dash-card">
+                <div class="dash-icon accent-icon">
+                    <i class="fas fa-leaf"></i>
+                </div>
+                <h3>Plant Health</h3>
+                <p>AI-powered crop diagnosis from a single photo</p>
+            </a>
+            <a href="/marketplace/farmer" class="dash-card">
+                <div class="dash-icon warm-icon">
+                    <i class="fas fa-store"></i>
+                </div>
+                <h3>Marketplace</h3>
+                <p>Browse and manage your product listings</p>
+            </a>
+            <a href="/sell" class="dash-card">
+                <div class="dash-icon secondary-icon">
+                    <i class="fas fa-plus-circle"></i>
+                </div>
+                <h3>Sell Product</h3>
+                <p>List a new product for buyers to discover</p>
+            </a>
+            <a href="/orders" class="dash-card">
+                <div class="dash-icon primary-icon">
+                    <i class="fas fa-box"></i>
+                </div>
+                <h3>Orders</h3>
+                <p>Track and manage your incoming orders</p>
+            </a>
+        </section>
     </main>
 
-    <!-- Footer section -->
-<footer class="footer"></footer>
+    <footer class="footer"></footer>
 
     <script src="/js/auth.js"></script>
     <script src="/js/components.js"></script>

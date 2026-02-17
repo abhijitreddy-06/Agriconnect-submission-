@@ -3,140 +3,212 @@
    Global styles handled by global.css
    ═══════════════════════════════════════════════════ */
 
-/* ── Dashboard Layout ── */
-main {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: calc(100vh - 120px);
-  padding: 2rem;
-}
-
-/* ── Glassmorphism Container ── */
-.main-container {
-  background: var(--color-surface);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+/* ── Welcome Banner ── */
+.welcome-banner {
+  max-width: 1000px;
+  margin: 3rem auto 0;
+  padding: 3rem 2.5rem;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 60%, var(--color-accent) 100%);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-xl);
-  max-width: 800px;
-  width: 100%;
-  padding: 3.5rem 3rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   text-align: center;
-  gap: 1.25rem;
+  position: relative;
+  overflow: hidden;
   opacity: 0;
-  animation: fadeIn 1s ease forwards;
+  animation: fadeIn 0.8s ease forwards;
 }
 
-/* ── Typography ── */
-.main-container h1 {
-  font-size: 2.5rem;
+.welcome-banner::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.welcome-banner h1 {
+  font-size: 2.25rem;
   font-weight: 700;
-  color: var(--color-primary);
+  color: #ffffff;
   line-height: 1.2;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.3px;
+  margin-bottom: 0.6rem;
 }
 
-.main-container p {
-  font-size: 1.1rem;
-  color: var(--color-text-light);
-  line-height: 1.7;
-  max-width: 560px;
+.welcome-banner p {
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.6;
 }
 
-/* ── Feature Card Buttons ── */
-.main-container button {
+/* ── Dashboard Grid ── */
+.dashboard-grid {
+  max-width: 1000px;
+  margin: 2rem auto 3rem;
+  padding: 0 1rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.dash-card {
   background: var(--color-surface);
   backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: var(--color-primary);
-  border: 1px solid var(--color-border);
-  padding: 1rem 2rem;
-  width: 100%;
-  max-width: 380px;
-  font-size: 1.05rem;
-  font-weight: 700;
-  font-family: "Nunito", sans-serif;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  box-shadow: var(--shadow-sm);
-  transition: background var(--transition), transform var(--transition),
-    box-shadow var(--transition), border-color var(--transition);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: var(--radius-lg);
+  padding: 2rem 1.75rem;
+  text-align: center;
+  text-decoration: none;
+  box-shadow: var(--shadow-md);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  animation: fadeIn 0.8s ease forwards;
 }
 
-.main-container button:hover {
-  background: var(--color-primary);
-  color: var(--color-surface-solid);
-  border-color: var(--color-primary);
-  transform: translateY(-3px);
+.dash-card:nth-child(1) { animation-delay: 0.1s; }
+.dash-card:nth-child(2) { animation-delay: 0.15s; }
+.dash-card:nth-child(3) { animation-delay: 0.2s; }
+.dash-card:nth-child(4) { animation-delay: 0.25s; }
+
+.dash-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-accent-warm));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s ease;
+}
+
+.dash-card:hover {
+  transform: translateY(-6px);
   box-shadow: var(--shadow-lg);
 }
 
-.main-container button:active {
-  transform: translateY(0);
-  box-shadow: var(--shadow-sm);
+.dash-card:hover::before {
+  transform: scaleX(1);
+}
+
+.dash-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem;
+  font-size: 1.35rem;
+}
+
+.accent-icon {
+  background: rgba(93, 163, 153, 0.12);
+  color: var(--color-accent);
+}
+
+.warm-icon {
+  background: rgba(255, 126, 103, 0.12);
+  color: var(--color-accent-warm);
+}
+
+.secondary-icon {
+  background: rgba(196, 164, 132, 0.15);
+  color: var(--color-secondary);
+}
+
+.primary-icon {
+  background: rgba(26, 45, 64, 0.1);
+  color: var(--color-primary);
+}
+
+.dash-card h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 0.4rem;
+}
+
+.dash-card p {
+  font-size: 0.9rem;
+  color: var(--color-text-light);
+  line-height: 1.5;
 }
 
 /* ── Responsive: Tablet ── */
 @media (max-width: 1024px) {
-  .main-container {
-    max-width: 650px;
-    padding: 3rem 2.5rem;
+  .welcome-banner {
+    margin: 2rem 1.5rem 0;
+    padding: 2.5rem 2rem;
   }
 
-  .main-container h1 {
-    font-size: 2.15rem;
+  .welcome-banner h1 {
+    font-size: 2rem;
+  }
+
+  .dashboard-grid {
+    margin: 1.5rem 1.5rem 2.5rem;
+    padding: 0;
   }
 }
 
 /* ── Responsive: Small Tablet / Large Phone ── */
 @media (max-width: 768px) {
-  main {
-    padding: 1.5rem 1rem;
+  .welcome-banner {
+    margin: 1.5rem 1rem 0;
+    padding: 2rem 1.5rem;
+    border-radius: var(--radius-lg);
   }
 
-  .main-container {
-    padding: 2.5rem 1.75rem;
+  .welcome-banner h1 {
+    font-size: 1.75rem;
   }
 
-  .main-container h1 {
-    font-size: 1.85rem;
+  .welcome-banner p {
+    font-size: 0.95rem;
   }
 
-  .main-container p {
-    font-size: 1rem;
+  .dashboard-grid {
+    margin: 1.25rem 1rem 2rem;
+    grid-template-columns: 1fr;
+    gap: 1rem;
   }
 
-  .main-container button {
-    max-width: 100%;
+  .dash-card {
+    padding: 1.5rem;
   }
 }
 
 /* ── Responsive: Mobile ── */
 @media (max-width: 480px) {
-  main {
-    padding: 1rem 0.75rem;
+  .welcome-banner {
+    margin: 1rem 0.5rem 0;
+    padding: 1.75rem 1.25rem;
+    border-radius: var(--radius-md);
   }
 
-  .main-container {
-    padding: 2rem 1.25rem;
-    border-radius: var(--radius-lg);
+  .welcome-banner h1 {
+    font-size: 1.5rem;
   }
 
-  .main-container h1 {
-    font-size: 1.55rem;
+  .dashboard-grid {
+    margin: 1rem 0.5rem 1.5rem;
   }
 
-  .main-container p {
-    font-size: 0.95rem;
+  .dash-card {
+    padding: 1.25rem;
   }
 
-  .main-container button {
-    padding: 0.85rem 1.25rem;
-    font-size: 0.95rem;
+  .dash-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
   }
 }
