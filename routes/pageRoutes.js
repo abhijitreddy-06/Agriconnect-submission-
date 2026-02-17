@@ -46,6 +46,12 @@ router.get("/market", (req, res) => {
 router.get("/marketcus", (req, res) => {
   res.sendFile(path.join(pagesDir, "farmer-market_cus.html"));
 });
+router.get("/cart", (req, res) => {
+  res.sendFile(path.join(pagesDir, "cart.html"));
+});
+router.get("/orders", (req, res) => {
+  res.sendFile(path.join(pagesDir, "orders.html"));
+});
 router.get("/predict", (req, res) => {
   res.sendFile(path.join(pagesDir, "prediction.html"));
 });

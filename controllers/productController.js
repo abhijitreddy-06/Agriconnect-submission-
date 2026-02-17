@@ -1,4 +1,10 @@
 import pool from "../config/database.js";
+import { cacheInvalidatePattern } from "../config/redis.js";
+
+// Helper: Invalidate all product caches
+const invalidateProductCache = async () => {
+  await cacheInvalidatePattern("products:*");
+};
 
 // POST /api/products - Create a new product
 export const createProduct = async (req, res) => {
@@ -53,6 +59,9 @@ export const createProduct = async (req, res) => {
        RETURNING id`,
       [farmerId, product_name, parsedPrice, parsedQuantity, quality || "", description || "", imagePath, quantity_unit || ""]
     );
+
+    // Invalidate product cache
+    await invalidateProductCache();
 
     return res.status(201).json({
       success: true,
@@ -151,6 +160,9 @@ export const updateProduct = async (req, res) => {
       productId,
     ]);
 
+    // Invalidate product cache
+    await invalidateProductCache();
+
     return res.json({
       success: true,
       message: "Product updated successfully.",
@@ -192,6 +204,9 @@ export const deleteProduct = async (req, res) => {
 
     // Delete product
     await pool.query("DELETE FROM products WHERE id = $1", [productId]);
+
+    // Invalidate product cache
+    await invalidateProductCache();
 
     return res.json({
       success: true,

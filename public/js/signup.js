@@ -1,25 +1,73 @@
-const hamburger = document.querySelector(".hamburger");
-const navLinks = document.querySelector(".nav-links");
+// ─── Farmer Signup (AJAX) ──────────────────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.querySelector(".signup-form");
+  if (!form) return;
 
-hamburger.addEventListener("click", () => {
-  navLinks.classList.toggle("active");
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const username = form.querySelector('[name="username"]').value.trim();
+    const phone = form.querySelector('[name="phone"]').value.trim();
+    const password = form.querySelector('[name="password"]').value;
+
+    if (!username || !phone || !password) {
+      showError("Please fill in all fields.");
+      return;
+    }
+
+    if (!/^\d{10}$/.test(phone)) {
+      showError("Phone number must be exactly 10 digits.");
+      return;
+    }
+
+    if (password.length < 6) {
+      showError("Password must be at least 6 characters.");
+      return;
+    }
+
+    const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
+    if (submitBtn) submitBtn.disabled = true;
+
+    try {
+      const result = await Auth.signup(username, phone, password, "farmer");
+      if (!result.success) {
+        showError(result.error || "Signup failed. Please try again.");
+      }
+    } catch (err) {
+      showError("Network error. Please try again.");
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
+    }
+  });
 });
-function toggleDropdown(button) {
-  const dropdownContent =
-    button.parentElement.querySelector(".dropdown-content");
-  dropdownContent.style.display =
-    dropdownContent.style.display === "block" ? "none" : "block";
+
+function showError(message) {
+  let errorEl = document.querySelector(".auth-error");
+  if (!errorEl) {
+    errorEl = document.createElement("div");
+    errorEl.className = "auth-error";
+    errorEl.style.cssText = "color:#e74c3c;background:#fdf0ef;padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:14px;text-align:center;";
+    const form = document.querySelector(".signup-form");
+    form.insertBefore(errorEl, form.firstChild);
+  }
+  errorEl.textContent = message;
+  errorEl.style.display = "block";
+  setTimeout(() => { errorEl.style.display = "none"; }, 5000);
 }
 
-// Close the dropdown if the user clicks outside
+// ─── UI Helpers ────────────────────────────────────────────────
+const hamburger = document.querySelector(".hamburger");
+const navLinks = document.querySelector(".nav-links");
+if (hamburger) hamburger.addEventListener("click", () => navLinks.classList.toggle("active"));
+
+function toggleDropdown(button) {
+  const dc = button.parentElement.querySelector(".dropdown-content");
+  dc.style.display = dc.style.display === "block" ? "none" : "block";
+}
+
 window.onclick = function (event) {
   if (!event.target.matches(".dropbtn")) {
-    const dropdowns = document.querySelectorAll(".dropdown-content");
-    dropdowns.forEach((dropdown) => {
-      if (dropdown.style.display === "block") {
-        dropdown.style.display = "none";
-      }
-    });
+    document.querySelectorAll(".dropdown-content").forEach((d) => { if (d.style.display === "block") d.style.display = "none"; });
   }
 };
 

@@ -1,59 +1,41 @@
+// ─── Sell Product Form (AJAX with Auth) ─────────────────────────
 const hamburger = document.querySelector(".hamburger");
 const navLinks = document.querySelector(".nav-links");
+if (hamburger) hamburger.addEventListener("click", () => navLinks.classList.toggle("active"));
 
-hamburger.addEventListener("click", () => {
-  navLinks.classList.toggle("active");
-});
 function toggleDropdown(button) {
-  const dropdownContent =
-    button.parentElement.querySelector(".dropdown-content");
-  dropdownContent.style.display =
-    dropdownContent.style.display === "block" ? "none" : "block";
+  const dc = button.parentElement.querySelector(".dropdown-content");
+  dc.style.display = dc.style.display === "block" ? "none" : "block";
 }
 
-// Close the dropdown if the user clicks outside
 window.onclick = function (event) {
   if (!event.target.matches(".dropbtn")) {
-    const dropdowns = document.querySelectorAll(".dropdown-content");
-    dropdowns.forEach((dropdown) => {
-      if (dropdown.style.display === "block") {
-        dropdown.style.display = "none";
-      }
-    });
+    document.querySelectorAll(".dropdown-content").forEach((d) => { if (d.style.display === "block") d.style.display = "none"; });
   }
 };
 
+// Unit toggle buttons
 document.querySelectorAll(".unit-toggle").forEach((group) => {
   group.querySelectorAll(".toggle-btn").forEach((button) => {
     button.addEventListener("click", () => {
-      // Remove active class from siblings and add to clicked button
-      group
-        .querySelectorAll(".toggle-btn")
-        .forEach((btn) => btn.classList.remove("active"));
+      group.querySelectorAll(".toggle-btn").forEach((btn) => btn.classList.remove("active"));
       button.classList.add("active");
 
-      // Update corresponding hidden input based on the group context
       const formGroup = button.closest(".form-group");
       if (formGroup.querySelector("#productPrice")) {
-        // Price unit toggle
         document.getElementById("priceCurrency").value = button.dataset.unit;
       } else if (formGroup.querySelector("#productQuantity")) {
-        // Quantity unit toggle
         document.getElementById("quantityUnit").value = button.dataset.unit;
       }
     });
   });
 });
 
+// Image source toggle
 document.querySelectorAll(".source-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
-    // Remove active from all source buttons and add to clicked one
-    document
-      .querySelectorAll(".source-btn")
-      .forEach((b) => b.classList.remove("active"));
+    document.querySelectorAll(".source-btn").forEach((b) => b.classList.remove("active"));
     btn.classList.add("active");
-
-    // Update file input capture attribute based on source selection
     const fileInput = document.getElementById("productImage");
     if (btn.dataset.source === "camera") {
       fileInput.setAttribute("capture", "environment");
@@ -63,39 +45,63 @@ document.querySelectorAll(".source-btn").forEach((btn) => {
   });
 });
 
+// Form submission with Auth
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("productForm");
+  if (!form) return;
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData();
+    formData.append("product_name", form.querySelector("#productName")?.value || form.querySelector('[name="productName"]')?.value || "");
+    formData.append("price", form.querySelector("#productPrice")?.value || form.querySelector('[name="productPrice"]')?.value || "");
+    formData.append("quantity", form.querySelector("#productQuantity")?.value || form.querySelector('[name="productQuantity"]')?.value || "");
+    formData.append("quality", form.querySelector("#productQuality")?.value || form.querySelector('[name="productQuality"]')?.value || "");
+    formData.append("description", form.querySelector("#productDescription")?.value || form.querySelector('[name="productDescription"]')?.value || "");
+    formData.append("quantity_unit", document.getElementById("quantityUnit")?.value || "kilogram");
+
+    const imageInput = form.querySelector("#productImage") || form.querySelector('[name="productImage"]');
+    if (imageInput && imageInput.files[0]) {
+      formData.append("productImage", imageInput.files[0]);
+    }
+
+    const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Uploading...";
+    }
+
+    try {
+      const res = await Auth.authFetch("/api/products", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        alert("Product listed successfully!");
+        window.location.href = "/market";
+      } else {
+        alert(data.error || "Failed to list product.");
+      }
+    } catch (err) {
+      alert("Error: " + err.message);
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "List Product";
+      }
+    }
+  });
+});
+
+// Loader
 document.addEventListener("readystatechange", () => {
   if (document.readyState === "complete") {
     document.body.classList.add("loaded");
-    document.getElementById("global-loader").style.opacity = "0";
-    setTimeout(() => {
-      document.getElementById("global-loader").remove();
-    }, 300);
+    const loader = document.getElementById("global-loader");
+    if (loader) { loader.style.opacity = "0"; setTimeout(() => loader.remove(), 300); }
   }
 });
-
-// Handle page transitions
-document.addEventListener("DOMContentLoaded", () => {
-  // Show loader before unload
-  window.addEventListener("beforeunload", () => {
-    document.body.classList.remove("loaded");
-    document.getElementById("global-loader").style.opacity = "1";
-  });
-
-  // Fade in content after load
-  setTimeout(() => {
-    document.body.classList.add("loaded");
-    document.getElementById("global-loader").style.opacity = "0";
-    setTimeout(() => {
-      document.getElementById("global-loader").remove();
-    }, 300);
-  }, 300);
-});
-
-// Fallback for slow connections
-window.onload = function () {
-  document.body.classList.add("loaded");
-  document.getElementById("global-loader").style.opacity = "0";
-  setTimeout(() => {
-    document.getElementById("global-loader").remove();
-  }, 300);
-};

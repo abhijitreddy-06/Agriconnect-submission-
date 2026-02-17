@@ -1,0 +1,372 @@
+/* ─── Orders Page Styles ──────────────────────────────────────── */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --primary-color: #2a5c82;
+  --secondary-color: #5da399;
+  --accent-color: #ff7e67;
+  --danger-color: #e74c3c;
+  --warning-color: #f39c12;
+  --success-color: #27ae60;
+  --dark-bg: #1a2d40;
+  --light-bg: #f8f9fa;
+  --text-dark: #2d3436;
+  --text-light: #f8f9fa;
+  --border-color: #e0e0e0;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+body {
+  font-family: "Nunito", sans-serif;
+  background: var(--light-bg);
+  color: var(--text-dark);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ─── Header ──────────────────────────────────────────────────── */
+header {
+  background: var(--dark-bg);
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.logo {
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: #c4a484;
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+  gap: 0.5rem;
+}
+
+.nav-links a {
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  transition: all 0.3s;
+  font-size: 0.95rem;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+}
+
+.bar {
+  background: white;
+  height: 3px;
+  width: 25px;
+  margin: 3px 0;
+}
+
+/* ─── Orders Page ─────────────────────────────────────────────── */
+.orders-page {
+  flex: 1;
+  max-width: 900px;
+  width: 100%;
+  margin: 2rem auto;
+  padding: 0 1.5rem;
+}
+
+.orders-header h1 {
+  font-size: 1.75rem;
+  color: var(--primary-color);
+  margin-bottom: 1.5rem;
+}
+
+.orders-header h1 i {
+  margin-right: 0.5rem;
+}
+
+/* ─── Empty State ─────────────────────────────────────────────── */
+.empty-orders {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+
+.empty-orders i {
+  font-size: 4rem;
+  color: var(--border-color);
+  margin-bottom: 1rem;
+}
+
+.empty-orders h2 {
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+}
+
+.empty-orders p {
+  color: #7f8c8d;
+}
+
+/* ─── Orders List ─────────────────────────────────────────────── */
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.order-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  gap: 1.25rem;
+  align-items: center;
+  transition: transform 0.2s ease;
+}
+
+.order-card:hover {
+  transform: translateX(4px);
+}
+
+.order-image {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #f5f5f5;
+}
+
+.order-details h3 {
+  font-size: 1.05rem;
+  color: var(--primary-color);
+  margin-bottom: 0.2rem;
+}
+
+.order-details .order-meta {
+  font-size: 0.85rem;
+  color: #7f8c8d;
+  margin-bottom: 0.3rem;
+}
+
+.order-details .order-total {
+  font-weight: 700;
+  color: var(--secondary-color);
+  font-size: 1.1rem;
+}
+
+.order-status-section {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+
+/* ─── Status Badge ────────────────────────────────────────────── */
+.status-badge {
+  display: inline-block;
+  padding: 0.35rem 0.9rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-pending {
+  background: rgba(243, 156, 18, 0.15);
+  color: var(--warning-color);
+}
+
+.status-accepted {
+  background: rgba(52, 152, 219, 0.15);
+  color: #3498db;
+}
+
+.status-shipped {
+  background: rgba(155, 89, 182, 0.15);
+  color: #9b59b6;
+}
+
+.status-delivered {
+  background: rgba(39, 174, 96, 0.15);
+  color: var(--success-color);
+}
+
+.status-cancelled {
+  background: rgba(231, 76, 60, 0.15);
+  color: var(--danger-color);
+}
+
+/* Customer: Cancel button */
+.btn-cancel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.9rem;
+  border: 2px solid var(--danger-color);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--danger-color);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-cancel:hover {
+  background: var(--danger-color);
+  color: white;
+}
+
+.btn-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Cancelled order card faded */
+.order-cancelled {
+  opacity: 0.65;
+}
+
+.order-cancelled .order-details h3 {
+  text-decoration: line-through;
+}
+
+/* Farmer: Status update select */
+.status-select {
+  padding: 0.4rem 0.75rem;
+  border: 2px solid var(--border-color);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  background: white;
+}
+
+.status-select:focus {
+  outline: none;
+  border-color: var(--secondary-color);
+}
+
+/* ─── Loader ──────────────────────────────────────────────────── */
+#global-loader {
+  position: fixed;
+  inset: 0;
+  background: #fff;
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: opacity 0.3s ease;
+}
+
+.loader-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid var(--dark-bg);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+body:not(.loaded) > :not(#global-loader) {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.footer {
+  background: var(--dark-bg);
+  color: white;
+  padding: 1.25rem;
+  text-align: center;
+  margin-top: auto;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* ─── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .navbar {
+    flex-wrap: wrap;
+    padding: 0.75rem 1rem;
+  }
+  .logo {
+    font-size: 1.3rem;
+  }
+
+  .nav-links {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    background: var(--dark-bg);
+    position: absolute;
+    top: 60px;
+    left: 0;
+    z-index: 1;
+    text-align: center;
+    padding: 0.5rem 0;
+  }
+
+  .nav-links.active {
+    display: flex;
+  }
+  .hamburger {
+    display: flex;
+  }
+
+  .order-card {
+    grid-template-columns: 60px 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .order-status-section {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    text-align: left;
+  }
+
+  .order-image {
+    width: 60px;
+    height: 60px;
+  }
+}

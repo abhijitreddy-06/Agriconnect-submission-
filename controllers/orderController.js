@@ -1,4 +1,5 @@
 import pool from "../config/database.js";
+import { cacheGet, cacheSet, cacheInvalidatePattern } from "../config/redis.js";
 
 // POST /api/orders - Create a new order
 export const createOrder = async (req, res) => {
@@ -37,6 +38,9 @@ export const createOrder = async (req, res) => {
       [customerId, product_id, parseFloat(quantity), totalPrice]
     );
 
+    // Invalidate order caches for both customer and related farmer
+    await cacheInvalidatePattern("orders:*");
+
     return res.status(201).json({
       success: true,
       orderId: orderResult.rows[0].id,
@@ -51,11 +55,18 @@ export const createOrder = async (req, res) => {
   }
 };
 
-// GET /api/orders - Get orders for user
+// GET /api/orders - Get orders for user (cached 2 min)
 export const getOrders = async (req, res) => {
   try {
     const userId = req.user.userId;
     const role = req.user.role;
+
+    // Check cache
+    const cacheKey = `orders:${role}:${userId}`;
+    const cached = await cacheGet(cacheKey);
+    if (cached) {
+      return res.json({ success: true, data: cached });
+    }
 
     let query = "";
     let params = [];
@@ -77,6 +88,9 @@ export const getOrders = async (req, res) => {
     }
 
     const result = await pool.query(query, params);
+
+    // Cache for 2 minutes
+    await cacheSet(cacheKey, result.rows, 120);
 
     return res.json({
       success: true,
@@ -135,6 +149,70 @@ export const getOrderById = async (req, res) => {
   }
 };
 
+// PUT /api/orders/:id/cancel - Customer cancels their order
+export const cancelOrder = async (req, res) => {
+  const client = await pool.connect();
+
+  try {
+    const customerId = req.user.userId;
+    const orderId = req.params.id;
+
+    await client.query("BEGIN");
+
+    // Get order with product details (lock row)
+    const orderResult = await client.query(
+      `SELECT o.id, o.customer_id, o.product_id, o.quantity, o.status
+       FROM orders o WHERE o.id = $1 FOR UPDATE`,
+      [orderId]
+    );
+
+    if (orderResult.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ success: false, error: "Order not found." });
+    }
+
+    const order = orderResult.rows[0];
+
+    // Verify the customer owns this order
+    if (order.customer_id !== customerId) {
+      await client.query("ROLLBACK");
+      return res.status(403).json({ success: false, error: "You can only cancel your own orders." });
+    }
+
+    // Only allow cancellation if pending or accepted
+    if (!["pending", "accepted"].includes(order.status)) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({
+        success: false,
+        error: `Cannot cancel an order that is already "${order.status}".`,
+      });
+    }
+
+    // Update order status to cancelled
+    await client.query("UPDATE orders SET status = 'cancelled' WHERE id = $1", [orderId]);
+
+    // Restore product stock
+    await client.query(
+      "UPDATE products SET quantity = quantity + $1 WHERE id = $2",
+      [order.quantity, order.product_id]
+    );
+
+    await client.query("COMMIT");
+
+    // Invalidate caches
+    await cacheInvalidatePattern("orders:*");
+    await cacheInvalidatePattern("products:*");
+
+    return res.json({ success: true, message: "Order cancelled successfully. Stock has been restored." });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    console.error("Error cancelling order:", error.message);
+    return res.status(500).json({ success: false, error: "Failed to cancel order." });
+  } finally {
+    client.release();
+  }
+};
+
 // PUT /api/orders/:id - Update order status (farmers only)
 export const updateOrder = async (req, res) => {
   try {
@@ -184,6 +262,9 @@ export const updateOrder = async (req, res) => {
       status,
       orderId,
     ]);
+
+    // Invalidate order caches
+    await cacheInvalidatePattern("orders:*");
 
     return res.json({
       success: true,

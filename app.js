@@ -10,6 +10,8 @@ import rateLimit from "express-rate-limit";
 import authRoutes from "./routes/authRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import predictionRoutes from "./routes/predictionRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
+import cartRoutes from "./routes/cartRoutes.js";
 import pageRoutes from "./routes/pageRoutes.js";
 import errorHandler from "./middleware/errorHandler.js";
 
@@ -43,13 +45,13 @@ app.use(express.urlencoded({ extended: true }));
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 20,
-  message:
-    '<script>alert("Too many attempts. Please try again later."); window.history.back();</script>',
+  message: { success: false, error: "Too many attempts. Please try again later." },
 });
+app.use("/api/auth/login", authLimiter);
+app.use("/api/auth/signup", authLimiter);
+app.use("/api/auth/refresh", authLimiter);
 app.use("/signup", authLimiter);
 app.use("/login", authLimiter);
-app.use("/signupcus", authLimiter);
-app.use("/logincus", authLimiter);
 
 // Static files
 app.use(express.static(path.join(__dirname, "public")));
@@ -58,6 +60,8 @@ app.use("/uploads", express.static(path.join(__dirname, "public", "uploads")));
 // Routes
 app.use(authRoutes);
 app.use(productRoutes);
+app.use(orderRoutes);
+app.use(cartRoutes);
 app.use(predictionRoutes);
 app.use(pageRoutes);
 

@@ -62,11 +62,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const analysisLoader = document.getElementById("analysis-loader");
 
     try {
-      // Show loader
       analysisLoader.style.display = "flex";
 
-      // Upload image
-      const response = await fetch("/upload", {
+      // Upload image with auth
+      const response = await Auth.authFetch("/upload", {
         method: "POST",
         body: formData,
       });
@@ -75,12 +74,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const result = await response.json();
 
-      // Show analyzing status
       document.querySelector(".loader-text").textContent =
         "Analyzing with Gemini AI...";
 
-      // Analyze image
-      const analysisResponse = await fetch("/analyze", {
+      // Analyze image with auth
+      const analysisResponse = await Auth.authFetch("/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ predictionId: result.predictionId }),
@@ -88,85 +86,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (!analysisResponse.ok) throw new Error("Analysis failed");
 
-      // Redirect to results
       window.location.href = `/predict?id=${result.predictionId}`;
     } catch (error) {
       console.error("Error:", error);
       alert(`Error: ${error.message}`);
     } finally {
-      // Hide loader
       analysisLoader.style.display = "none";
     }
   });
-  // In your existing loader script
+
+  // Loader
   setTimeout(() => {
     document.body.classList.add("loaded");
-    document.getElementById("global-loader").style.opacity = "0";
-    setTimeout(() => {
-      document.getElementById("global-loader").remove();
-    }, 300);
-  }, 500); // Add 500ms delay here
+    const loader = document.getElementById("global-loader");
+    if (loader) { loader.style.opacity = "0"; setTimeout(() => loader.remove(), 300); }
+  }, 500);
 });
 
 const hamburger = document.querySelector(".hamburger");
 const navLinks = document.querySelector(".nav-links");
+if (hamburger) hamburger.addEventListener("click", () => navLinks.classList.toggle("active"));
 
-hamburger.addEventListener("click", () => {
-  navLinks.classList.toggle("active");
-});
 function toggleDropdown(button) {
-  const dropdownContent =
-    button.parentElement.querySelector(".dropdown-content");
-  dropdownContent.style.display =
-    dropdownContent.style.display === "block" ? "none" : "block";
+  const dc = button.parentElement.querySelector(".dropdown-content");
+  dc.style.display = dc.style.display === "block" ? "none" : "block";
 }
 
-// Close the dropdown if the user clicks outside
 window.onclick = function (event) {
   if (!event.target.matches(".dropbtn")) {
-    const dropdowns = document.querySelectorAll(".dropdown-content");
-    dropdowns.forEach((dropdown) => {
-      if (dropdown.style.display === "block") {
-        dropdown.style.display = "none";
-      }
-    });
+    document.querySelectorAll(".dropdown-content").forEach((d) => { if (d.style.display === "block") d.style.display = "none"; });
   }
 };
 
-// Show loader immediately
 document.addEventListener("readystatechange", () => {
   if (document.readyState === "complete") {
     document.body.classList.add("loaded");
-    document.getElementById("global-loader").style.opacity = "0";
-    setTimeout(() => {
-      document.getElementById("global-loader").remove();
-    }, 300);
+    const loader = document.getElementById("global-loader");
+    if (loader) { loader.style.opacity = "0"; setTimeout(() => loader.remove(), 300); }
   }
 });
-
-// Handle page transitions
-document.addEventListener("DOMContentLoaded", () => {
-  // Show loader before unload
-  window.addEventListener("beforeunload", () => {
-    document.body.classList.remove("loaded");
-    document.getElementById("global-loader").style.opacity = "1";
-  });
-
-  // Fade in content after load
-  setTimeout(() => {
-    document.body.classList.add("loaded");
-    document.getElementById("global-loader").style.opacity = "0";
-    setTimeout(() => {
-      document.getElementById("global-loader").remove();
-    }, 300);
-  }, 300);
-});
-
-// Fallback for slow connections
-window.onload = function () {
-  document.body.classList.add("loaded");
-  document.getElementById("global-loader").style.opacity = "0";
-  setTimeout(() => {
-    document.getElementById("global-loader").remove();
-  }, 300);
-};

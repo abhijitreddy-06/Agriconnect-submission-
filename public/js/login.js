@@ -1,64 +1,74 @@
-// Toggle mobile hamburger menu
-const hamburger = document.querySelector(".hamburger");
-const navLinks = document.querySelector(".nav-links");
-hamburger.addEventListener("click", () => {
-  navLinks.classList.toggle("active");
+// ─── Farmer Login (AJAX) ───────────────────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.querySelector(".login-form");
+  if (!form) return;
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const phone = form.querySelector('[name="phone"]').value.trim();
+    const password = form.querySelector('[name="password"]').value;
+
+    if (!phone || !password) {
+      showError("Please fill in all fields.");
+      return;
+    }
+
+    if (!/^\d{10}$/.test(phone)) {
+      showError("Phone number must be exactly 10 digits.");
+      return;
+    }
+
+    const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
+    if (submitBtn) submitBtn.disabled = true;
+
+    try {
+      const result = await Auth.login(phone, password, "farmer");
+      if (!result.success) {
+        showError(result.error || "Login failed. Please try again.");
+      }
+    } catch (err) {
+      showError("Network error. Please try again.");
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
+    }
+  });
 });
 
-// Function to toggle dropdown menus
-function toggleDropdown(button) {
-  const dropdownContent =
-    button.parentElement.querySelector(".dropdown-content");
-  dropdownContent.style.display =
-    dropdownContent.style.display === "block" ? "none" : "block";
+function showError(message) {
+  let errorEl = document.querySelector(".auth-error");
+  if (!errorEl) {
+    errorEl = document.createElement("div");
+    errorEl.className = "auth-error";
+    errorEl.style.cssText = "color:#e74c3c;background:#fdf0ef;padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:14px;text-align:center;";
+    const form = document.querySelector(".login-form");
+    form.insertBefore(errorEl, form.firstChild);
+  }
+  errorEl.textContent = message;
+  errorEl.style.display = "block";
+  setTimeout(() => { errorEl.style.display = "none"; }, 5000);
 }
 
-// Close dropdown menus if click occurs outside of a dropdown button
+// ─── UI Helpers ────────────────────────────────────────────────
+const hamburger = document.querySelector(".hamburger");
+const navLinks = document.querySelector(".nav-links");
+if (hamburger) hamburger.addEventListener("click", () => navLinks.classList.toggle("active"));
+
+function toggleDropdown(button) {
+  const dc = button.parentElement.querySelector(".dropdown-content");
+  dc.style.display = dc.style.display === "block" ? "none" : "block";
+}
+
 window.onclick = function (event) {
   if (!event.target.matches(".dropbtn")) {
-    const dropdowns = document.querySelectorAll(".dropdown-content");
-    dropdowns.forEach((dropdown) => {
-      if (dropdown.style.display === "block") {
-        dropdown.style.display = "none";
-      }
-    });
+    document.querySelectorAll(".dropdown-content").forEach((d) => { if (d.style.display === "block") d.style.display = "none"; });
   }
 };
 
-// Show loader immediately when document is fully loaded
 document.addEventListener("readystatechange", () => {
   if (document.readyState === "complete") {
     document.body.classList.add("loaded");
-    document.getElementById("global-loader").style.opacity = "0";
-    setTimeout(() => {
-      document.getElementById("global-loader").remove();
-    }, 300);
+    const loader = document.getElementById("global-loader");
+    if (loader) { loader.style.opacity = "0"; setTimeout(() => loader.remove(), 300); }
   }
 });
-
-// Handle page transitions on unload and load events
-document.addEventListener("DOMContentLoaded", () => {
-  // Show loader before page unload
-  window.addEventListener("beforeunload", () => {
-    document.body.classList.remove("loaded");
-    document.getElementById("global-loader").style.opacity = "1";
-  });
-
-  // Fade in content after load
-  setTimeout(() => {
-    document.body.classList.add("loaded");
-    document.getElementById("global-loader").style.opacity = "0";
-    setTimeout(() => {
-      document.getElementById("global-loader").remove();
-    }, 300);
-  }, 300);
-});
-
-// Fallback for slow connections
-window.onload = function () {
-  document.body.classList.add("loaded");
-  document.getElementById("global-loader").style.opacity = "0";
-  setTimeout(() => {
-    document.getElementById("global-loader").remove();
-  }, 300);
-};

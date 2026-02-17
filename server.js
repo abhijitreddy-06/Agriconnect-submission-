@@ -3,6 +3,7 @@ dotenv.config();
 
 import app from "./app.js";
 import pool from "./config/database.js";
+import { closeRedis } from "./config/redis.js";
 
 const port = process.env.PORT || 8080;
 
@@ -21,6 +22,11 @@ const shutdown = async (signal) => {
     console.log("Database pool closed.");
   } catch (err) {
     console.error("Error closing database pool:", err.message);
+  }
+  try {
+    await closeRedis();
+  } catch (err) {
+    console.error("Error closing Redis:", err.message);
   }
   process.exit(0);
 };

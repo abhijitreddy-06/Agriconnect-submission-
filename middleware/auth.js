@@ -1,5 +1,8 @@
 import { verifyAccessToken } from "../utils/tokenUtils.js";
 
+/**
+ * Verify JWT access token from Authorization header
+ */
 export const verifyToken = (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -17,10 +20,33 @@ export const verifyToken = (req, res, next) => {
     next();
   } catch (error) {
     if (error.message.includes("expired")) {
-      return res.status(401).json({ success: false, error: "Token expired." });
+      return res.status(401).json({ success: false, error: "Token expired.", code: "TOKEN_EXPIRED" });
     }
-    return res.status(401).json({ success: false, error: "Unauthorized." });
+    return res.status(401).json({ success: false, error: "Unauthorized.", code: "UNAUTHORIZED" });
   }
+};
+
+/**
+ * Role-based access control middleware.
+ * Must be used AFTER verifyToken.
+ *
+ * @param  {...string} allowedRoles - Roles allowed to access the route (e.g., "farmer", "customer")
+ */
+export const requireRole = (...allowedRoles) => {
+  return (req, res, next) => {
+    if (!req.user || !req.user.role) {
+      return res.status(401).json({ success: false, error: "Authentication required." });
+    }
+
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        error: `Access denied. Required role: ${allowedRoles.join(" or ")}.`,
+      });
+    }
+
+    next();
+  };
 };
 
 export default verifyToken;

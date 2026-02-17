@@ -2,6 +2,7 @@ import path from "path";
 import axios from "axios";
 import https from "https";
 import pool from "../config/database.js";
+import { cacheGet, cacheSet } from "../config/redis.js";
 
 export const uploadImage = async (req, res) => {
   try {
@@ -163,13 +164,27 @@ Step-by-step technical guidance covering:
 
 export const getPrediction = async (req, res) => {
   try {
+    const predictionId = req.params.id;
+
+    // Check Redis cache for completed predictions
+    const cacheKey = `prediction:${predictionId}`;
+    const cached = await cacheGet(cacheKey);
+    if (cached) {
+      return res.json({ success: true, data: cached });
+    }
+
     const result = await pool.query(
       "SELECT * FROM predictions WHERE id = $1",
-      [req.params.id]
+      [predictionId]
     );
 
     if (result.rows.length > 0) {
-      res.json({ success: true, data: result.rows[0] });
+      const data = result.rows[0];
+      // Cache completed predictions for 30 minutes (they don't change)
+      if (data.status === "complete") {
+        await cacheSet(cacheKey, data, 1800);
+      }
+      res.json({ success: true, data });
     } else {
       res
         .status(404)

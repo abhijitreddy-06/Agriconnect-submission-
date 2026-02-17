@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>My Cart - AgriConnect</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+        integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+    <link href="/css/cart.css" rel="stylesheet" />
+</head>
+
+<body>
+    <!-- Global loader -->
+    <div id="global-loader">
+        <div class="loader-spinner"></div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <nav class="navbar">
+            <div class="logo">AgriConnect</div>
+            <ul class="nav-links">
+                <li><a href="/homecus">🏠 Home</a></li>
+                <li><a href="/marketcus">🛒 Farmers' Market</a></li>
+                <li><a href="/cart" class="active">🛍️ My Cart</a></li>
+                <li><a href="/orders">📦 My Orders</a></li>
+                <li><a href="/">Log-out</a></li>
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Cart Content -->
+    <main class="cart-page">
+        <div class="cart-header">
+            <h1><i class="fas fa-shopping-cart"></i> My Cart</h1>
+            <span class="cart-count" id="cartCount">0 items</span>
+        </div>
+
+        <!-- Empty state -->
+        <div class="empty-cart" id="emptyCart" style="display:none;">
+            <i class="fas fa-cart-plus"></i>
+            <h2>Your cart is empty</h2>
+            <p>Browse the marketplace and add products to your cart.</p>
+            <a href="/marketcus" class="btn btn-primary">Browse Market</a>
+        </div>
+
+        <!-- Cart items container -->
+        <div class="cart-container" id="cartContainer" style="display:none;">
+            <div class="cart-items" id="cartItems">
+                <!-- Cart items will be injected here -->
+            </div>
+
+            <!-- Cart summary -->
+            <div class="cart-summary">
+                <h2>Order Summary</h2>
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span id="subtotal">₹0.00</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total</span>
+                    <span id="cartTotal">₹0.00</span>
+                </div>
+                <button class="btn btn-checkout" id="checkoutBtn" onclick="handleCheckout()">
+                    <i class="fas fa-lock"></i> Proceed to Checkout
+                </button>
+                <button class="btn btn-clear" onclick="handleClearCart()">
+                    <i class="fas fa-trash"></i> Clear Cart
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Checkout Success Modal -->
+    <div class="modal" id="checkoutModal" style="display:none;">
+        <div class="modal-content checkout-success">
+            <i class="fas fa-check-circle"></i>
+            <h2>Order Placed!</h2>
+            <p id="checkoutMessage"></p>
+            <div class="modal-actions">
+                <a href="/orders" class="btn btn-primary">View Orders</a>
+                <a href="/marketcus" class="btn btn-secondary">Continue Shopping</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 AgriConnect. All rights reserved.</p>
+    </footer>
+
+    <script src="/js/auth.js"></script>
+    <script src="/js/cart.js"></script>
+</body>
+
+</html>

@@ -1,3 +1,4 @@
+// ─── Prediction Results Page (uses Auth) ────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
   const loadingOverlay = document.getElementById("global-loader");
   const analysisResults = document.getElementById("analysisResults");
@@ -6,101 +7,61 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (id) {
     try {
-      loadingOverlay.style.display = "flex";
+      if (loadingOverlay) loadingOverlay.style.display = "flex";
 
-      const res = await fetch(`/prediction/${id}`);
+      const res = await Auth.authFetch(`/prediction/${id}`);
       const result = await res.json();
 
       if (result.success) {
-        const rawContent =
-          result.data.gemini_details || "No analysis available";
-
-        // Convert markdown to HTML
+        const rawContent = result.data.gemini_details || "No analysis available";
         const formattedHtml = DOMPurify.sanitize(marked.parse(rawContent));
-
-        // Create structured HTML
         analysisResults.innerHTML = `
-            <div class="formatted-content">
-              <h2>${result.data.gemini_title || "Analysis Results"}</h2>
-              ${formattedHtml}
-            </div>
-          `;
+          <div class="formatted-content">
+            <h2>${result.data.gemini_title || "Analysis Results"}</h2>
+            ${formattedHtml}
+          </div>
+        `;
       }
     } catch (error) {
       analysisResults.innerHTML = `
-          <div class="error-message">
-            <h3>⚠️ Error Loading Analysis</h3>
-            <p>${error.message}</p>
-          </div>
-        `;
+        <div class="error-message">
+          <h3>Error Loading Analysis</h3>
+          <p>${error.message}</p>
+        </div>
+      `;
     } finally {
-      loadingOverlay.style.display = "none";
+      if (loadingOverlay) loadingOverlay.style.display = "none";
     }
   }
 
-  document.getElementById("newPrediction").addEventListener("click", () => {
-    window.location.href = "/upload";
-  });
+  const newPredBtn = document.getElementById("newPrediction");
+  if (newPredBtn) {
+    newPredBtn.addEventListener("click", () => {
+      window.location.href = "/upload";
+    });
+  }
 });
 
+// ─── UI Helpers ────────────────────────────────────────────────
 const hamburger = document.querySelector(".hamburger");
 const navLinks = document.querySelector(".nav-links");
+if (hamburger) hamburger.addEventListener("click", () => navLinks.classList.toggle("active"));
 
-hamburger.addEventListener("click", () => {
-  navLinks.classList.toggle("active");
-});
 function toggleDropdown(button) {
-  const dropdownContent =
-    button.parentElement.querySelector(".dropdown-content");
-  dropdownContent.style.display =
-    dropdownContent.style.display === "block" ? "none" : "block";
+  const dc = button.parentElement.querySelector(".dropdown-content");
+  dc.style.display = dc.style.display === "block" ? "none" : "block";
 }
 
-// Close the dropdown if the user clicks outside
 window.onclick = function (event) {
   if (!event.target.matches(".dropbtn")) {
-    const dropdowns = document.querySelectorAll(".dropdown-content");
-    dropdowns.forEach((dropdown) => {
-      if (dropdown.style.display === "block") {
-        dropdown.style.display = "none";
-      }
-    });
+    document.querySelectorAll(".dropdown-content").forEach((d) => { if (d.style.display === "block") d.style.display = "none"; });
   }
 };
 
 document.addEventListener("readystatechange", () => {
   if (document.readyState === "complete") {
     document.body.classList.add("loaded");
-    document.getElementById("global-loader").style.opacity = "0";
-    setTimeout(() => {
-      document.getElementById("global-loader").remove();
-    }, 300);
+    const loader = document.getElementById("global-loader");
+    if (loader) { loader.style.opacity = "0"; setTimeout(() => loader.remove(), 300); }
   }
 });
-
-// Handle page transitions
-document.addEventListener("DOMContentLoaded", () => {
-  // Show loader before unload
-  window.addEventListener("beforeunload", () => {
-    document.body.classList.remove("loaded");
-    document.getElementById("global-loader").style.opacity = "1";
-  });
-
-  // Fade in content after load
-  setTimeout(() => {
-    document.body.classList.add("loaded");
-    document.getElementById("global-loader").style.opacity = "0";
-    setTimeout(() => {
-      document.getElementById("global-loader").remove();
-    }, 300);
-  }, 300);
-});
-
-// Fallback for slow connections
-window.onload = function () {
-  document.body.classList.add("loaded");
-  document.getElementById("global-loader").style.opacity = "0";
-  setTimeout(() => {
-    document.getElementById("global-loader").remove();
-  }, 300);
-};

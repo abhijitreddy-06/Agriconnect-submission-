@@ -30,8 +30,10 @@
 
             <!-- Navigation links -->
             <ul class="nav-links">
-                <li><a href="/homecus">🏠Home</a></li>
-                <li><a href="/marketcus">🛒Farmers’ Market</a></li>
+                <li><a href="/homecus">🏠 Home</a></li>
+                <li><a href="/marketcus">🛒 Market</a></li>
+                <li><a href="/cart">🛍️ Cart</a></li>
+                <li><a href="/orders">📦 Orders</a></li>
                 <li><a href="/">Log-out</a></li>
             </ul>
 
@@ -51,7 +53,8 @@
                 <button class="dropbtn" onclick="toggleDropdown(this)">Profile</button>
                 <div class="dropdown-content">
                     <a href="">My Details</a>
-                    <a href="">My Cart</a>
+                    <a href="/cart">My Cart</a>
+                    <a href="/orders">My Orders</a>
                 </div>
             </div>
 
@@ -111,8 +114,15 @@
             <p id="modalQuality"></p>
             <!-- Product description -->
             <p id="modalDescription"></p>
-            <!-- Contact details for the product -->
-            <p id="modalContact"></p>
+            <!-- Quantity selector + Add to Cart -->
+            <div style="display:flex; align-items:center; gap:1rem; margin-top:1rem; flex-wrap:wrap;">
+                <label style="font-weight:600;">Qty:</label>
+                <input type="number" id="modalQtyInput" value="1" min="1" max="9999"
+                    style="width:80px; padding:0.5rem; border:2px solid #e0e0e0; border-radius:6px; font-size:1rem;" />
+                <button id="modalAddBtn" onclick="addModalToCart()"
+                    style="flex:1; min-width:150px; padding:0.75rem 1.5rem; background:#5da399; color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer; font-size:1rem;">🛒
+                    Add to Cart</button>
+            </div>
         </div>
     </div>
 
@@ -121,6 +131,7 @@
         <p>&copy; 2025 AgriConnect. All rights reserved.</p>
     </footer>
 
+<script src="/js/auth.js"></script>
 <script src="/js/farmer-market-cus.js"></script>
 </body>
 
