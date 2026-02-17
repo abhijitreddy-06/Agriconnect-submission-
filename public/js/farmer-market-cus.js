@@ -43,7 +43,7 @@ function renderProducts(products) {
     card.className = "product-card";
     card.onclick = () => openModal(product);
     card.innerHTML = `
-      <img src="${product.image}" alt="${product.product_name}" onerror="this.src='/images/indian-farmer.avif'">
+      <img src="${product.image || ""}" alt="${product.product_name}" onerror="this.style.display='none'">
       <h3>${product.product_name}</h3>
       <div class="price">${product.currency ?? "₹"}${product.price}</div>
       <div class="reviews">Quality: ${product.quality || "N/A"}</div>

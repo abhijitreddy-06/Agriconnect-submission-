@@ -1,5 +1,5 @@
 /**
- * components.js — Renders consistent navbar & footer across all pages.
+ * components.js -- Renders consistent navbar & footer across all pages.
  * Load AFTER auth.js so the Auth object is available.
  */
 (() => {
@@ -9,25 +9,25 @@
     const user = isLoggedIn ? Auth.getUser() : null;
     const userName = user?.username || 'User';
 
-    // ── Nav links by role ─────────────────────────────
+    // -- Nav links by role --
     const guestLinks = [
-        { href: '/', label: '🏠 Home' },
-        { href: '/get-started', label: '🌾 Get Started' },
+        { href: '/', label: 'Home' },
+        { href: '/get-started', label: 'Get Started' },
     ];
 
     const farmerLinks = [
-        { href: '/dashboard/farmer', label: '🏠 Home' },
-        { href: '/plant-health', label: '🌿 Plant Health' },
-        { href: '/marketplace/farmer', label: '🛒 Market' },
-        { href: '/sell', label: '🛍️ Sell' },
-        { href: '/orders', label: '📦 Orders' },
+        { href: '/dashboard/farmer', label: 'Home' },
+        { href: '/plant-health', label: 'Plant Health' },
+        { href: '/marketplace/farmer', label: 'Market' },
+        { href: '/sell', label: 'Sell' },
+        { href: '/orders', label: 'Orders' },
     ];
 
     const customerLinks = [
-        { href: '/dashboard/customer', label: '🏠 Home' },
-        { href: '/marketplace/customer', label: '🛒 Market' },
-        { href: '/cart', label: '🛍️ Cart' },
-        { href: '/orders', label: '📦 Orders' },
+        { href: '/dashboard/customer', label: 'Home' },
+        { href: '/marketplace/customer', label: 'Market' },
+        { href: '/cart', label: 'Cart' },
+        { href: '/orders', label: 'Orders' },
     ];
 
     function getNavLinks() {
@@ -42,7 +42,7 @@
         return '/';
     }
 
-    // ── Build Navbar HTML ─────────────────────────────
+    // -- Build Navbar HTML --
     function buildNavbar() {
         const links = getNavLinks();
         const linksHtml = links
@@ -61,7 +61,7 @@
             <button class="profile-toggle" id="profileToggle">
               <i class="fas fa-user-circle"></i>
               <span class="profile-name">${userName}</span>
-              <i class="fas fa-chevron-down" style="font-size:0.7rem;opacity:0.7"></i>
+              <i class="fas fa-chevron-down" style="font-size:0.65rem;opacity:0.5"></i>
             </button>
             <div class="profile-menu" id="profileMenu">
               <a href="/profile"><i class="fas fa-user"></i> My Profile</a>
@@ -75,7 +75,7 @@
         } else {
             actionsHtml = `
         <div class="nav-actions">
-          <button class="nav-btn" onclick="window.location.href='/get-started'">Sign Up</button>
+          <button class="nav-btn" onclick="window.location.href='/get-started'">Get Started</button>
         </div>`;
         }
 
@@ -92,7 +92,7 @@
       </nav>`;
     }
 
-    // ── Build Footer HTML ─────────────────────────────
+    // -- Build Footer HTML --
     function buildFooter() {
         return `
       <div class="footer-content">
@@ -106,7 +106,7 @@
       </div>`;
     }
 
-    // ── Inject & wire up ──────────────────────────────
+    // -- Inject & wire up --
     function init() {
         // Inject navbar
         const header = document.querySelector('header');

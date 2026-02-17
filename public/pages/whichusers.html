@@ -19,34 +19,30 @@
 
     <header></header>
 
-    <!-- Main content area -->
     <main>
-        <!-- Loading Overlay -->
-        <div id="loadingOverlay" style="display: none;">
-            <div class="spinner"></div>
-        </div>
-        <!-- Container for the main content -->
         <div class="main-content">
-            <!-- Container for selection cards -->
             <div class="cards-container">
-                <!-- Card for Customer selection -->
                 <div class="card">
-                    <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80" alt="Customer">
-                    <h2>Are you a Customer?</h2>
-                    <button class="btn" onclick="window.location.href='/signup/customer'">Login as Customer</button>
+                    <div class="card-icon customer-icon">
+                        <i class="fas fa-shopping-bag"></i>
+                    </div>
+                    <h2>Customer</h2>
+                    <p class="card-desc">Browse and buy fresh agricultural products directly from farmers.</p>
+                    <button class="btn" onclick="window.location.href='/signup/customer'">Continue as Customer</button>
                 </div>
-                <!-- Card for Farmer selection -->
                 <div class="card">
-                    <img src="https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=400&q=80" alt="Farmer">
-                    <h2>Are you a Farmer?</h2>
-                    <button class="btn" onclick="window.location.href='/signup/farmer'">Login as Farmer</button>
+                    <div class="card-icon farmer-icon">
+                        <i class="fas fa-seedling"></i>
+                    </div>
+                    <h2>Farmer</h2>
+                    <p class="card-desc">List your products, manage orders, and grow your business.</p>
+                    <button class="btn" onclick="window.location.href='/signup/farmer'">Continue as Farmer</button>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Footer section -->
-<footer class="footer"></footer>
+    <footer class="footer"></footer>
 
     <script src="/js/auth.js"></script>
     <script src="/js/components.js"></script>

@@ -74,9 +74,9 @@ async function loadOrders() {
                 return `
         <div class="order-card ${order.status === "cancelled" ? "order-cancelled" : ""}">
           <img class="order-image"
-               src="${order.image || "/images/indian-farmer.avif"}"
+               src="${order.image || ""}"
                alt="${order.product_name}"
-               onerror="this.src='/images/indian-farmer.avif'" />
+               onerror="this.style.display='none'" />
           <div class="order-details">
             <h3>${order.product_name}</h3>
             <p class="order-meta">

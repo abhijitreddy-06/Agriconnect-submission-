@@ -1,41 +1,101 @@
-/* ═══════════════════════════════════════════════════
-   profile.css — User profile page styles (profile.html)
+/* ===================================================
+   profile.css — User profile page styles
    Global styles handled by global.css
-   ═══════════════════════════════════════════════════ */
+   =================================================== */
 
 .profile-page {
-  max-width: 700px;
+  max-width: 640px;
   margin: 2rem auto;
   padding: 0 1.5rem;
-  animation: fadeIn 0.5s ease;
 }
 
-.profile-card {
-  background: var(--color-surface);
-  backdrop-filter: blur(10px);
+/* -- Profile Header Card -- */
+.profile-header-card {
+  background: var(--color-primary);
   border-radius: var(--radius-xl);
-  padding: 2rem;
-  box-shadow: var(--shadow-lg);
+  padding: 2.5rem 2rem 2rem;
+  text-align: center;
   margin-bottom: 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: var(--shadow-lg);
+  position: relative;
+}
+
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  font-size: 2rem;
+  color: var(--color-secondary);
+  border: 3px solid rgba(255, 255, 255, 0.2);
+}
+
+.profile-display-name {
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.profile-header-card .role-badge {
+  display: inline-block;
+  padding: 0.3rem 1rem;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.role-badge.farmer {
+  background: rgba(93, 163, 153, 0.2);
+  color: #7edccc;
+}
+
+.role-badge.customer {
+  background: rgba(196, 164, 132, 0.2);
+  color: var(--color-secondary-light);
+}
+
+/* -- Info Card -- */
+.profile-card {
+  background: var(--color-surface-solid);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1.25rem;
+  border: 1px solid var(--color-border);
 }
 
 .profile-card h2 {
   color: var(--color-primary);
-  margin-bottom: 1.5rem;
-  font-size: 1.4rem;
+  margin-bottom: 1.25rem;
+  font-size: 1.15rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
+.profile-card h2 i {
+  font-size: 1rem;
+  opacity: 0.6;
+}
+
 .profile-field {
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.profile-field:last-of-type {
+  margin-bottom: 0;
 }
 
 .profile-field label {
   display: block;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--color-text-light);
   margin-bottom: 0.3rem;
   font-weight: 700;
@@ -44,17 +104,17 @@
 }
 
 .profile-field .field-value {
-  font-size: 1.05rem;
+  font-size: 1rem;
   color: var(--color-text);
-  padding: 0.7rem 1rem;
+  padding: 0.6rem 0.85rem;
   background: var(--color-bg);
   border-radius: var(--radius-sm);
-  border: 2px solid transparent;
+  border: 1px solid transparent;
 }
 
 .profile-field input {
   width: 100%;
-  padding: 0.7rem 1rem;
+  padding: 0.65rem 0.85rem;
   font-size: 1rem;
   border: 2px solid var(--color-border);
   border-radius: var(--radius-sm);
@@ -66,42 +126,23 @@
 
 .profile-field input:focus {
   outline: none;
-  border-color: var(--color-secondary);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(93, 163, 153, 0.1);
 }
 
-/* ── Edit Row ── */
+/* -- Edit Row -- */
 .edit-row {
   margin-top: 0.5rem;
 }
 
 .edit-row input {
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.6rem;
 }
 
-/* ── Role Badge ── */
-.role-badge {
-  display: inline-block;
-  padding: 0.25rem 0.85rem;
-  border-radius: var(--radius-full);
-  font-size: 0.85rem;
-  font-weight: 700;
-  text-transform: capitalize;
-}
-
-.role-badge.farmer {
-  background: #e8f5e9;
-  color: #2e7d32;
-}
-
-.role-badge.customer {
-  background: #e3f2fd;
-  color: #1565c0;
-}
-
-/* ── Buttons ── */
+/* -- Buttons -- */
 .profile-actions {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .btn-edit {
@@ -110,11 +151,11 @@
   gap: 0.4rem;
   margin-top: 1rem;
   background: transparent;
-  border: 2px solid var(--color-secondary);
-  color: var(--color-primary);
-  padding: 0.6rem 1.25rem;
-  font-size: 0.9rem;
-  font-weight: 700;
+  border: 1.5px solid var(--color-border);
+  color: var(--color-text);
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-family: "Nunito", sans-serif;
@@ -122,25 +163,28 @@
 }
 
 .btn-edit:hover {
-  background: var(--color-secondary);
-  color: white;
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 
 .btn-save {
-  background: var(--color-secondary);
-  color: var(--color-primary);
+  background: var(--color-accent);
+  color: #ffffff;
   border: none;
-  padding: 0.65rem 1.5rem;
-  font-size: 0.95rem;
+  padding: 0.55rem 1.25rem;
+  font-size: 0.9rem;
   font-weight: 700;
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-family: "Nunito", sans-serif;
   transition: background var(--transition), transform 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .btn-save:hover {
-  background: var(--color-secondary-light);
+  background: var(--color-primary);
   transform: translateY(-1px);
 }
 
@@ -152,10 +196,10 @@
 
 .btn-cancel {
   background: transparent;
-  border: 2px solid var(--color-border);
+  border: 1.5px solid var(--color-border);
   color: var(--color-text-light);
-  padding: 0.65rem 1.25rem;
-  font-size: 0.95rem;
+  padding: 0.55rem 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -168,12 +212,12 @@
   color: var(--color-text);
 }
 
-/* ── Stats ── */
+/* -- Stats -- */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 1rem;
-  margin-top: 0.5rem;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
 }
 
 .stat-card {
@@ -181,6 +225,7 @@
   border-radius: var(--radius-md);
   padding: 1.25rem;
   text-align: center;
+  border: 1px solid var(--color-border);
   transition: transform 0.2s;
 }
 
@@ -189,23 +234,29 @@
 }
 
 .stat-card .stat-value {
-  font-size: 1.8rem;
+  font-size: 1.75rem;
   font-weight: 700;
   color: var(--color-primary);
 }
 
 .stat-card .stat-label {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--color-text-light);
-  margin-top: 0.25rem;
+  margin-top: 0.2rem;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
-/* ── Responsive ── */
+/* -- Responsive -- */
 @media (max-width: 768px) {
   .profile-page {
     margin: 1rem auto;
     padding: 0 1rem;
+  }
+
+  .profile-header-card {
+    padding: 2rem 1.5rem 1.5rem;
   }
 
   .profile-card {
@@ -214,5 +265,17 @@
 
   .profile-actions {
     flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-avatar {
+    width: 64px;
+    height: 64px;
+    font-size: 1.5rem;
+  }
+
+  .profile-display-name {
+    font-size: 1.25rem;
   }
 }

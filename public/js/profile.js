@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const cachedUser = Auth.getUser();
     if (cachedUser) {
         document.getElementById('profileNameDisplay').textContent = cachedUser.username || '--';
+        document.getElementById('profilePhone').textContent = cachedUser.phone || '--';
         const roleEl = document.getElementById('profileRole');
         roleEl.textContent = cachedUser.role || role || '--';
         roleEl.className = 'role-badge ' + (cachedUser.role || role);
@@ -18,20 +19,27 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Load fresh profile data from API
     try {
-        const res = await Auth.authFetch('/api/auth/profile');
+        const res = await Auth.authFetch('/api/auth/verify');
         const result = await res.json();
-        if (result.success) {
-            document.getElementById('profileNameDisplay').textContent = result.data.username || '--';
-            document.getElementById('profilePhone').textContent = result.data.phone_no || '--';
-            document.getElementById('profileName').value = result.data.username || '';
+        if (result.success && result.user) {
+            document.getElementById('profileNameDisplay').textContent = result.user.username || '--';
+            document.getElementById('profileNameValue').textContent = result.user.username || '--';
+            document.getElementById('profilePhone').textContent = result.user.phone || '--';
+            document.getElementById('profileName').value = result.user.username || '';
             const roleEl = document.getElementById('profileRole');
-            roleEl.textContent = result.data.role;
-            roleEl.className = 'role-badge ' + result.data.role;
+            roleEl.textContent = result.user.role;
+            roleEl.className = 'role-badge ' + result.user.role;
+
+            // Update localStorage with fresh data including phone
+            Auth.setUser({
+                id: result.user.id,
+                username: result.user.username,
+                role: result.user.role,
+                phone: result.user.phone,
+            });
         }
     } catch (err) {
         console.error('Failed to load profile:', err);
-        document.getElementById('profileNameDisplay').textContent = cachedUser?.username || '--';
-        document.getElementById('profilePhone').textContent = '--';
     }
 
     // Load stats
@@ -39,7 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function toggleEdit() {
-    const display = document.getElementById('profileNameDisplay');
+    const display = document.getElementById('profileNameValue');
     const editRow = document.getElementById('editNameRow');
     const editBtn = document.getElementById('editBtn');
     const nameInput = document.getElementById('profileName');
@@ -56,7 +64,7 @@ function toggleEdit() {
 }
 
 function cancelEdit() {
-    document.getElementById('profileNameDisplay').style.display = '';
+    document.getElementById('profileNameValue').style.display = '';
     document.getElementById('editNameRow').style.display = 'none';
     document.getElementById('editBtn').style.display = '';
 }
@@ -129,6 +137,7 @@ async function saveProfile() {
 
             // Update display
             document.getElementById('profileNameDisplay').textContent = user.username;
+            document.getElementById('profileNameValue').textContent = user.username;
             cancelEdit();
             showToast('Profile updated!');
 

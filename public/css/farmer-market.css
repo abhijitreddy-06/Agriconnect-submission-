@@ -24,19 +24,7 @@
   margin: 1.5rem auto;
   border-radius: var(--radius-xl);
   padding: 3rem 2rem;
-  background: url("https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=1200&q=80") no-repeat center center/cover;
-}
-
-.hero-section::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(26, 45, 64, 0.85) 0%,
-    rgba(93, 163, 153, 0.75) 100%
-  );
-  z-index: 0;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 50%, var(--color-accent) 100%);
 }
 
 .hero-text {
@@ -198,6 +186,52 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+}
+
+/* ── Delete Product Button ── */
+.delete-product-btn {
+  background: transparent;
+  color: var(--color-danger);
+  border: 1.5px solid var(--color-danger);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  margin-top: 0.75rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: all var(--transition);
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.delete-product-btn:hover {
+  background: var(--color-danger);
+  color: #ffffff;
+}
+
+.delete-product-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.modal-actions {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.modal-delete-btn {
+  padding: 0.6rem 1.25rem;
+  font-size: 0.9rem;
+}
+
+.empty-state {
+  text-align: center;
+  color: var(--color-text-light);
+  padding: 3rem 1rem;
+  font-size: 1.05rem;
 }
 
 /* ── Add to Cart Button ── */

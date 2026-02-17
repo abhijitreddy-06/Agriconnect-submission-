@@ -58,9 +58,9 @@ function renderCart() {
     <div class="cart-item" data-id="${item.id}">
       <img
         class="cart-item-image"
-        src="${item.image || "/images/placeholder.png"}"
+        src="${item.image || ""}"
         alt="${item.product_name}"
-        onerror="this.src='/images/indian-farmer.avif'"
+        onerror="this.style.display='none'"
       />
       <div class="cart-item-details">
         <h3>${item.product_name}</h3>

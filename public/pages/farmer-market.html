@@ -20,49 +20,40 @@
     <header></header>
 
     <main>
+        <div class="hero-section">
+            <div class="hero-text">
+                <h1>Farmer Bazaar</h1>
+                <p>One of India's largest marketplace to BUY, SELL & RENT Agriculture products.</p>
+            </div>
+        </div>
+
         <div class="search-container">
-            <div class="input-group">
             <input type="text" class="search-input" id="searchInput" placeholder="Search products..." />
+        </div>
+
+        <div class="container">
+            <div class="marketplace" id="marketplace"></div>
+        </div>
+
+        <div id="productModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <img id="modalImage" src="" alt="Product Image" />
+                <h3 id="modalName"></h3>
+                <p id="modalPrice"></p>
+                <p id="modalQuantity"></p>
+                <p id="modalQuality"></p>
+                <p id="modalDescription"></p>
+                <p id="modalContact"></p>
+                <div class="modal-actions">
+                    <button class="delete-product-btn modal-delete-btn" id="modalDeleteBtn" style="display:none;">
+                        <i class="fas fa-trash-alt"></i> Delete Product
+                    </button>
+                </div>
             </div>
-            </div>
-    <!-- Hero section with banner image and text -->
-    <div class="hero-section">
-        <div class="hero-text">
-            <h1>Farmer Bazaar is One of India’s Largest Marketplace.</h1>
-            <p>User Can BUY, SELL & RENT Agriculture.</p>
         </div>
-        <!-- Replace /farmer-bg with your actual banner image path -->
-        <img src="https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=1200&q=80" alt="Farmer Bazaar" class="hero-image" />
-    </div>
-
-    <!-- Main container for marketplace content -->
-    <div class="container">
-        <!-- Marketplace grid; product cards will be injected here dynamically -->
-        <div class="marketplace" id="marketplace">
-            <!-- Product cards will be injected here -->
-        </div>
-    </div>
-
-    <!-- Modal for detailed product view -->
-    <div id="productModal" class="modal">
-        <div class="modal-content">
-            <!-- Close button -->
-            <span class="close" onclick="closeModal()">&times;</span>
-            <!-- Product image -->
-            <img id="modalImage" src="" alt="Product Image" />
-            <!-- Product details -->
-            <h3 id="modalName"></h3>
-            <p id="modalPrice"></p>
-            <p id="modalQuantity"></p>
-            <p id="modalQuality"></p>
-            <p id="modalDescription"></p>
-            <p id="modalContact"></p>
-        </div>
-    </div>
-
-    <!-- Footer section -->
     </main>
-    
+
     <footer class="footer"></footer>
 
     <script src="/js/auth.js"></script>
