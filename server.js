@@ -1,3 +1,7 @@
+import dns from "dns";
+// Force IPv4 DNS resolution — Render free-tier cannot reach Supabase over IPv6
+dns.setDefaultResultOrder("ipv4first");
+
 import dotenv from "dotenv";
 dotenv.config();
 
