@@ -15,24 +15,24 @@ router.get("/", (req, res) => {
 });
 
 // Auth pages
-router.get("/login", (req, res) => {
+router.get("/login/farmer", (req, res) => {
   res.sendFile(path.join(pagesDir, "login.html"));
 });
-router.get("/signup", (req, res) => {
+router.get("/signup/farmer", (req, res) => {
   res.sendFile(path.join(pagesDir, "signUp.html"));
 });
-router.get("/signupcus", (req, res) => {
+router.get("/signup/customer", (req, res) => {
   res.sendFile(path.join(pagesDir, "signupcus.html"));
 });
-router.get("/logincus", (req, res) => {
+router.get("/login/customer", (req, res) => {
   res.sendFile(path.join(pagesDir, "logincus.html"));
 });
 
-// Home pages
-router.get("/home", (req, res) => {
+// Dashboard pages
+router.get("/dashboard/farmer", (req, res) => {
   res.sendFile(path.join(pagesDir, "homepage.html"));
 });
-router.get("/homecus", (req, res) => {
+router.get("/dashboard/customer", (req, res) => {
   res.sendFile(path.join(pagesDir, "homepage_cus.html"));
 });
 
@@ -40,10 +40,10 @@ router.get("/homecus", (req, res) => {
 router.get("/sell", (req, res) => {
   res.sendFile(path.join(pagesDir, "selling.html"));
 });
-router.get("/market", (req, res) => {
+router.get("/marketplace/farmer", (req, res) => {
   res.sendFile(path.join(pagesDir, "farmer-market.html"));
 });
-router.get("/marketcus", (req, res) => {
+router.get("/marketplace/customer", (req, res) => {
   res.sendFile(path.join(pagesDir, "farmer-market_cus.html"));
 });
 router.get("/cart", (req, res) => {
@@ -52,14 +52,17 @@ router.get("/cart", (req, res) => {
 router.get("/orders", (req, res) => {
   res.sendFile(path.join(pagesDir, "orders.html"));
 });
-router.get("/predict", (req, res) => {
+router.get("/diagnosis", (req, res) => {
   res.sendFile(path.join(pagesDir, "prediction.html"));
 });
-router.get("/upload", (req, res) => {
+router.get("/plant-health", (req, res) => {
   res.sendFile(path.join(pagesDir, "symptom.html"));
 });
-router.get("/whichusers", (req, res) => {
+router.get("/get-started", (req, res) => {
   res.sendFile(path.join(pagesDir, "whichusers.html"));
+});
+router.get("/profile", (req, res) => {
+  res.sendFile(path.join(pagesDir, "profile.html"));
 });
 
 // Image routes

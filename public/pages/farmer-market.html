@@ -1,87 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <!-- Meta tags and title -->
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Farmer Market</title>
-
-    <!-- Link to external stylesheets -->
-    <!-- Global styles (commented out) -->
-    <!-- <link rel="stylesheet" href="/css/styles.css"> -->
-    <!-- Marketplace specific styles -->
-    <link rel="stylesheet" href="/css/market.css" />
-    <!-- Font Awesome icons -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer Market - AgriConnect</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
         integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600&display=swap" rel="stylesheet" />
-
-<link href="/css/farmer-market.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/farmer-market.css">
 </head>
-
 <body>
-    <!-- Global Loader (displays while content loads) -->
     <div id="global-loader">
         <div class="loader-spinner"></div>
     </div>
+    <div class="body-bg"></div>
 
-    <!-- Header section with navigation -->
-    <header>
-        <nav class="navbar">
-            <!-- Logo -->
-            <div class="logo">AgriConnect</div>
+    <header></header>
 
-            <!-- Navigation links -->
-            <ul class="nav-links">
-                <li><a href="/home">🏠 Home</a></li>
-                <li><a href="/upload">🌿 Plant Health</a></li>
-                <li><a href="/market">🛒 Market</a></li>
-                <li><a href="/sell">🛍️ Sell</a></li>
-                <li><a href="/orders">📦 Orders</a></li>
-                <li><a href="/">Log-out</a></li>
-            </ul>
-
-            <!-- Dropdown for language selection -->
-            <div class="dropdown">
-                <!-- Button triggers the language dropdown -->
-                <button class="dropbtn" onclick="toggleDropdown(this)">Language</button>
-                <!-- Dropdown content with available languages -->
-                <div class="dropdown-content">
-                    <a href="">English</a>
-                    <a href="">Kannada</a>
-                </div>
-            </div>
-
-            <!-- Profile dropdown -->
-            <div class="dropdown dropdown1">
-                <button class="dropbtn" onclick="toggleDropdown(this)">Profile</button>
-                <div class="dropdown-content">
-                    <a href="">My Details</a>
-                    <a href="/orders">My Orders</a>
-                    <a href="">My Health</a>
-                    <a href="">My Products</a>
-                </div>
-            </div>
-
-            <!-- Hamburger menu for mobile devices -->
-            <div class="hamburger">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
-            </div>
-        </nav>
-
-        <!-- Search container -->
+    <main>
         <div class="search-container">
             <div class="input-group">
-                <input type="text" class="search-input" id="searchInput" placeholder="Search..." />
+            <input type="text" class="search-input" id="searchInput" placeholder="Search products..." />
             </div>
-        </div>
-    </header>
-
+            </div>
     <!-- Hero section with banner image and text -->
     <div class="hero-section">
         <div class="hero-text">
@@ -118,12 +61,12 @@
     </div>
 
     <!-- Footer section -->
-    <footer class="footer">
-        <p>&copy; 2025 AgriConnect. All rights reserved.</p>
-    </footer>
+    </main>
+    
+    <footer class="footer"></footer>
 
-<script src="/js/auth.js"></script>
-<script src="/js/farmer-market.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/components.js"></script>
+    <script src="/js/farmer-market.js"></script>
 </body>
-
 </html>

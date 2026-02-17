@@ -1,164 +1,86 @@
-import path from "path";
 import axios from "axios";
-import https from "https";
+import FormData from "form-data";
 import pool from "../config/database.js";
 import { cacheGet, cacheSet } from "../config/redis.js";
 
-export const uploadImage = async (req, res) => {
+const HF_API_URL = process.env.HF_API_URL || "https://ajay123naik-plant-disease-api.hf.space/predict";
+
+/**
+ * POST /api/predict/analyze
+ * Accepts image via memory storage, forwards to Hugging Face plant disease model,
+ * saves result to DB.
+ */
+export const analyzeImage = async (req, res) => {
+  let predictionId = null;
   try {
+    const userId = req.user.userId;
+
     if (!req.file) {
       return res.status(400).json({ success: false, error: "No image uploaded." });
     }
 
-    const farmerId = req.user.userId;
-    const filePath = `/public/uploads/${req.file.filename}`;
     const { description, language } = req.body;
+    const lang = language || "English";
+    const desc = description || "";
 
-    const query =
-      "INSERT INTO predictions (farmer_id, image_path, description, language, status) VALUES ($1, $2, $3, $4, 'pending') RETURNING id";
-    const values = [farmerId, filePath, description || "", language || ""];
-    const result = await pool.query(query, values);
-    res.json({ success: true, predictionId: result.rows[0].id });
-  } catch (error) {
-    console.error("Upload error:", error.message);
-    res.status(500).json({ success: false, error: "Failed to upload image." });
-  }
-};
-
-export const analyzeImage = async (req, res) => {
-  try {
-    const userId = req.user.userId;
-    const { predictionId } = req.body;
-
-    if (!predictionId) {
-      return res
-        .status(400)
-        .json({ success: false, error: "Prediction ID is required." });
-    }
-
-    const dbResult = await pool.query(
-      "SELECT * FROM predictions WHERE id = $1",
-      [predictionId]
+    // Create prediction record
+    const insertResult = await pool.query(
+      "INSERT INTO predictions (farmer_id, image_path, description, language, status) VALUES ($1, $2, $3, $4, 'analyzing') RETURNING id",
+      [userId, "", desc, lang]
     );
+    predictionId = insertResult.rows[0].id;
 
-    if (dbResult.rows.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, error: "Prediction not found." });
-    }
+    // Build multipart form with the image buffer
+    const formData = new FormData();
+    formData.append("file", req.file.buffer, {
+      filename: req.file.originalname || "plant.jpg",
+      contentType: req.file.mimetype || "image/jpeg",
+    });
 
-    const record = dbResult.rows[0];
+    // Send image to Hugging Face plant disease model
+    const response = await axios.post(HF_API_URL, formData, {
+      headers: formData.getHeaders(),
+      timeout: 60000,
+    });
 
-    // Verify farmer owns this prediction
-    if (record.farmer_id !== userId) {
-      return res.status(403).json({
-        success: false,
-        error: "You do not have permission to analyze this prediction.",
-      });
-    }
+    const hfResult = response.data;
 
-    if (!record.image_path) {
-      return res.status(400).json({
-        success: false,
-        error: "Image not found for this prediction.",
-      });
-    }
+    // Build structured result from HF response
+    const diagnosisResult = JSON.stringify({
+      disease: hfResult.prediction || hfResult.class || hfResult.label || "Unknown",
+      confidence: hfResult.confidence || hfResult.score || null,
+      raw: hfResult,
+    });
 
-    const baseUrl =
-      process.env.BASE_URL || `http://localhost:${process.env.PORT || 8080}`;
-    const imageUrl = `${baseUrl}/uploads/${path.basename(record.image_path)}`;
-
-    const prompt = `
-**Plant Health Analysis Request**
-
-Analyze this plant health issue based on:
-- Image Observation: ${imageUrl}
-- User Description (${record.language}): ${record.description}
-
-Provide structured response in ${record.language} with:
-
-### 🌿 Recommended Organic Treatments
-1. [Primary solution using common ingredients]
-2. [Alternative approach with household items]
-3. [Preventative measures]
-
-### 🔬 Probable Causes
-- Likely pathogen type (fungal/bacterial/viral)
-- Common environmental contributors
-- Typical transmission vectors
-
-### 📝 Management Plan
-Step-by-step technical guidance covering:
-1. Immediate containment measures
-2. Long-term prevention strategies
-3. Soil/foliage treatment options
-4. Beneficial companion plants
-
-**Format Requirements:**
-- Use clear markdown formatting
-- Include measurement units
-- Bold key scientific terms
-- Focus on cost-effective solutions
-`;
-
-    // Update status to analyzing
-    await pool.query(
-      "UPDATE predictions SET status = $1 WHERE id = $2",
-      ["analyzing", predictionId]
-    );
-
-    const geminiModel =
-      process.env.GEMINI_MODEL || "models/gemini-1.5-pro-002";
-    const geminiApiUrl = `https://generativelanguage.googleapis.com/v1/${geminiModel}:generateContent?key=${process.env.GEMINI_API_KEY}`;
-    const httpsAgent = new https.Agent({ keepAlive: true });
-
-    const response = await axios.post(
-      geminiApiUrl,
-      {
-        contents: [{ parts: [{ text: prompt }] }],
-      },
-      {
-        headers: { "Content-Type": "application/json" },
-        timeout: 30000,
-        httpsAgent,
-      }
-    );
-
-    const geminiResponse = response.data;
-
-    if (!geminiResponse.candidates || geminiResponse.candidates.length === 0) {
-      throw new Error("No response from Gemini AI.");
-    }
-
-    const responseText =
-      geminiResponse.candidates[0]?.content?.parts[0]?.text ||
-      "No valid response.";
-
-    // Update prediction with status and details
+    // Save analysis result to DB (reusing gemini_details column to avoid migration)
     await pool.query(
       "UPDATE predictions SET gemini_details = $1, status = $2 WHERE id = $3",
-      [responseText, "complete", predictionId]
+      [diagnosisResult, "complete", predictionId]
     );
 
-    res.json({ success: true, data: { details: responseText } });
+    const parsed = JSON.parse(diagnosisResult);
+    res.json({
+      success: true,
+      predictionId,
+      data: {
+        diagnosis: parsed.disease,
+        confidence: parsed.confidence,
+        details: diagnosisResult,
+      },
+    });
   } catch (error) {
-    // Update status to failed if error occurs
-    if (error.message && predictionId) {
+    // Mark prediction as failed
+    if (predictionId) {
       await pool
-        .query("UPDATE predictions SET status = $1 WHERE id = $2", [
-          "failed",
-          predictionId,
-        ])
+        .query("UPDATE predictions SET status = $1 WHERE id = $2", ["failed", predictionId])
         .catch(() => {});
     }
 
-    console.error("Error in /analyze:", error.message);
+    console.error("Error in /api/predict/analyze:", error.message);
     if (error.response) {
       console.error("API response status:", error.response.status);
     }
-    res
-      .status(500)
-      .json({ success: false, error: "Analysis failed. Please try again." });
+    res.status(500).json({ success: false, error: "Analysis failed. Please try again." });
   }
 };
 
@@ -170,7 +92,19 @@ export const getPrediction = async (req, res) => {
     const cacheKey = `prediction:${predictionId}`;
     const cached = await cacheGet(cacheKey);
     if (cached) {
-      return res.json({ success: true, data: cached });
+      // Parse stored JSON to return clean field names
+      let diagnosis = cached.gemini_details;
+      let confidence = null;
+      try {
+        const parsed = JSON.parse(cached.gemini_details);
+        diagnosis = parsed.disease || cached.gemini_details;
+        confidence = parsed.confidence || null;
+      } catch { /* stored as plain text from old records */ }
+
+      return res.json({
+        success: true,
+        data: { ...cached, diagnosis, confidence, details: cached.gemini_details },
+      });
     }
 
     const result = await pool.query(
@@ -184,7 +118,20 @@ export const getPrediction = async (req, res) => {
       if (data.status === "complete") {
         await cacheSet(cacheKey, data, 1800);
       }
-      res.json({ success: true, data });
+
+      // Parse stored JSON to return clean field names
+      let diagnosis = data.gemini_details;
+      let confidence = null;
+      try {
+        const parsed = JSON.parse(data.gemini_details);
+        diagnosis = parsed.disease || data.gemini_details;
+        confidence = parsed.confidence || null;
+      } catch { /* stored as plain text from old records */ }
+
+      res.json({
+        success: true,
+        data: { ...data, diagnosis, confidence, details: data.gemini_details },
+      });
     } else {
       res
         .status(404)

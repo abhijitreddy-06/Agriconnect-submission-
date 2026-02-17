@@ -1,9 +1,6 @@
 // ─── Cart Page JS ───────────────────────────────────────────────
 
-// ─── UI Helpers ─────────────────────────────────────────────────
-const hamburger = document.querySelector(".hamburger");
-const navLinks = document.querySelector(".nav-links");
-if (hamburger) hamburger.addEventListener("click", () => navLinks.classList.toggle("active"));
+
 
 function showToast(message, type = "success") {
     const existing = document.querySelector(".toast");
@@ -187,13 +184,3 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // Loader
-document.addEventListener("readystatechange", () => {
-    if (document.readyState === "complete") {
-        document.body.classList.add("loaded");
-        const loader = document.getElementById("global-loader");
-        if (loader) {
-            loader.style.opacity = "0";
-            setTimeout(() => loader.remove(), 300);
-        }
-    }
-});

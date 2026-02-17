@@ -135,7 +135,7 @@ const Auth = (() => {
             setUser({ id: data.userId, username: data.username, role: data.role });
 
             // Replace current history entry so user can't go back to login
-            const homeUrl = data.role === "farmer" ? "/home" : "/homecus";
+            const homeUrl = data.role === "farmer" ? "/dashboard/farmer" : "/dashboard/customer";
             window.location.replace(homeUrl);
         }
 
@@ -156,7 +156,7 @@ const Auth = (() => {
             setUser({ id: data.userId, username: data.username || username, role: data.role });
 
             // Replace current history entry so user can't go back to signup
-            const homeUrl = data.role === "farmer" ? "/home" : "/homecus";
+            const homeUrl = data.role === "farmer" ? "/dashboard/farmer" : "/dashboard/customer";
             window.location.replace(homeUrl);
         }
 
@@ -180,37 +180,38 @@ const Auth = (() => {
 
     const handleForceLogout = () => {
         clearAuth();
-        window.location.replace("/login");
+        window.location.replace("/get-started");
     };
 
     // ─── Page Guards ─────────────────────────────────────────────────
     // Role-to-homepage mapping
     const HOME_ROUTES = {
-        farmer: "/home",
-        customer: "/homecus",
+        farmer: "/dashboard/farmer",
+        customer: "/dashboard/customer",
     };
 
     // Which guard type each page path requires
     const PAGE_GUARDS = {
         // Guest-only pages (redirect to home if logged in)
         "/": "guest",
-        "/login": "guest",
-        "/signup": "guest",
-        "/logincus": "guest",
-        "/signupcus": "guest",
-        "/whichusers": "guest",
+        "/login/farmer": "guest",
+        "/signup/farmer": "guest",
+        "/login/customer": "guest",
+        "/signup/customer": "guest",
+        "/get-started": "guest",
         // Farmer-only pages
-        "/home": "farmer",
+        "/dashboard/farmer": "farmer",
         "/sell": "farmer",
-        "/market": "farmer",
-        "/upload": "farmer",
-        "/predict": "farmer",
+        "/marketplace/farmer": "farmer",
+        "/plant-health": "farmer",
+        "/diagnosis": "farmer",
         // Customer-only pages
-        "/homecus": "customer",
-        "/marketcus": "customer",
+        "/dashboard/customer": "customer",
+        "/marketplace/customer": "customer",
         "/cart": "customer",
         // Any authenticated role
         "/orders": "any",
+        "/profile": "any",
     };
 
     /**
@@ -232,7 +233,7 @@ const Auth = (() => {
 
         if (guardType === "farmer") {
             if (!loggedIn) {
-                window.location.replace("/login");
+                window.location.replace("/get-started");
                 return false;
             }
             if (role !== "farmer") {
@@ -244,7 +245,7 @@ const Auth = (() => {
 
         if (guardType === "customer") {
             if (!loggedIn) {
-                window.location.replace("/logincus");
+                window.location.replace("/login/customer");
                 return false;
             }
             if (role !== "customer") {
@@ -256,7 +257,7 @@ const Auth = (() => {
 
         if (guardType === "any") {
             if (!loggedIn) {
-                window.location.replace("/whichusers");
+                window.location.replace("/get-started");
                 return false;
             }
             return true;
@@ -291,11 +292,11 @@ const Auth = (() => {
             window.addEventListener("popstate", () => {
                 const loggedIn = isLoggedIn();
                 const currentPath = window.location.pathname;
-                const guestPages = ["/", "/login", "/signup", "/logincus", "/signupcus", "/whichusers"];
+                const guestPages = ["/", "/login/farmer", "/signup/farmer", "/login/customer", "/signup/customer", "/get-started"];
 
                 if (loggedIn && guestPages.includes(currentPath)) {
                     const role = getRole();
-                    window.location.replace(HOME_ROUTES[role] || "/home");
+                    window.location.replace(HOME_ROUTES[role] || "/dashboard/farmer");
                 }
             });
         }

@@ -1,9 +1,6 @@
 // ─── Orders Page JS ─────────────────────────────────────────────
 
-// ─── UI Helpers ─────────────────────────────────────────────────
-const hamburger = document.querySelector(".hamburger");
-const navLinks = document.querySelector(".nav-links");
-if (hamburger) hamburger.addEventListener("click", () => navLinks.classList.toggle("active"));
+
 
 function showToast(message, type = "success") {
     const existing = document.querySelector(".toast");
@@ -20,30 +17,6 @@ function showToast(message, type = "success") {
     toast.textContent = message;
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
-}
-
-// ─── Setup Navigation Based on Role ─────────────────────────────
-function setupNav() {
-    const nav = document.getElementById("navLinks");
-    const role = Auth.getRole();
-
-    if (role === "customer") {
-        nav.innerHTML = `
-      <li><a href="/homecus">🏠 Home</a></li>
-      <li><a href="/marketcus">🛒 Market</a></li>
-      <li><a href="/cart">🛍️ Cart</a></li>
-      <li><a href="/orders" class="active">📦 Orders</a></li>
-      <li><a href="/">Log-out</a></li>
-    `;
-    } else if (role === "farmer") {
-        nav.innerHTML = `
-      <li><a href="/home">🏠 Home</a></li>
-      <li><a href="/market">🛒 Market</a></li>
-      <li><a href="/sell">🛍️ Sell</a></li>
-      <li><a href="/orders" class="active">📦 Orders</a></li>
-      <li><a href="/">Log-out</a></li>
-    `;
-    }
 }
 
 // ─── Load Orders ────────────────────────────────────────────────
@@ -176,18 +149,7 @@ async function cancelOrder(orderId, btnEl) {
 
 // ─── Init ───────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
-    setupNav();
     loadOrders();
 });
 
 // Loader
-document.addEventListener("readystatechange", () => {
-    if (document.readyState === "complete") {
-        document.body.classList.add("loaded");
-        const loader = document.getElementById("global-loader");
-        if (loader) {
-            loader.style.opacity = "0";
-            setTimeout(() => loader.remove(), 300);
-        }
-    }
-});

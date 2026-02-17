@@ -7,20 +7,45 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (id) {
     try {
+      document.body.classList.remove("loaded");
       if (loadingOverlay) loadingOverlay.style.display = "flex";
 
-      const res = await Auth.authFetch(`/prediction/${id}`);
+      const res = await Auth.authFetch(`/api/predict/${id}`);
       const result = await res.json();
 
       if (result.success) {
-        const rawContent = result.data.gemini_details || "No analysis available";
-        const formattedHtml = DOMPurify.sanitize(marked.parse(rawContent));
-        analysisResults.innerHTML = `
-          <div class="formatted-content">
-            <h2>${result.data.gemini_title || "Analysis Results"}</h2>
-            ${formattedHtml}
-          </div>
-        `;
+        const data = result.data;
+
+        // Try to render as structured diagnosis (new HF format)
+        let diagnosis = data.diagnosis;
+        let confidence = data.confidence;
+        let html = "";
+
+        if (diagnosis && diagnosis !== "Unknown") {
+          const pct = confidence != null ? `${(confidence * 100).toFixed(1)}%` : null;
+          html = `
+            <div class="formatted-content">
+              <h2>Diagnosis Results</h2>
+              <h3>${diagnosis}</h3>
+              ${pct ? `<p class="confidence">Confidence: <strong>${pct}</strong></p>` : ""}
+            </div>
+          `;
+        } else {
+          // Fallback: render as markdown (old records)
+          const raw = data.details || data.gemini_details || "No analysis available";
+          let rendered = raw;
+          if (typeof marked !== "undefined") {
+            rendered = DOMPurify.sanitize(marked.parse(raw));
+          }
+          html = `
+            <div class="formatted-content">
+              <h2>Analysis Results</h2>
+              ${rendered}
+            </div>
+          `;
+        }
+
+        analysisResults.innerHTML = html;
       }
     } catch (error) {
       analysisResults.innerHTML = `
@@ -31,37 +56,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       `;
     } finally {
       if (loadingOverlay) loadingOverlay.style.display = "none";
+      document.body.classList.add("loaded");
     }
   }
 
   const newPredBtn = document.getElementById("newPrediction");
   if (newPredBtn) {
     newPredBtn.addEventListener("click", () => {
-      window.location.href = "/upload";
+      window.location.href = "/plant-health";
     });
-  }
-});
-
-// ─── UI Helpers ────────────────────────────────────────────────
-const hamburger = document.querySelector(".hamburger");
-const navLinks = document.querySelector(".nav-links");
-if (hamburger) hamburger.addEventListener("click", () => navLinks.classList.toggle("active"));
-
-function toggleDropdown(button) {
-  const dc = button.parentElement.querySelector(".dropdown-content");
-  dc.style.display = dc.style.display === "block" ? "none" : "block";
-}
-
-window.onclick = function (event) {
-  if (!event.target.matches(".dropbtn")) {
-    document.querySelectorAll(".dropdown-content").forEach((d) => { if (d.style.display === "block") d.style.display = "none"; });
-  }
-};
-
-document.addEventListener("readystatechange", () => {
-  if (document.readyState === "complete") {
-    document.body.classList.add("loaded");
-    const loader = document.getElementById("global-loader");
-    if (loader) { loader.style.opacity = "0"; setTimeout(() => loader.remove(), 300); }
   }
 });

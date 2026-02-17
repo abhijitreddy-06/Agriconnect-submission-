@@ -1,41 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Cart - AgriConnect</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
         integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
-    <link href="/css/cart.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/cart.css">
 </head>
-
 <body>
-    <!-- Global loader -->
     <div id="global-loader">
         <div class="loader-spinner"></div>
     </div>
+    <div class="body-bg"></div>
 
-    <!-- Header -->
-    <header>
-        <nav class="navbar">
-            <div class="logo">AgriConnect</div>
-            <ul class="nav-links">
-                <li><a href="/homecus">🏠 Home</a></li>
-                <li><a href="/marketcus">🛒 Farmers' Market</a></li>
-                <li><a href="/cart" class="active">🛍️ My Cart</a></li>
-                <li><a href="/orders">📦 My Orders</a></li>
-                <li><a href="/">Log-out</a></li>
-            </ul>
-            <div class="hamburger">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
-            </div>
-        </nav>
-    </header>
+    <header></header>
 
     <!-- Cart Content -->
     <main class="cart-page">
@@ -49,7 +31,7 @@
             <i class="fas fa-cart-plus"></i>
             <h2>Your cart is empty</h2>
             <p>Browse the marketplace and add products to your cart.</p>
-            <a href="/marketcus" class="btn btn-primary">Browse Market</a>
+            <a href="/marketplace/customer" class="btn btn-primary">Browse Market</a>
         </div>
 
         <!-- Cart items container -->
@@ -87,18 +69,16 @@
             <p id="checkoutMessage"></p>
             <div class="modal-actions">
                 <a href="/orders" class="btn btn-primary">View Orders</a>
-                <a href="/marketcus" class="btn btn-secondary">Continue Shopping</a>
+                <a href="/marketplace/customer" class="btn btn-secondary">Continue Shopping</a>
             </div>
         </div>
     </div>
 
     <!-- Footer -->
-    <footer class="footer">
-        <p>&copy; 2025 AgriConnect. All rights reserved.</p>
-    </footer>
+<footer class="footer"></footer>
 
     <script src="/js/auth.js"></script>
+    <script src="/js/components.js"></script>
     <script src="/js/cart.js"></script>
 </body>
-
 </html>

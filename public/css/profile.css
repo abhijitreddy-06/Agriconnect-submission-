@@ -1,0 +1,166 @@
+/* ── Profile Page ── */
+.profile-page {
+  max-width: 700px;
+  margin: 2rem auto;
+  padding: 0 1.5rem;
+  animation: fadeIn 0.5s ease;
+}
+
+.profile-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1.5rem;
+  backdrop-filter: blur(10px);
+}
+
+.profile-card h2 {
+  color: #1a2d40;
+  margin-bottom: 1.5rem;
+  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.profile-field {
+  margin-bottom: 1.25rem;
+}
+
+.profile-field label {
+  display: block;
+  font-size: 0.8rem;
+  color: #888;
+  margin-bottom: 0.3rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.profile-field .field-value {
+  font-size: 1.05rem;
+  color: #1a2d40;
+  padding: 0.7rem 1rem;
+  background: #f5f6f8;
+  border-radius: 8px;
+  border: 2px solid transparent;
+}
+
+.profile-field input {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  font-size: 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-family: "Nunito", sans-serif;
+  transition: border-color 0.3s;
+  background: #fff;
+}
+
+.profile-field input:focus {
+  outline: none;
+  border-color: #c4a484;
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 0.25rem 0.85rem;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.role-badge.farmer {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.role-badge.customer {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.btn-save {
+  background: #c4a484;
+  color: #1a2d40;
+  border: none;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: "Nunito", sans-serif;
+  transition:
+    background 0.3s,
+    transform 0.15s;
+}
+
+.btn-save:hover {
+  background: #d4b896;
+  transform: translateY(-1px);
+}
+
+.btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.stat-card {
+  background: #f5f6f8;
+  border-radius: 12px;
+  padding: 1.25rem;
+  text-align: center;
+  transition: transform 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.stat-card .stat-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1a2d40;
+}
+
+.stat-card .stat-label {
+  font-size: 0.8rem;
+  color: #888;
+  margin-top: 0.25rem;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .profile-page {
+    margin: 1rem auto;
+    padding: 0 1rem;
+  }
+
+  .profile-card {
+    padding: 1.25rem;
+  }
+
+  .profile-actions {
+    flex-direction: column;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

@@ -18,7 +18,7 @@ export const createProduct = async (req, res) => {
       description,
       quantity_unit,
     } = req.body;
-    const imagePath = req.file ? `/uploads/${req.file.filename}` : "";
+    const imagePath = req.file ? `/uploads/${req.user.userId}/${req.file.filename}` : "";
 
     // Validation
     if (!product_name || price === undefined || quantity === undefined) {

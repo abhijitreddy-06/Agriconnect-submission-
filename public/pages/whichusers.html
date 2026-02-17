@@ -1,57 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <!-- Set character encoding and responsive viewport -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Page title -->
-    <title>Profession Selection</title>
-    <!-- Link to profession selection specific styles -->
-
+    <title>Select Role - AgriConnect</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+        integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/global.css">
     <link rel="stylesheet" href="/css/whichusers.css">
 </head>
-
 <body>
     <div id="global-loader">
         <div class="loader-spinner"></div>
     </div>
-    <!-- Header with navigation bar -->
-    <header>
-        <nav class="navbar">
-            <!-- Logo for AgriConnect -->
-            <div class="logo">AgriConnect</div>
+    <div class="body-bg"></div>
 
-            <!-- Navigation Links -->
-            <ul class="nav-links">
-                <li><a href="/" data-translate>🏠Home</a></li>
-                <li><a href="/whichusers" data-translate>🌾Farming Guide</a></li>
-                <li><a href="/whichusers" data-translate>🌿Check Plant Health </a></li>
-                <li><a href="/whichusers" data-translate>🛒Farmers’ Market</a></li>
-            </ul>
-
-            <!-- Dropdown for language selection -->
-            <div class="dropdown">
-                <!-- Button that triggers the language dropdown -->
-                <button class="dropbtn" onclick="toggleDropdown(this)">Language</button>
-                <!-- Dropdown content with available languages -->
-                <div class="dropdown-content">
-                    <a href="">English</a>
-                    <a href="">Kannada</a>
-                </div>
-            </div>
-
-            <!-- Sign-up Button -->
-            <button class="login-btn" onclick="window.location.href='/whichusers'">Sign-up</button>
-
-            <!-- Hamburger menu for mobile navigation -->
-            <div class="hamburger">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
-            </div>
-        </nav>
-    </header>
+    <header></header>
 
     <!-- Main content area -->
     <main>
@@ -59,8 +25,6 @@
         <div id="loadingOverlay" style="display: none;">
             <div class="spinner"></div>
         </div>
-        <!-- Background styling element -->
-        <div class="body-bg"></div>
         <!-- Container for the main content -->
         <div class="main-content">
             <!-- Container for selection cards -->
@@ -69,26 +33,23 @@
                 <div class="card">
                     <img src="/customer" alt="Customer">
                     <h2>Are you a Customer?</h2>
-                    <button class="btn" onclick="window.location.href='/signupcus'">Login as Customer</button>
+                    <button class="btn" onclick="window.location.href='/signup/customer'">Login as Customer</button>
                 </div>
                 <!-- Card for Farmer selection -->
                 <div class="card">
                     <img src="/ind_farmer" alt="Farmer">
                     <h2>Are you a Farmer?</h2>
-                    <button class="btn" onclick="window.location.href='/signup'">Login as Farmer</button>
+                    <button class="btn" onclick="window.location.href='/signup/farmer'">Login as Farmer</button>
                 </div>
             </div>
         </div>
     </main>
 
     <!-- Footer section -->
-    <footer class="footer">
-        <p>&copy; 2025 AgriConnect. All rights reserved.</p>
-    </footer>
+<footer class="footer"></footer>
 
-    <!-- External JavaScript file -->
-<script src="/js/auth.js"></script>
-<script src="/js/whichusers.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/components.js"></script>
+    <script src="/js/whichusers.js"></script>
 </body>
-
 </html>

@@ -25,6 +25,8 @@ build/
 # Temporary files
 tmp/
 temp/
+tmpclaude-*-cwd
+nul
 
 # Editor files
 *.sublime-workspace

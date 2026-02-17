@@ -1,18 +1,9 @@
 // ─── Sell Product Form (AJAX with Auth) ─────────────────────────
-const hamburger = document.querySelector(".hamburger");
-const navLinks = document.querySelector(".nav-links");
-if (hamburger) hamburger.addEventListener("click", () => navLinks.classList.toggle("active"));
 
-function toggleDropdown(button) {
-  const dc = button.parentElement.querySelector(".dropdown-content");
-  dc.style.display = dc.style.display === "block" ? "none" : "block";
-}
 
-window.onclick = function (event) {
-  if (!event.target.matches(".dropbtn")) {
-    document.querySelectorAll(".dropdown-content").forEach((d) => { if (d.style.display === "block") d.style.display = "none"; });
-  }
-};
+
+
+
 
 // Unit toggle buttons
 document.querySelectorAll(".unit-toggle").forEach((group) => {
@@ -82,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (data.success) {
         alert("Product listed successfully!");
-        window.location.href = "/market";
+        window.location.href = "/marketplace/farmer";
       } else {
         alert(data.error || "Failed to list product.");
       }
@@ -98,10 +89,3 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // Loader
-document.addEventListener("readystatechange", () => {
-  if (document.readyState === "complete") {
-    document.body.classList.add("loaded");
-    const loader = document.getElementById("global-loader");
-    if (loader) { loader.style.opacity = "0"; setTimeout(() => loader.remove(), 300); }
-  }
-});
