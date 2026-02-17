@@ -3,65 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leaf Disease Analyzer - AgriConnect</title>
+    <title>Plant Health Check - AgriConnect</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
-      integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
-      crossorigin="anonymous" referrerpolicy="no-referrer" />
+        integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/global.css">
     <link rel="stylesheet" href="/css/symptom.css">
 </head>
 <body>
     <div id="global-loader">
-      <div class="loader-spinner"></div>
+        <div class="loader-spinner"></div>
     </div>
     <div class="body-bg"></div>
 
     <header></header>
 
-    <!-- Main content area -->
-  <main>
-    <div class="container">
-      <!-- Form for image upload and analysis -->
-      <form id="uploadForm" enctype="multipart/form-data">
-        <!-- Image upload input -->
-        <label for="imageInput">Upload Image:</label>
-        <input type="file" id="imageInput" name="imageInput" accept="image/*" capture="environment" required />
+    <main>
+        <div class="upload-container">
+            <div class="upload-card">
+                <div class="upload-header">
+                    <i class="fas fa-leaf"></i>
+                    <h1>Plant Health Check</h1>
+                    <p>Upload a photo of your plant to detect diseases</p>
+                </div>
 
-        <!-- Text area for description -->
-        <label for="description">Description:</label>
-        <textarea id="description" name="description" placeholder="Describe the issue..."></textarea>
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <div class="drop-zone" id="dropZone">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Drag & drop your plant image here</p>
+                        <span>or</span>
+                        <label for="imageInput" class="browse-btn">Browse Files</label>
+                        <input type="file" id="imageInput" name="imageInput" accept="image/*" capture="environment" required hidden />
+                        <p class="file-hint">Supports JPG, PNG, WebP (max 5MB)</p>
+                    </div>
 
-        <!-- Input for preferred language -->
-        <label for="language">Preferred Language (e.g., Kannada, Marathi, English, or any
-          other):</label>
-        <input type="text" id="language" name="language" placeholder="English" required />
+                    <div class="preview-section" id="previewSection" style="display: none;">
+                        <img id="imagePreview" src="" alt="Plant image preview" />
+                        <button type="button" class="remove-preview" id="removePreview">
+                            <i class="fas fa-times"></i> Remove
+                        </button>
+                    </div>
 
-        <!-- Button to trigger speech input -->
-        <button type="button" id="micButton">🎤 Speak</button>
-        <!-- Paragraph to display microphone status -->
-        <p id="micStatus" style="color: green"></p>
-
-        <!-- Submit button for analysis -->
-        <button type="submit">Submit & Analyze</button>
-      </form>
-      <div id="analysis-loader" class="analysis-loader" style="display: none;">
-        <div class="loader-content">
-          <div class="loader-spinner"></div>
-          <div class="loader-text">Analyzing Plant Health...</div>
+                    <button type="submit" class="submit-btn" id="submitBtn" disabled>
+                        <i class="fas fa-search"></i> Analyze Plant
+                    </button>
+                </form>
+            </div>
         </div>
-      </div>
-      <!-- Image preview section -->
-      <div class="preview">
-        <h2>Uploaded Image Preview</h2>
-        <img id="imagePreview" src="" alt="Image preview" style="display: none" />
-      </div>
-    </div>
-  </main>
-  <!-- Footer section -->
-<footer class="footer"></footer>
 
-<script src="/js/auth.js"></script>
+        <div id="analysis-loader" class="analysis-loader" style="display: none;">
+            <div class="loader-content">
+                <div class="loader-spinner"></div>
+                <div class="loader-text">Analyzing plant health...</div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer"></footer>
+
+    <script src="/js/auth.js"></script>
     <script src="/js/components.js"></script>
     <script src="/js/symptom.js"></script>
 </body>

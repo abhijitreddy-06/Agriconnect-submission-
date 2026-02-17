@@ -1,4 +1,9 @@
-/* ── Profile Page ── */
+/* ═══════════════════════════════════════════════════
+   profile.css — User profile page styles (profile.html)
+   Global styles handled by global.css
+   ═══════════════════════════════════════════════════ */
+
+/* ── Profile Page Layout ── */
 .profile-page {
   max-width: 700px;
   margin: 2rem auto;
@@ -6,17 +11,18 @@
   animation: fadeIn 0.5s ease;
 }
 
+/* ── Profile Card ── */
 .profile-card {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 16px;
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
   padding: 2rem;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-lg);
   margin-bottom: 1.5rem;
   backdrop-filter: blur(10px);
 }
 
 .profile-card h2 {
-  color: #1a2d40;
+  color: var(--color-primary);
   margin-bottom: 1.5rem;
   font-size: 1.4rem;
   display: flex;
@@ -24,6 +30,7 @@
   gap: 0.5rem;
 }
 
+/* ── Profile Fields ── */
 .profile-field {
   margin-bottom: 1.25rem;
 }
@@ -31,7 +38,7 @@
 .profile-field label {
   display: block;
   font-size: 0.8rem;
-  color: #888;
+  color: var(--color-text-light);
   margin-bottom: 0.3rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -40,33 +47,36 @@
 
 .profile-field .field-value {
   font-size: 1.05rem;
-  color: #1a2d40;
+  color: var(--color-text);
   padding: 0.7rem 1rem;
-  background: #f5f6f8;
-  border-radius: 8px;
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
   border: 2px solid transparent;
 }
 
+/* ── Profile Inputs ── */
 .profile-field input {
   width: 100%;
   padding: 0.7rem 1rem;
   font-size: 1rem;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
   font-family: "Nunito", sans-serif;
-  transition: border-color 0.3s;
-  background: #fff;
+  transition: border-color var(--transition);
+  background: var(--color-surface-solid);
+  color: var(--color-text);
 }
 
 .profile-field input:focus {
   outline: none;
-  border-color: #c4a484;
+  border-color: var(--color-secondary);
 }
 
+/* ── Role Badge ── */
 .role-badge {
   display: inline-block;
   padding: 0.25rem 0.85rem;
-  border-radius: 50px;
+  border-radius: var(--radius-full);
   font-size: 0.85rem;
   font-weight: 700;
   text-transform: capitalize;
@@ -82,29 +92,29 @@
   color: #1565c0;
 }
 
+/* ── Profile Actions ── */
 .profile-actions {
   display: flex;
   gap: 1rem;
   margin-top: 1.5rem;
 }
 
+/* ── Save Button ── */
 .btn-save {
-  background: #c4a484;
-  color: #1a2d40;
+  background: var(--color-secondary);
+  color: var(--color-primary);
   border: none;
   padding: 0.75rem 2rem;
   font-size: 1rem;
   font-weight: 700;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-family: "Nunito", sans-serif;
-  transition:
-    background 0.3s,
-    transform 0.15s;
+  transition: background var(--transition), transform 0.15s ease;
 }
 
 .btn-save:hover {
-  background: #d4b896;
+  background: var(--color-secondary-light);
   transform: translateY(-1px);
 }
 
@@ -114,6 +124,7 @@
   transform: none;
 }
 
+/* ── Stats Grid ── */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -122,30 +133,39 @@
 }
 
 .stat-card {
-  background: #f5f6f8;
-  border-radius: 12px;
+  background: var(--color-surface-solid);
+  border-radius: var(--radius-md);
   padding: 1.25rem;
   text-align: center;
-  transition: transform 0.2s;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition), box-shadow var(--transition);
 }
 
 .stat-card:hover {
   transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .stat-card .stat-value {
   font-size: 1.8rem;
   font-weight: 700;
-  color: #1a2d40;
+  color: var(--color-primary);
 }
 
 .stat-card .stat-label {
   font-size: 0.8rem;
-  color: #888;
+  color: var(--color-text-light);
   margin-top: 0.25rem;
   font-weight: 600;
 }
 
+/* ── Animations ── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Responsive: Tablet ── */
 @media (max-width: 768px) {
   .profile-page {
     margin: 1rem auto;
@@ -154,13 +174,48 @@
 
   .profile-card {
     padding: 1.25rem;
+    border-radius: var(--radius-lg);
   }
 
   .profile-actions {
     flex-direction: column;
   }
 
+  .btn-save {
+    width: 100%;
+  }
+
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ── Responsive: Small Mobile ── */
+@media (max-width: 480px) {
+  .profile-page {
+    padding: 0 0.75rem;
+    margin: 0.75rem auto;
+  }
+
+  .profile-card {
+    padding: 1rem;
+    border-radius: var(--radius-md);
+  }
+
+  .profile-card h2 {
+    font-size: 1.2rem;
+  }
+
+  .profile-field .field-value {
+    font-size: 0.95rem;
+    padding: 0.6rem 0.85rem;
+  }
+
+  .stat-card {
+    padding: 1rem;
+  }
+
+  .stat-card .stat-value {
+    font-size: 1.5rem;
   }
 }

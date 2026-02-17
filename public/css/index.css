@@ -3,39 +3,133 @@
    Global styles handled by global.css
    ═══════════════════════════════════════════════════ */
 
-.main-container {
-  color: white;
-  font-size: 24px;
-  text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000,
-    -1px 1px 0 #000;
-  max-width: 1200px;
-  height: 80vh;
-  width: 90vw;
-  margin: auto;
-  margin-top: 2rem;
-  margin-bottom: 2rem;
+/* ── Hero Section ── */
+main {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  border-radius: 10px;
-  padding: 25px;
-  opacity: 0;
-  animation: fadeIn 2s forwards;
-  gap: 10px;
+  min-height: calc(100vh - 120px);
+  padding: 2rem;
 }
 
+/* ── Glassmorphism Content Box ── */
+.main-container {
+  background: var(--color-surface);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  max-width: 720px;
+  width: 100%;
+  padding: 4rem 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.25rem;
+  opacity: 0;
+  animation: fadeIn 1s ease forwards;
+}
+
+/* ── Typography ── */
+.main-container h1 {
+  font-size: 2.75rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+}
+
+.main-container p {
+  font-size: 1.15rem;
+  color: var(--color-text-light);
+  line-height: 1.7;
+  max-width: 520px;
+}
+
+/* ── CTA Button ── */
 .main-container button {
-  width: 15rem;
-  height: 3rem;
-  border-radius: 17px;
-  padding: 10px 20px;
-  font-size: 16px;
-  box-shadow: 2px 4px 8px rgba(0, 0, 0, 2);
-  transition: all 0.3s ease;
+  background: var(--color-primary);
+  color: var(--color-surface-solid);
+  border: none;
+  padding: 0.9rem 2.5rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  font-family: "Nunito", sans-serif;
+  border-radius: var(--radius-full);
   cursor: pointer;
+  box-shadow: var(--shadow-md);
+  transition: background var(--transition), transform var(--transition),
+    box-shadow var(--transition);
+  margin-top: 0.5rem;
 }
 
 .main-container button:hover {
-  background: #c4a484;
-  color: black;
+  background: var(--color-primary-light);
+  color: var(--color-surface-solid);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.main-container button:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── Responsive: Tablet ── */
+@media (max-width: 1024px) {
+  .main-container {
+    max-width: 600px;
+    padding: 3.5rem 2.5rem;
+  }
+
+  .main-container h1 {
+    font-size: 2.25rem;
+  }
+}
+
+/* ── Responsive: Small Tablet / Large Phone ── */
+@media (max-width: 768px) {
+  main {
+    padding: 1.5rem 1rem;
+  }
+
+  .main-container {
+    padding: 3rem 2rem;
+  }
+
+  .main-container h1 {
+    font-size: 2rem;
+  }
+
+  .main-container p {
+    font-size: 1.05rem;
+  }
+}
+
+/* ── Responsive: Mobile ── */
+@media (max-width: 480px) {
+  main {
+    padding: 1rem 0.75rem;
+  }
+
+  .main-container {
+    padding: 2.5rem 1.5rem;
+    border-radius: var(--radius-lg);
+  }
+
+  .main-container h1 {
+    font-size: 1.65rem;
+  }
+
+  .main-container p {
+    font-size: 0.95rem;
+  }
+
+  .main-container button {
+    width: 100%;
+    padding: 0.85rem 1.5rem;
+    font-size: 1rem;
+  }
 }

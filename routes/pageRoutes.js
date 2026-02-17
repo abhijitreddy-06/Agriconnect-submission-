@@ -5,8 +5,6 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const pagesDir = path.join(__dirname, "..", "public", "pages");
-const imagesDir = path.join(__dirname, "..", "public", "images");
-
 const router = express.Router();
 
 // Default route
@@ -63,26 +61,6 @@ router.get("/get-started", (req, res) => {
 });
 router.get("/profile", (req, res) => {
   res.sendFile(path.join(pagesDir, "profile.html"));
-});
-
-// Image routes
-router.get("/main-bg", (req, res) => {
-  res.sendFile(path.join(imagesDir, "hero_grass.jpg"));
-});
-router.get("/main-bg1", (req, res) => {
-  res.sendFile(path.join(imagesDir, "hero_grass1.jpg"));
-});
-router.get("/customer", (req, res) => {
-  res.sendFile(path.join(imagesDir, "customer.jpg"));
-});
-router.get("/farmer-bg", (req, res) => {
-  res.sendFile(path.join(imagesDir, "farmer-removebg-preview.png"));
-});
-router.get("/ind_farmer", (req, res) => {
-  res.sendFile(path.join(imagesDir, "indian_farmer.jpg"));
-});
-router.get("/ind_farmer1", (req, res) => {
-  res.sendFile(path.join(imagesDir, "indian-farmer.avif"));
 });
 
 // Favicon

@@ -12,6 +12,7 @@
     "install:prod": "npm install --omit=dev"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.96.0",
     "axios": "^1.8.3",
     "bcrypt": "^5.1.1",
     "compression": "^1.8.1",

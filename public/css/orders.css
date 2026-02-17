@@ -3,27 +3,7 @@
    Global styles handled by global.css
    ═══════════════════════════════════════════════════ */
 
-:root {
-  --primary-color: #2a5c82;
-  --secondary-color: #5da399;
-  --accent-color: #ff7e67;
-  --danger-color: #e74c3c;
-  --warning-color: #f39c12;
-  --success-color: #27ae60;
-  --dark-bg: #1a2d40;
-  --light-bg: #f8f9fa;
-  --text-dark: #2d3436;
-  --text-light: #f8f9fa;
-  --border-color: #e0e0e0;
-  --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-body {
-  font-family: "Nunito", sans-serif;
-  background: var(--light-bg);
-  color: var(--text-dark);
-}
-
+/* ── Orders Page Layout ── */
 .orders-page {
   flex: 1;
   max-width: 900px;
@@ -32,9 +12,10 @@ body {
   padding: 0 1.5rem;
 }
 
+/* ── Header ── */
 .orders-header h1 {
   font-size: 1.75rem;
-  color: var(--primary-color);
+  color: var(--color-primary);
   margin-bottom: 1.5rem;
 }
 
@@ -42,77 +23,93 @@ body {
   margin-right: 0.5rem;
 }
 
+/* ── Empty State ── */
 .empty-orders {
   text-align: center;
   padding: 4rem 2rem;
-  background: white;
-  border-radius: 12px;
-  box-shadow: var(--shadow);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(10px);
 }
 
 .empty-orders i {
   font-size: 4rem;
-  color: var(--border-color);
+  color: var(--color-border);
   margin-bottom: 1rem;
 }
 
 .empty-orders h2 {
-  color: var(--primary-color);
+  color: var(--color-primary);
   margin-bottom: 0.5rem;
 }
 
 .empty-orders p {
-  color: #7f8c8d;
+  color: var(--color-text-light);
 }
 
+/* ── Orders List ── */
 .orders-list {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
+/* ── Order Card ── */
 .order-card {
-  background: white;
-  border-radius: 12px;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
   padding: 1.5rem;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(10px);
   display: grid;
   grid-template-columns: 80px 1fr auto;
   gap: 1.25rem;
   align-items: center;
-  transition: transform 0.2s ease;
+  transition: transform var(--transition), box-shadow var(--transition);
+  animation: fadeInUp 0.4s ease both;
 }
+
+.order-card:nth-child(1) { animation-delay: 0s; }
+.order-card:nth-child(2) { animation-delay: 0.05s; }
+.order-card:nth-child(3) { animation-delay: 0.1s; }
+.order-card:nth-child(4) { animation-delay: 0.15s; }
+.order-card:nth-child(5) { animation-delay: 0.2s; }
 
 .order-card:hover {
   transform: translateX(4px);
+  box-shadow: var(--shadow-lg);
 }
 
+/* ── Order Image ── */
 .order-image {
   width: 80px;
   height: 80px;
   object-fit: cover;
-  border-radius: 8px;
-  background: #f5f5f5;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
 }
 
+/* ── Order Details ── */
 .order-details h3 {
   font-size: 1.05rem;
-  color: var(--primary-color);
+  color: var(--color-primary);
   margin-bottom: 0.2rem;
 }
 
 .order-details .order-meta {
   font-size: 0.85rem;
-  color: #7f8c8d;
+  color: var(--color-text-light);
   margin-bottom: 0.3rem;
 }
 
 .order-details .order-total {
   font-weight: 700;
-  color: var(--secondary-color);
+  color: var(--color-accent);
   font-size: 1.1rem;
 }
 
+/* ── Order Status Section ── */
 .order-status-section {
   text-align: right;
   display: flex;
@@ -121,56 +118,114 @@ body {
   align-items: flex-end;
 }
 
+/* ── Status Badges (Pill Style) ── */
 .status-badge {
   display: inline-block;
   padding: 0.35rem 0.9rem;
-  border-radius: 20px;
+  border-radius: var(--radius-full);
   font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.status-pending { background: rgba(243, 156, 18, 0.15); color: var(--warning-color); }
-.status-accepted { background: rgba(52, 152, 219, 0.15); color: #3498db; }
-.status-shipped { background: rgba(155, 89, 182, 0.15); color: #9b59b6; }
-.status-delivered { background: rgba(39, 174, 96, 0.15); color: var(--success-color); }
-.status-cancelled { background: rgba(231, 76, 60, 0.15); color: var(--danger-color); }
+.status-pending {
+  background: rgba(243, 156, 18, 0.15);
+  color: #f39c12;
+}
 
+.status-accepted {
+  background: rgba(52, 152, 219, 0.15);
+  color: #3498db;
+}
+
+.status-shipped {
+  background: rgba(155, 89, 182, 0.15);
+  color: #9b59b6;
+}
+
+.status-delivered {
+  background: rgba(39, 174, 96, 0.15);
+  color: var(--color-success);
+}
+
+.status-completed {
+  background: rgba(39, 174, 96, 0.15);
+  color: var(--color-success);
+}
+
+.status-cancelled {
+  background: rgba(231, 76, 60, 0.15);
+  color: var(--color-danger);
+}
+
+/* ── Cancel Button ── */
 .btn-cancel {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
   padding: 0.4rem 0.9rem;
-  border: 2px solid var(--danger-color);
-  border-radius: 6px;
+  border: 2px solid var(--color-danger);
+  border-radius: var(--radius-sm);
   background: transparent;
-  color: var(--danger-color);
+  color: var(--color-danger);
   font-family: inherit;
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition);
 }
 
-.btn-cancel:hover { background: var(--danger-color); color: white; }
-.btn-cancel:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-cancel:hover {
+  background: var(--color-danger);
+  color: var(--color-surface-solid);
+}
 
-.order-cancelled { opacity: 0.65; }
-.order-cancelled .order-details h3 { text-decoration: line-through; }
+.btn-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
+/* ── Cancelled Order State ── */
+.order-cancelled {
+  opacity: 0.65;
+}
+
+.order-cancelled .order-details h3 {
+  text-decoration: line-through;
+}
+
+/* ── Status Select (Farmer View) ── */
 .status-select {
   padding: 0.4rem 0.75rem;
-  border: 2px solid var(--border-color);
-  border-radius: 6px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
   font-family: inherit;
   font-size: 0.85rem;
   cursor: pointer;
-  background: white;
+  background: var(--color-surface-solid);
+  color: var(--color-text);
+  transition: border-color var(--transition);
 }
 
-.status-select:focus { outline: none; border-color: var(--secondary-color); }
+.status-select:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
 
+/* ── Animations ── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Responsive: Tablet ── */
 @media (max-width: 768px) {
   .order-card {
     grid-template-columns: 60px 1fr;
@@ -185,5 +240,44 @@ body {
     text-align: left;
   }
 
-  .order-image { width: 60px; height: 60px; }
+  .order-image {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+/* ── Responsive: Small Mobile ── */
+@media (max-width: 480px) {
+  .orders-page {
+    padding: 0 1rem;
+    margin: 1rem auto;
+  }
+
+  .orders-header h1 {
+    font-size: 1.35rem;
+  }
+
+  .order-card {
+    grid-template-columns: 50px 1fr;
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .order-image {
+    width: 50px;
+    height: 50px;
+  }
+
+  .order-details h3 {
+    font-size: 0.95rem;
+  }
+
+  .order-details .order-total {
+    font-size: 1rem;
+  }
+
+  .status-badge {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.7rem;
+  }
 }

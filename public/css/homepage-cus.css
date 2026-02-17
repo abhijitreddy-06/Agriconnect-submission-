@@ -3,39 +3,140 @@
    Global styles handled by global.css
    ═══════════════════════════════════════════════════ */
 
-.main-container {
-  color: #fff;
-  font-size: 24px;
-  text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000,
-    -1px 1px 0 #000;
-  max-width: 1200px;
-  height: 80vh;
-  width: 90vw;
-  margin: auto;
-  margin-top: 2rem;
-  margin-bottom: 2rem;
+/* ── Dashboard Layout ── */
+main {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  border-radius: 10px;
-  padding: 25px;
-  opacity: 0;
-  animation: fadeIn 2s forwards;
-  gap: 10px;
+  min-height: calc(100vh - 120px);
+  padding: 2rem;
 }
 
+/* ── Glassmorphism Container ── */
+.main-container {
+  background: var(--color-surface);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  max-width: 800px;
+  width: 100%;
+  padding: 3.5rem 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.25rem;
+  opacity: 0;
+  animation: fadeIn 1s ease forwards;
+}
+
+/* ── Typography ── */
+.main-container h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+}
+
+.main-container p {
+  font-size: 1.1rem;
+  color: var(--color-text-light);
+  line-height: 1.7;
+  max-width: 560px;
+}
+
+/* ── Feature Card Buttons ── */
 .main-container button {
-  width: 15rem;
-  height: 3rem;
-  border-radius: 17px;
-  padding: 10px 20px;
-  font-size: 16px;
-  box-shadow: 2px 4px 8px rgba(0, 0, 0, 2);
-  transition: all 0.3s ease;
+  background: var(--color-surface);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--color-primary);
+  border: 1px solid var(--color-border);
+  padding: 1rem 2rem;
+  width: 100%;
+  max-width: 380px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  font-family: "Nunito", sans-serif;
+  border-radius: var(--radius-md);
   cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: background var(--transition), transform var(--transition),
+    box-shadow var(--transition), border-color var(--transition);
 }
 
 .main-container button:hover {
-  background: #c4a484;
-  color: black;
+  background: var(--color-primary);
+  color: var(--color-surface-solid);
+  border-color: var(--color-primary);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+.main-container button:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── Responsive: Tablet ── */
+@media (max-width: 1024px) {
+  .main-container {
+    max-width: 650px;
+    padding: 3rem 2.5rem;
+  }
+
+  .main-container h1 {
+    font-size: 2.15rem;
+  }
+}
+
+/* ── Responsive: Small Tablet / Large Phone ── */
+@media (max-width: 768px) {
+  main {
+    padding: 1.5rem 1rem;
+  }
+
+  .main-container {
+    padding: 2.5rem 1.75rem;
+  }
+
+  .main-container h1 {
+    font-size: 1.85rem;
+  }
+
+  .main-container p {
+    font-size: 1rem;
+  }
+
+  .main-container button {
+    max-width: 100%;
+  }
+}
+
+/* ── Responsive: Mobile ── */
+@media (max-width: 480px) {
+  main {
+    padding: 1rem 0.75rem;
+  }
+
+  .main-container {
+    padding: 2rem 1.25rem;
+    border-radius: var(--radius-lg);
+  }
+
+  .main-container h1 {
+    font-size: 1.55rem;
+  }
+
+  .main-container p {
+    font-size: 0.95rem;
+  }
+
+  .main-container button {
+    padding: 0.85rem 1.25rem;
+    font-size: 0.95rem;
+  }
 }

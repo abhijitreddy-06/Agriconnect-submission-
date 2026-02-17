@@ -1,15 +1,54 @@
 import pool from "../config/database.js";
+import supabase from "../config/supabase.js";
 import { cacheInvalidatePattern } from "../config/redis.js";
+import path from "path";
+
+const BUCKET = process.env.SUPABASE_BUCKET || "product-images";
 
 // Helper: Invalidate all product caches
 const invalidateProductCache = async () => {
   await cacheInvalidatePattern("products:*");
 };
 
+// Helper: Upload image buffer to Supabase Storage, return public URL
+const uploadToSupabase = async (fileBuffer, originalname, mimetype, userId) => {
+  if (!supabase) {
+    throw new Error("Supabase not configured. Set SUPABASE_URL and SUPABASE_KEY.");
+  }
+
+  const ext = path.extname(originalname || ".jpg").toLowerCase();
+  const filename = `products/${userId}/${Date.now()}-${Math.round(Math.random() * 1e6)}${ext}`;
+
+  const { error } = await supabase.storage
+    .from(BUCKET)
+    .upload(filename, fileBuffer, {
+      contentType: mimetype || "image/jpeg",
+      upsert: false,
+    });
+
+  if (error) throw error;
+
+  const { data: urlData } = supabase.storage.from(BUCKET).getPublicUrl(filename);
+  return { publicUrl: urlData.publicUrl, storagePath: filename };
+};
+
+// Helper: Delete image from Supabase Storage
+const deleteFromSupabase = async (storagePath) => {
+  if (!supabase || !storagePath || !storagePath.startsWith("products/")) return;
+  await supabase.storage.from(BUCKET).remove([storagePath]).catch(() => { });
+};
+
+// Extract storage path from a Supabase public URL
+const getStoragePath = (imageUrl) => {
+  if (!imageUrl) return null;
+  const match = imageUrl.match(/\/object\/public\/[^/]+\/(.+)$/);
+  return match ? match[1] : null;
+};
+
 // POST /api/products - Create a new product
 export const createProduct = async (req, res) => {
   try {
-    const farmerId = req.user.userId; // From JWT token
+    const farmerId = req.user.userId;
     const {
       product_name,
       price,
@@ -18,7 +57,6 @@ export const createProduct = async (req, res) => {
       description,
       quantity_unit,
     } = req.body;
-    const imagePath = req.file ? `/uploads/${req.user.userId}/${req.file.filename}` : "";
 
     // Validation
     if (!product_name || price === undefined || quantity === undefined) {
@@ -50,6 +88,18 @@ export const createProduct = async (req, res) => {
         success: false,
         error: "Maximum allowed price is 20000.",
       });
+    }
+
+    // Upload image to Supabase Storage
+    let imagePath = "";
+    if (req.file) {
+      const { publicUrl } = await uploadToSupabase(
+        req.file.buffer,
+        req.file.originalname,
+        req.file.mimetype,
+        farmerId
+      );
+      imagePath = publicUrl;
     }
 
     // Insert product with farmer_id
@@ -120,7 +170,7 @@ export const updateProduct = async (req, res) => {
 
     // Verify ownership
     const product = await pool.query(
-      "SELECT farmer_id FROM products WHERE id = $1",
+      "SELECT farmer_id, image FROM products WHERE id = $1",
       [productId]
     );
 
@@ -138,6 +188,22 @@ export const updateProduct = async (req, res) => {
       });
     }
 
+    // Handle image update
+    let imageUpdate = "";
+    if (req.file) {
+      // Delete old image from Supabase if it's a Supabase URL
+      const oldPath = getStoragePath(product.rows[0].image);
+      if (oldPath) await deleteFromSupabase(oldPath);
+
+      const { publicUrl } = await uploadToSupabase(
+        req.file.buffer,
+        req.file.originalname,
+        req.file.mimetype,
+        farmerId
+      );
+      imageUpdate = publicUrl;
+    }
+
     // Update product
     const updateQuery = `
       UPDATE products
@@ -147,10 +213,11 @@ export const updateProduct = async (req, res) => {
           quality = COALESCE($4, quality),
           description = COALESCE($5, description),
           quantity_unit = COALESCE($6, quantity_unit)
+          ${req.file ? ", image = $8" : ""}
       WHERE id = $7
     `;
 
-    await pool.query(updateQuery, [
+    const params = [
       product_name,
       price ? parseFloat(price) : null,
       quantity ? parseFloat(quantity) : null,
@@ -158,7 +225,11 @@ export const updateProduct = async (req, res) => {
       description,
       quantity_unit,
       productId,
-    ]);
+    ];
+
+    if (req.file) params.push(imageUpdate);
+
+    await pool.query(updateQuery, params);
 
     // Invalidate product cache
     await invalidateProductCache();
@@ -184,7 +255,7 @@ export const deleteProduct = async (req, res) => {
 
     // Verify ownership
     const product = await pool.query(
-      "SELECT farmer_id FROM products WHERE id = $1",
+      "SELECT farmer_id, image FROM products WHERE id = $1",
       [productId]
     );
 
@@ -201,6 +272,10 @@ export const deleteProduct = async (req, res) => {
         error: "You do not have permission to delete this product.",
       });
     }
+
+    // Delete image from Supabase
+    const storagePath = getStoragePath(product.rows[0].image);
+    if (storagePath) await deleteFromSupabase(storagePath);
 
     // Delete product
     await pool.query("DELETE FROM products WHERE id = $1", [productId]);

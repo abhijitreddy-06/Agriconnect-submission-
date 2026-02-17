@@ -19,9 +19,9 @@ export const analyzeImage = async (req, res) => {
       return res.status(400).json({ success: false, error: "No image uploaded." });
     }
 
-    const { description, language } = req.body;
-    const lang = language || "English";
-    const desc = description || "";
+    // Description and language are optional (kept for backward compat)
+    const desc = req.body.description || "";
+    const lang = req.body.language || "en";
 
     // Create prediction record
     const insertResult = await pool.query(
@@ -30,20 +30,8 @@ export const analyzeImage = async (req, res) => {
     );
     predictionId = insertResult.rows[0].id;
 
-    // Build multipart form with the image buffer
-    const formData = new FormData();
-    formData.append("file", req.file.buffer, {
-      filename: req.file.originalname || "plant.jpg",
-      contentType: req.file.mimetype || "image/jpeg",
-    });
-
-    // Send image to Hugging Face plant disease model
-    const response = await axios.post(HF_API_URL, formData, {
-      headers: formData.getHeaders(),
-      timeout: 60000,
-    });
-
-    const hfResult = response.data;
+    // Call HF API with retry
+    const hfResult = await callHFWithRetry(req.file);
 
     // Build structured result from HF response
     const diagnosisResult = JSON.stringify({
@@ -78,11 +66,47 @@ export const analyzeImage = async (req, res) => {
 
     console.error("Error in /api/predict/analyze:", error.message);
     if (error.response) {
-      console.error("API response status:", error.response.status);
+      console.error("HF API status:", error.response.status);
+      console.error("HF API data:", JSON.stringify(error.response.data).slice(0, 500));
     }
     res.status(500).json({ success: false, error: "Analysis failed. Please try again." });
   }
 };
+
+/**
+ * Call HF API with one retry on timeout/503 (handles cold starts on free tier).
+ */
+async function callHFWithRetry(file, retries = 1) {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const formData = new FormData();
+      formData.append("file", file.buffer, {
+        filename: file.originalname || "plant.jpg",
+        contentType: file.mimetype || "image/jpeg",
+      });
+
+      const response = await axios.post(HF_API_URL, formData, {
+        headers: formData.getHeaders(),
+        timeout: 120000, // 2 minutes for cold starts
+      });
+
+      console.log("HF API response:", JSON.stringify(response.data));
+      return response.data;
+    } catch (err) {
+      const isRetryable =
+        err.code === "ECONNABORTED" ||
+        err.code === "ETIMEDOUT" ||
+        (err.response && (err.response.status === 503 || err.response.status === 502));
+
+      if (attempt < retries && isRetryable) {
+        console.log(`HF API attempt ${attempt + 1} failed (${err.message}), retrying in 5s...`);
+        await new Promise((r) => setTimeout(r, 5000));
+        continue;
+      }
+      throw err;
+    }
+  }
+}
 
 export const getPrediction = async (req, res) => {
   try {
@@ -92,7 +116,6 @@ export const getPrediction = async (req, res) => {
     const cacheKey = `prediction:${predictionId}`;
     const cached = await cacheGet(cacheKey);
     if (cached) {
-      // Parse stored JSON to return clean field names
       let diagnosis = cached.gemini_details;
       let confidence = null;
       try {
@@ -114,12 +137,10 @@ export const getPrediction = async (req, res) => {
 
     if (result.rows.length > 0) {
       const data = result.rows[0];
-      // Cache completed predictions for 30 minutes (they don't change)
       if (data.status === "complete") {
         await cacheSet(cacheKey, data, 1800);
       }
 
-      // Parse stored JSON to return clean field names
       let diagnosis = data.gemini_details;
       let confidence = null;
       try {
@@ -133,14 +154,10 @@ export const getPrediction = async (req, res) => {
         data: { ...data, diagnosis, confidence, details: data.gemini_details },
       });
     } else {
-      res
-        .status(404)
-        .json({ success: false, error: "Prediction not found." });
+      res.status(404).json({ success: false, error: "Prediction not found." });
     }
   } catch (error) {
     console.error("Error in GET /prediction:", error.message);
-    res
-      .status(500)
-      .json({ success: false, error: "Failed to fetch prediction." });
+    res.status(500).json({ success: false, error: "Failed to fetch prediction." });
   }
 };

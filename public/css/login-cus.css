@@ -3,72 +3,77 @@
    Global styles handled by global.css
    ═══════════════════════════════════════════════════ */
 
+/* ── Outer wrapper: vertically & horizontally centered ── */
 .logincontainer {
   display: flex;
   justify-content: center;
-  height: 100vh;
   align-items: center;
+  min-height: calc(100vh - 160px);
+  padding: 2rem 1rem;
 }
 
+/* ── Glassmorphism card ── */
 .login-container {
-  background: white;
-  padding: 2rem;
-  border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  background: var(--color-surface);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 2.5rem 2rem;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--color-border);
   width: 100%;
-  max-width: 400px;
+  max-width: 440px;
   text-align: center;
 }
 
+/* ── Form heading ── */
 .login-form h2 {
-  margin-bottom: 1rem;
-  color: #1a2d40;
+  margin-bottom: 1.5rem;
+  color: var(--color-primary);
+  font-family: "Nunito", sans-serif;
+  font-size: 1.75rem;
+  font-weight: 800;
 }
 
+/* ── Input groups ── */
 .input-group {
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
   text-align: left;
 }
 
 .input-group label {
   display: block;
-  font-weight: bold;
-  margin-bottom: 5px;
+  font-family: "Nunito", sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 0.4rem;
+  color: var(--color-text);
 }
 
 .input-group input {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: "Nunito", sans-serif;
+  font-size: 0.95rem;
+  color: var(--color-text);
+  background: var(--color-surface-solid);
+  transition: border-color var(--transition), box-shadow var(--transition);
+  outline: none;
+  box-sizing: border-box;
 }
 
-.login-btnn {
-  width: 100%;
-  padding: 10px;
-  background: #1a2d40;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1rem;
+.input-group input:focus {
+  border-color: var(--color-secondary);
+  box-shadow: 0 0 0 3px rgba(196, 164, 132, 0.15);
 }
 
-.signup-link {
-  margin-top: 10px;
-  font-size: 0.9rem;
+.input-group input::placeholder {
+  color: var(--color-text-light);
 }
 
-.signup-link a {
-  color: #1a2d40;
-  text-decoration: none;
-  font-weight: bold;
-}
-
-.signup-link a:hover {
-  text-decoration: underline;
-}
-
+/* ── Password field with toggle icon ── */
 .password-container {
   position: relative;
   display: flex;
@@ -78,30 +83,133 @@
 
 .password-container input {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  padding: 0.85rem 2.75rem 0.85rem 1rem;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: "Nunito", sans-serif;
+  font-size: 0.95rem;
+  color: var(--color-text);
+  background: var(--color-surface-solid);
+  transition: border-color var(--transition), box-shadow var(--transition);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.password-container input:focus {
+  border-color: var(--color-secondary);
+  box-shadow: 0 0 0 3px rgba(196, 164, 132, 0.15);
 }
 
 .toggle-password {
   position: absolute;
-  right: 10px;
+  right: 0.85rem;
   cursor: pointer;
-  font-size: 1.2rem;
-  color: gray;
+  font-size: 1.15rem;
+  color: var(--color-text-light);
+  transition: color var(--transition);
+}
+
+.toggle-password:hover {
+  color: var(--color-primary);
 }
 
 .fa-eye {
-  color: #1a2d40;
+  color: var(--color-primary);
 }
 
-@media (max-width: 480px) {
+/* ── Submit button ── */
+.login-btnn {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-family: "Nunito", sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transition: opacity var(--transition), transform var(--transition), box-shadow var(--transition);
+  margin-top: 0.5rem;
+}
+
+.login-btnn:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.login-btnn:active {
+  transform: translateY(0);
+}
+
+/* ── Error messages ── */
+.error-message {
+  color: var(--color-danger);
+  font-size: 0.85rem;
+  margin-top: 0.35rem;
+  font-family: "Nunito", sans-serif;
+}
+
+/* ── Signup redirect link ── */
+.signup-link {
+  margin-top: 1.25rem;
+  font-size: 0.9rem;
+  color: var(--color-text-light);
+  font-family: "Nunito", sans-serif;
+}
+
+.signup-link a {
+  color: var(--color-secondary);
+  text-decoration: none;
+  font-weight: 700;
+  transition: color var(--transition), text-decoration var(--transition);
+}
+
+.signup-link a:hover {
+  text-decoration: underline;
+  color: var(--color-secondary-light);
+}
+
+/* ── Responsive: tablets ── */
+@media (max-width: 768px) {
   .login-container {
-    width: 90%;
-    padding: 1.5rem;
+    max-width: 400px;
+    padding: 2rem 1.5rem;
+  }
+
+  .login-form h2 {
+    font-size: 1.5rem;
+  }
+}
+
+/* ── Responsive: phones ── */
+@media (max-width: 480px) {
+  .logincontainer {
+    padding: 1.5rem 0.75rem;
+    min-height: calc(100vh - 120px);
+  }
+
+  .login-container {
+    width: 92%;
+    padding: 1.75rem 1.25rem;
+    border-radius: var(--radius-lg);
+  }
+
+  .login-form h2 {
+    font-size: 1.35rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .input-group input,
+  .password-container input {
+    padding: 0.75rem 0.85rem;
+    font-size: 0.9rem;
   }
 
   .login-btnn {
+    padding: 0.85rem;
     font-size: 0.9rem;
   }
 }

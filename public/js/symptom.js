@@ -1,96 +1,107 @@
+// ─── Plant Health Upload Page ────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
-  const micButton = document.getElementById("micButton");
-  const micStatus = document.getElementById("micStatus");
-  const descriptionField = document.getElementById("description");
-  const imageInput = document.getElementById("imageInput");
-  const imagePreview = document.getElementById("imagePreview");
   const uploadForm = document.getElementById("uploadForm");
+  const imageInput = document.getElementById("imageInput");
+  const dropZone = document.getElementById("dropZone");
+  const previewSection = document.getElementById("previewSection");
+  const imagePreview = document.getElementById("imagePreview");
+  const removePreview = document.getElementById("removePreview");
+  const submitBtn = document.getElementById("submitBtn");
+  const analysisLoader = document.getElementById("analysis-loader");
 
-  // Image preview functionality
-  imageInput.addEventListener("change", function () {
-    const file = this.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        imagePreview.src = e.target.result;
-        imagePreview.style.display = "block";
-      };
-      reader.readAsDataURL(file);
+  // Image preview on file select
+  imageInput.addEventListener("change", () => {
+    if (imageInput.files && imageInput.files[0]) {
+      showPreview(imageInput.files[0]);
     }
   });
 
-  // Setup speech-to-text using the Web Speech API
-  let recognition;
-  if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
-    recognition = new SpeechRecognition();
-    recognition.lang = "en-US";
-    recognition.continuous = false;
-    recognition.interimResults = false;
+  // Drag & drop support
+  dropZone.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    dropZone.classList.add("drag-over");
+  });
 
-    // Update mic status when speech recognition starts
-    recognition.addEventListener("start", () => {
-      micStatus.innerText = "Listening, please speak...";
-    });
+  dropZone.addEventListener("dragleave", () => {
+    dropZone.classList.remove("drag-over");
+  });
 
-    // Clear status when speech recognition ends
-    recognition.addEventListener("end", () => {
-      micStatus.innerText = "";
-    });
-  } else {
-    micButton.style.display = "none";
-  }
-
-  micButton.addEventListener("click", () => {
-    if (recognition) {
-      recognition.start();
+  dropZone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropZone.classList.remove("drag-over");
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith("image/")) {
+      // Create a new DataTransfer to set files on input
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      imageInput.files = dt.files;
+      showPreview(file);
     }
   });
 
-  if (recognition) {
-    recognition.addEventListener("result", (e) => {
-      const transcript = e.results[0][0].transcript;
-      descriptionField.value += transcript;
-    });
+  // Remove preview
+  removePreview.addEventListener("click", () => {
+    imageInput.value = "";
+    previewSection.style.display = "none";
+    dropZone.style.display = "flex";
+    submitBtn.disabled = true;
+  });
+
+  function showPreview(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      imagePreview.src = e.target.result;
+      previewSection.style.display = "block";
+      dropZone.style.display = "none";
+      submitBtn.disabled = false;
+    };
+    reader.readAsDataURL(file);
   }
 
-  // Handle form submission: upload image, description, and language, then analyze
+  // Form submission
   uploadForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const formData = new FormData(uploadForm);
-    const analysisLoader = document.getElementById("analysis-loader");
+
+    if (!imageInput.files || !imageInput.files[0]) {
+      alert("Please select an image first.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("imageInput", imageInput.files[0]);
 
     try {
       analysisLoader.style.display = "flex";
+      submitBtn.disabled = true;
 
-      // Upload image with auth
-      document.querySelector(".loader-text").textContent =
-        "Analyzing plant health...";
-
-      // Upload + analyze in one step
       const response = await Auth.authFetch("/api/predict/analyze", {
         method: "POST",
         body: formData,
       });
 
-      if (!response.ok) throw new Error("Analysis failed");
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || "Analysis failed");
+      }
 
       const result = await response.json();
-
       window.location.href = `/diagnosis?id=${result.predictionId || result.data?.id}`;
     } catch (error) {
       console.error("Error:", error);
       alert(`Error: ${error.message}`);
+      submitBtn.disabled = false;
     } finally {
       analysisLoader.style.display = "none";
     }
   });
 
-  // Loader
+  // Page loader
   setTimeout(() => {
     document.body.classList.add("loaded");
     const loader = document.getElementById("global-loader");
-    if (loader) { loader.style.opacity = "0"; setTimeout(() => loader.remove(), 300); }
+    if (loader) {
+      loader.style.opacity = "0";
+      setTimeout(() => loader.remove(), 300);
+    }
   }, 500);
 });
