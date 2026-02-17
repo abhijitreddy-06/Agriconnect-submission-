@@ -89,3 +89,13 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // Loader
+document.addEventListener("DOMContentLoaded", () => {
+  setTimeout(() => {
+    document.body.classList.add("loaded");
+    const loader = document.getElementById("global-loader");
+    if (loader) {
+      loader.style.opacity = "0";
+      setTimeout(() => loader.remove(), 300);
+    }
+  }, 500);
+});

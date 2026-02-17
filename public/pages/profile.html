@@ -26,19 +26,26 @@
             <h2><i class="fas fa-user-circle"></i> My Profile</h2>
             <div class="profile-field">
                 <label>Name</label>
-                <input type="text" id="profileName" placeholder="Your name">
+                <div class="field-value" id="profileNameDisplay">Loading...</div>
+                <div class="edit-row" id="editNameRow" style="display: none;">
+                    <input type="text" id="profileName" placeholder="Enter your name">
+                    <div class="profile-actions">
+                        <button class="btn-save" onclick="saveProfile()">Save</button>
+                        <button class="btn-cancel" onclick="cancelEdit()">Cancel</button>
+                    </div>
+                </div>
             </div>
             <div class="profile-field">
                 <label>Phone Number</label>
-                <div class="field-value" id="profilePhone">&mdash;</div>
+                <div class="field-value" id="profilePhone">Loading...</div>
             </div>
             <div class="profile-field">
                 <label>Role</label>
-                <span class="role-badge" id="profileRole">&mdash;</span>
+                <span class="role-badge" id="profileRole">--</span>
             </div>
-            <div class="profile-actions">
-                <button class="btn-save" onclick="saveProfile()">Save Changes</button>
-            </div>
+            <button class="btn-edit" id="editBtn" onclick="toggleEdit()">
+                <i class="fas fa-pen"></i> Edit Name
+            </button>
         </div>
 
         <div class="profile-card">
