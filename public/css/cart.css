@@ -476,13 +476,11 @@
     height: 80px;
   }
 
-  /* Sticky checkout on mobile */
+  /* Cart summary: non-sticky on mobile so items aren't covered */
   .cart-summary {
-    position: sticky;
-    bottom: 0;
-    z-index: 100;
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+    position: static;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
   }
 }
 

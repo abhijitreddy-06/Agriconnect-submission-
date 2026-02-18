@@ -522,23 +522,6 @@
   background: rgba(93, 163, 153, 0.04);
 }
 
-.btn-password:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-.coming-soon-badge {
-  margin-left: auto;
-  font-size: 0.65rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  background: var(--color-bg);
-  color: var(--color-text-light);
-  padding: 0.2rem 0.6rem;
-  border-radius: var(--radius-full);
-}
-
 .btn-logout {
   border-color: rgba(231, 76, 60, 0.3);
   color: var(--color-danger);

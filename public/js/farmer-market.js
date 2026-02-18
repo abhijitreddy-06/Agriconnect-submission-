@@ -2,7 +2,7 @@
 let allProducts = [];
 let currentCategory = "";
 let currentPage = 1;
-const PAGE_LIMIT = 20;
+const PAGE_LIMIT = window.innerWidth <= 768 ? 6 : 20;
 
 async function fetchProducts(category, page) {
   try {
