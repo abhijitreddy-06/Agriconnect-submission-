@@ -3,7 +3,7 @@ import supabase from "../config/supabase.js";
 import { cacheInvalidatePattern } from "../config/redis.js";
 import path from "path";
 
-const BUCKET = process.env.SUPABASE_BUCKET || "product-images";
+const BUCKET = process.env.SUPABASE_BUCKET || "uploads";
 
 // Helper: Invalidate all product caches
 const invalidateProductCache = async () => {

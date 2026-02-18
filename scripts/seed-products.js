@@ -24,7 +24,7 @@ const pool = new Pool({
 });
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
-const BUCKET = process.env.SUPABASE_BUCKET || "product-images";
+const BUCKET = process.env.SUPABASE_BUCKET || "uploads";
 
 const DEMO_FARMER = {
   username: "DemoFarmer",
