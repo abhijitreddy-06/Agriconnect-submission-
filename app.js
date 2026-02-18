@@ -67,8 +67,6 @@ app.use("/api/auth/login", authLimiter);
 app.use("/api/auth/signup", authLimiter);
 app.use("/api/auth/refresh", authLimiter);
 app.use("/api/auth/logout", authLimiter);
-app.use("/signup", authLimiter);
-app.use("/login", authLimiter);
 
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes

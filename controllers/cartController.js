@@ -1,20 +1,11 @@
 import pool from "../config/database.js";
 import { cacheGet, cacheSet, cacheInvalidatePattern } from "../config/redis.js";
 
-// POST /api/cart — Add item to cart (or increment quantity if exists)
+// POST /api/cart — Add item to cart (validated by Zod middleware)
 export const addToCart = async (req, res) => {
     try {
         const customerId = req.user.userId;
         const { product_id, quantity } = req.body;
-
-        if (!product_id) {
-            return res.status(400).json({ success: false, error: "Product ID is required." });
-        }
-
-        const qty = parseFloat(quantity) || 1;
-        if (qty <= 0 || qty > 9999) {
-            return res.status(400).json({ success: false, error: "Quantity must be between 1 and 9999." });
-        }
 
         // Verify product exists and has stock
         const product = await pool.query(
@@ -38,7 +29,7 @@ export const addToCart = async (req, res) => {
        ON CONFLICT (customer_id, product_id)
        DO UPDATE SET quantity = cart_items.quantity + $3
        RETURNING id, quantity`,
-            [customerId, product_id, qty]
+            [customerId, product_id, quantity]
         );
 
         // Invalidate cart cache
@@ -97,17 +88,12 @@ export const getCart = async (req, res) => {
     }
 };
 
-// PUT /api/cart/:id — Update cart item quantity
+// PUT /api/cart/:id — Update cart item quantity (validated by Zod middleware)
 export const updateCartItem = async (req, res) => {
     try {
         const customerId = req.user.userId;
         const cartItemId = req.params.id;
         const { quantity } = req.body;
-
-        const qty = parseFloat(quantity);
-        if (!qty || qty <= 0 || qty > 9999) {
-            return res.status(400).json({ success: false, error: "Quantity must be between 1 and 9999." });
-        }
 
         // Verify ownership
         const item = await pool.query(
@@ -119,7 +105,7 @@ export const updateCartItem = async (req, res) => {
             return res.status(404).json({ success: false, error: "Cart item not found." });
         }
 
-        await pool.query("UPDATE cart_items SET quantity = $1 WHERE id = $2", [qty, cartItemId]);
+        await pool.query("UPDATE cart_items SET quantity = $1 WHERE id = $2", [quantity, cartItemId]);
 
         await cacheInvalidatePattern(`cart:${customerId}*`);
 

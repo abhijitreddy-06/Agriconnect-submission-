@@ -94,15 +94,33 @@
 
     // -- Build Footer HTML --
     function buildFooter() {
+        const navLinks = getNavLinks();
+        const quickLinksHtml = navLinks
+            .map(l => `<a href="${l.href}">${l.label}</a>`)
+            .join('');
+
         return `
-      <div class="footer-content">
-        <p>&copy; ${new Date().getFullYear()} AgriConnect. All rights reserved.</p>
-        <p>Built by <a href="https://abhijitreddy-portfolio.netlify.app/" target="_blank">Abhijit Reddy</a></p>
-        <div class="social-links">
-          <a href="https://www.linkedin.com/in/abhijitreddy75" target="_blank" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
-          <a href="https://github.com/abhijitreddy-06" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
-          <a href="https://leetcode.com/u/MWMznGTyFG/" target="_blank" title="LeetCode"><i class="fas fa-code"></i></a>
+      <div class="footer-inner">
+        <div class="footer-col footer-brand">
+          <span class="footer-logo">AgriConnect</span>
+          <p class="footer-tagline">Connecting farmers and customers for fresher produce, fairer prices.</p>
         </div>
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <div class="footer-links">${quickLinksHtml}</div>
+        </div>
+        <div class="footer-col">
+          <h4>Connect</h4>
+          <div class="footer-social">
+            <a href="https://www.linkedin.com/in/abhijitreddy75" target="_blank" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+            <a href="https://github.com/abhijitreddy-06" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
+            <a href="https://leetcode.com/u/MWMznGTyFG/" target="_blank" title="LeetCode"><i class="fas fa-code"></i></a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>&copy; ${new Date().getFullYear()} AgriConnect</span>
+        <span>Built by <a href="https://abhijitreddy-portfolio.netlify.app/" target="_blank">Abhijit Reddy</a></span>
       </div>`;
     }
 
@@ -116,7 +134,7 @@
 
         // Inject footer
         const footer = document.querySelector('footer.footer');
-        if (footer && !footer.querySelector('.footer-content')) {
+        if (footer && !footer.querySelector('.footer-inner')) {
             footer.innerHTML = buildFooter();
         }
 

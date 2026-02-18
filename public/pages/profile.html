@@ -22,70 +22,69 @@
     <header></header>
 
     <main class="profile-page">
-        <!-- Profile Header -->
-        <div class="profile-header-card">
-            <div class="profile-avatar" id="profileAvatar">
-                <span class="avatar-emoji" id="avatarEmoji"></span>
-            </div>
-            <h1 class="profile-display-name" id="profileNameDisplay">Loading...</h1>
-            <span class="role-badge" id="profileRole">--</span>
-            <p class="member-since" id="memberSince"></p>
-        </div>
+        <div class="profile-layout">
+            <!-- Left Sidebar -->
+            <aside class="profile-sidebar">
+                <div class="sidebar-card">
+                    <div class="profile-avatar" id="profileAvatar">
+                        <span class="avatar-emoji" id="avatarEmoji"></span>
+                    </div>
+                    <h1 class="profile-display-name" id="profileNameDisplay">Loading...</h1>
+                    <span class="role-badge" id="profileRole">--</span>
+                    <p class="member-since" id="memberSince"></p>
 
-        <!-- Quick Stats -->
-        <div class="stats-row" id="statsRow"></div>
+                    <div class="sidebar-info">
+                        <div class="sidebar-info-item">
+                            <i class="fas fa-phone"></i>
+                            <span id="profilePhone">Loading...</span>
+                        </div>
+                        <div class="sidebar-info-item">
+                            <i class="fas fa-user-tag"></i>
+                            <span id="profileRoleText">Loading...</span>
+                        </div>
+                    </div>
 
-        <!-- Personal Info -->
-        <div class="profile-card">
-            <h2><i class="fas fa-id-card"></i> Personal Information</h2>
-            <div class="profile-field">
-                <label>Full Name</label>
-                <div class="field-display" id="nameDisplay">
-                    <span class="field-value" id="profileNameValue">Loading...</span>
-                    <button class="btn-inline-edit" id="editNameBtn" onclick="toggleEdit()">
-                        <i class="fas fa-pen"></i> Edit
+                    <button class="btn-logout-sidebar" id="profileLogoutBtn">
+                        <i class="fas fa-sign-out-alt"></i> Log Out
                     </button>
                 </div>
-                <div class="field-edit" id="nameEditRow" style="display: none;">
-                    <input type="text" id="profileNameInput" placeholder="Enter your name" maxlength="50">
-                    <div class="edit-actions">
-                        <button class="btn-save" id="saveBtn" onclick="saveProfile()">
-                            <i class="fas fa-check"></i> Save
-                        </button>
-                        <button class="btn-cancel-edit" onclick="cancelEdit()">Cancel</button>
+            </aside>
+
+            <!-- Right Content -->
+            <div class="profile-content">
+                <!-- Quick Stats -->
+                <div class="stats-row" id="statsRow"></div>
+
+                <!-- Personal Info -->
+                <div class="profile-card">
+                    <h2><i class="fas fa-id-card"></i> Personal Information</h2>
+                    <div class="profile-field">
+                        <label>Full Name</label>
+                        <div class="field-display" id="nameDisplay">
+                            <span class="field-value" id="profileNameValue">Loading...</span>
+                            <button class="btn-inline-edit" id="editNameBtn" onclick="toggleEdit()">
+                                <i class="fas fa-pen"></i> Edit
+                            </button>
+                        </div>
+                        <div class="field-edit" id="nameEditRow" style="display: none;">
+                            <input type="text" id="profileNameInput" placeholder="Enter your name" maxlength="50">
+                            <div class="edit-actions">
+                                <button class="btn-save" id="saveBtn" onclick="saveProfile()">
+                                    <i class="fas fa-check"></i> Save
+                                </button>
+                                <button class="btn-cancel-edit" onclick="cancelEdit()">Cancel</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="profile-field">
-                <label>Phone Number</label>
-                <div class="field-display">
-                    <span class="field-value" id="profilePhone">Loading...</span>
-                    <span class="field-readonly-badge"><i class="fas fa-lock"></i> Read-only</span>
-                </div>
-            </div>
-            <div class="profile-field">
-                <label>Role</label>
-                <div class="field-display">
-                    <span class="field-value" id="profileRoleText">Loading...</span>
-                </div>
-            </div>
-        </div>
 
-        <!-- Recent Activity -->
-        <div class="profile-card">
-            <h2><i class="fas fa-clock"></i> Recent Activity</h2>
-            <div id="recentActivity">
-                <div class="activity-loading">Loading recent orders...</div>
-            </div>
-        </div>
-
-        <!-- Account Actions -->
-        <div class="profile-card account-actions-card">
-            <h2><i class="fas fa-cog"></i> Account</h2>
-            <div class="account-actions">
-                <button class="btn-action btn-logout" id="profileLogoutBtn">
-                    <i class="fas fa-sign-out-alt"></i> Log Out
-                </button>
+                <!-- Recent Activity -->
+                <div class="profile-card">
+                    <h2><i class="fas fa-clock"></i> Recent Activity</h2>
+                    <div id="recentActivity">
+                        <div class="activity-loading">Loading recent orders...</div>
+                    </div>
+                </div>
             </div>
         </div>
     </main>

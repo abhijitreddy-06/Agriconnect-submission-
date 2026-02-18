@@ -15,8 +15,4 @@ router.post("/api/auth/logout", logout);
 router.get("/api/auth/verify", verifyToken, verifyAuth);
 router.put("/api/auth/profile", verifyToken, validate(updateProfileSchema), updateProfile);
 
-// Legacy routes (redirect to new API — keeps old form actions working during transition)
-router.post("/signup", validate(signupSchema), signup);
-router.post("/login", validate(loginSchema), login);
-
 export default router;

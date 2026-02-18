@@ -1,124 +1,156 @@
 /* ===================================================
-   profile.css -- Profile dashboard page styles
+   profile.css -- Profile page (horizontal desktop layout)
    Global styles handled by global.css
    =================================================== */
 
 /* -- Page Layout -- */
 .profile-page {
-  max-width: 720px;
+  max-width: 1100px;
   margin: 2rem auto;
   padding: 0 1.5rem;
 }
 
-/* -- Profile Header Card -- */
-.profile-header-card {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 60%, var(--color-accent) 100%);
-  border-radius: var(--radius-xl);
-  padding: 3rem 2rem 2.5rem;
+.profile-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+  animation: fadeIn 0.5s ease forwards;
+}
+
+/* -- Sidebar Card -- */
+.sidebar-card {
+  background: var(--color-surface-solid);
+  border-radius: var(--radius-lg);
+  padding: 2rem 1.5rem;
   text-align: center;
-  margin-bottom: 1.5rem;
-  box-shadow: var(--shadow-lg);
-  position: relative;
-  overflow: hidden;
-  animation: fadeIn 0.6s ease forwards;
-}
-
-.profile-header-card::before {
-  content: '';
-  position: absolute;
-  top: -60px;
-  right: -40px;
-  width: 200px;
-  height: 200px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.profile-header-card::after {
-  content: '';
-  position: absolute;
-  bottom: -40px;
-  left: -30px;
-  width: 150px;
-  height: 150px;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 50%;
-  pointer-events: none;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+  position: sticky;
+  top: 72px;
 }
 
 .profile-avatar {
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.15);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 1rem;
-  border: 3px solid rgba(255, 255, 255, 0.25);
-  position: relative;
-  z-index: 1;
+  border: 3px solid var(--color-border);
 }
 
 .avatar-emoji {
-  font-size: 2.75rem;
+  font-size: 2.25rem;
   line-height: 1;
 }
 
 .profile-display-name {
-  color: #ffffff;
-  font-size: 1.75rem;
+  color: var(--color-primary);
+  font-size: 1.25rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
-  position: relative;
-  z-index: 1;
+  word-break: break-word;
 }
 
-.profile-header-card .role-badge {
+.sidebar-card .role-badge {
   display: inline-block;
-  padding: 0.35rem 1.1rem;
+  padding: 0.25rem 0.9rem;
   border-radius: var(--radius-full);
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  position: relative;
-  z-index: 1;
 }
 
 .role-badge.farmer {
-  background: rgba(93, 163, 153, 0.25);
-  color: #7edccc;
+  background: rgba(93, 163, 153, 0.12);
+  color: var(--color-accent);
 }
 
 .role-badge.customer {
-  background: rgba(196, 164, 132, 0.25);
-  color: var(--color-secondary-light);
+  background: rgba(196, 164, 132, 0.15);
+  color: var(--color-secondary);
 }
 
 .member-since {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-text-light);
+  font-size: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+/* -- Sidebar Info Items -- */
+.sidebar-info {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sidebar-info-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.85rem;
+  color: var(--color-text);
+  text-align: left;
+}
+
+.sidebar-info-item i {
+  width: 1.1rem;
+  text-align: center;
+  color: var(--color-text-light);
   font-size: 0.8rem;
-  margin-top: 0.75rem;
-  position: relative;
-  z-index: 1;
+  flex-shrink: 0;
+}
+
+/* -- Sidebar Logout -- */
+.btn-logout-sidebar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  margin-top: 1.25rem;
+  padding: 0.65rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: "Nunito", sans-serif;
+  cursor: pointer;
+  border: 1.5px solid rgba(231, 76, 60, 0.3);
+  background: transparent;
+  color: var(--color-danger);
+  transition: all var(--transition);
+}
+
+.btn-logout-sidebar:hover {
+  border-color: var(--color-danger);
+  background: rgba(231, 76, 60, 0.06);
+}
+
+/* -- Right Content -- */
+.profile-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
 /* -- Quick Stats Row -- */
 .stats-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 1rem;
-  margin-bottom: 1.5rem;
-  animation: fadeIn 0.6s ease 0.1s forwards;
-  opacity: 0;
 }
 
 .stat-card {
   background: var(--color-surface-solid);
   border-radius: var(--radius-lg);
-  padding: 1.5rem;
+  padding: 1.25rem;
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -128,18 +160,18 @@
 }
 
 .stat-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
 
 .stat-icon {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   flex-shrink: 0;
 }
 
@@ -169,14 +201,14 @@
 }
 
 .stat-value {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-weight: 700;
   color: var(--color-primary);
   line-height: 1.2;
 }
 
 .stat-label {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--color-text-light);
   font-weight: 600;
   text-transform: uppercase;
@@ -187,32 +219,29 @@
 .profile-card {
   background: var(--color-surface-solid);
   border-radius: var(--radius-lg);
-  padding: 1.75rem;
+  padding: 1.5rem;
   box-shadow: var(--shadow-sm);
-  margin-bottom: 1.25rem;
   border: 1px solid var(--color-border);
-  animation: fadeIn 0.6s ease 0.15s forwards;
-  opacity: 0;
 }
 
 .profile-card h2 {
   color: var(--color-primary);
-  margin-bottom: 1.25rem;
-  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  font-size: 1rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
 .profile-card h2 i {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   opacity: 0.6;
 }
 
 /* -- Profile Fields -- */
 .profile-field {
-  margin-bottom: 1.25rem;
-  padding-bottom: 1.25rem;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -224,9 +253,9 @@
 
 .profile-field label {
   display: block;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   color: var(--color-text-light);
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.35rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -240,34 +269,21 @@
 }
 
 .field-value {
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: var(--color-text);
   font-weight: 600;
-}
-
-.field-readonly-badge {
-  font-size: 0.7rem;
-  color: var(--color-text-light);
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  opacity: 0.7;
-}
-
-.field-readonly-badge i {
-  font-size: 0.6rem;
 }
 
 /* -- Inline Edit Button -- */
 .btn-inline-edit {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.3rem;
   background: transparent;
   border: 1.5px solid var(--color-border);
   color: var(--color-text-light);
-  padding: 0.35rem 0.85rem;
-  font-size: 0.78rem;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.75rem;
   font-weight: 600;
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -287,15 +303,15 @@
 
 .field-edit input {
   width: 100%;
-  padding: 0.65rem 0.85rem;
-  font-size: 1rem;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.95rem;
   border: 2px solid var(--color-border);
   border-radius: var(--radius-sm);
   font-family: "Nunito", sans-serif;
   transition: border-color var(--transition);
   background: var(--color-surface-solid);
   color: var(--color-text);
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.5rem;
   box-sizing: border-box;
 }
 
@@ -314,8 +330,8 @@
   background: var(--color-accent);
   color: #ffffff;
   border: none;
-  padding: 0.5rem 1.2rem;
-  font-size: 0.85rem;
+  padding: 0.45rem 1rem;
+  font-size: 0.82rem;
   font-weight: 700;
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -323,7 +339,7 @@
   transition: background var(--transition), transform 0.15s;
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.3rem;
 }
 
 .btn-save:hover {
@@ -341,8 +357,8 @@
   background: transparent;
   border: 1.5px solid var(--color-border);
   color: var(--color-text-light);
-  padding: 0.5rem 1rem;
-  font-size: 0.85rem;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.82rem;
   font-weight: 600;
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -358,52 +374,52 @@
 /* -- Recent Activity -- */
 .activity-loading {
   text-align: center;
-  padding: 2rem;
+  padding: 1.5rem;
   color: var(--color-text-light);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
 }
 
 .activity-empty {
   text-align: center;
-  padding: 2rem;
+  padding: 1.5rem;
   color: var(--color-text-light);
 }
 
 .activity-empty i {
-  font-size: 2rem;
+  font-size: 1.75rem;
   color: var(--color-border);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
   display: block;
 }
 
 .activity-list {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.6rem;
 }
 
 .activity-item {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 0.85rem 1rem;
+  gap: 0.85rem;
+  padding: 0.75rem 0.85rem;
   background: var(--color-bg);
   border-radius: var(--radius-md);
   transition: transform 0.2s ease;
 }
 
 .activity-item:hover {
-  transform: translateX(4px);
+  transform: translateX(3px);
 }
 
 .activity-icon {
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   flex-shrink: 0;
   background: rgba(26, 45, 64, 0.08);
   color: var(--color-primary);
@@ -415,7 +431,7 @@
 }
 
 .activity-name {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: var(--color-text);
   white-space: nowrap;
@@ -424,7 +440,7 @@
 }
 
 .activity-meta {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: var(--color-text-light);
 }
 
@@ -435,9 +451,9 @@
 /* -- Status Badges -- */
 .status-badge {
   display: inline-block;
-  padding: 0.25rem 0.7rem;
+  padding: 0.2rem 0.6rem;
   border-radius: var(--radius-full);
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -471,10 +487,10 @@
 .activity-view-all {
   display: block;
   text-align: center;
-  margin-top: 0.75rem;
-  padding: 0.6rem;
+  margin-top: 0.65rem;
+  padding: 0.5rem;
   color: var(--color-accent);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 600;
   border-radius: var(--radius-sm);
   transition: background var(--transition);
@@ -485,83 +501,66 @@
   background: rgba(93, 163, 153, 0.08);
 }
 
-/* -- Account Actions -- */
-.account-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.btn-action {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  width: 100%;
-  padding: 0.85rem 1rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.9rem;
-  font-weight: 600;
-  font-family: "Nunito", sans-serif;
-  cursor: pointer;
-  transition: all var(--transition);
-  border: 1.5px solid var(--color-border);
-  background: transparent;
-  color: var(--color-text);
-  text-align: left;
-}
-
-.btn-action i {
-  width: 1.2rem;
-  text-align: center;
-  font-size: 0.9rem;
-}
-
-.btn-action:hover:not(:disabled) {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-  background: rgba(93, 163, 153, 0.04);
-}
-
-.btn-logout {
-  border-color: rgba(231, 76, 60, 0.3);
-  color: var(--color-danger);
-}
-
-.btn-logout:hover {
-  border-color: var(--color-danger) !important;
-  color: var(--color-danger) !important;
-  background: rgba(231, 76, 60, 0.06) !important;
-}
-
-/* -- Toast -- */
+/* -- Toast Animation -- */
 @keyframes slideUp {
   from { transform: translateY(16px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
 
-/* -- Responsive: 768px -- */
-@media (max-width: 768px) {
+/* -- Responsive: Tablet -- */
+@media (max-width: 860px) {
+  .profile-layout {
+    grid-template-columns: 240px 1fr;
+    gap: 1rem;
+  }
+
+  .sidebar-card {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .profile-avatar {
+    width: 68px;
+    height: 68px;
+  }
+
+  .avatar-emoji {
+    font-size: 1.85rem;
+  }
+
+  .profile-display-name {
+    font-size: 1.1rem;
+  }
+}
+
+/* -- Responsive: Mobile -- */
+@media (max-width: 680px) {
   .profile-page {
     margin: 1rem auto;
     padding: 0 1rem;
   }
 
-  .profile-header-card {
-    padding: 2.5rem 1.5rem 2rem;
-    border-radius: var(--radius-lg);
+  .profile-layout {
+    grid-template-columns: 1fr;
+    gap: 1rem;
   }
 
-  .profile-avatar {
-    width: 84px;
-    height: 84px;
+  .sidebar-card {
+    position: static;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem 1.25rem;
   }
 
-  .avatar-emoji {
-    font-size: 2.25rem;
+  .sidebar-info {
+    width: 100%;
+    flex-direction: row;
+    justify-content: center;
+    gap: 1.5rem;
   }
 
-  .profile-display-name {
-    font-size: 1.5rem;
+  .btn-logout-sidebar {
+    max-width: 240px;
   }
 
   .stats-row {
@@ -575,34 +574,31 @@
   .edit-actions {
     flex-direction: column;
   }
-
-  .activity-item {
-    padding: 0.75rem;
-  }
 }
 
-/* -- Responsive: 480px -- */
+/* -- Responsive: Small Mobile -- */
 @media (max-width: 480px) {
   .profile-page {
     padding: 0 0.75rem;
   }
 
-  .profile-header-card {
-    padding: 2rem 1rem 1.5rem;
-    border-radius: var(--radius-md);
-  }
-
   .profile-avatar {
-    width: 72px;
-    height: 72px;
+    width: 64px;
+    height: 64px;
   }
 
   .avatar-emoji {
-    font-size: 2rem;
+    font-size: 1.75rem;
   }
 
   .profile-display-name {
-    font-size: 1.3rem;
+    font-size: 1.1rem;
+  }
+
+  .sidebar-info {
+    flex-direction: column;
+    gap: 0.6rem;
+    align-items: center;
   }
 
   .stats-row {
@@ -611,22 +607,12 @@
   }
 
   .stat-card {
-    padding: 1.15rem;
+    padding: 1rem;
   }
 
   .field-display {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.4rem;
-  }
-
-  .activity-item {
-    gap: 0.75rem;
-  }
-
-  .activity-icon {
-    width: 36px;
-    height: 36px;
-    font-size: 0.8rem;
   }
 }

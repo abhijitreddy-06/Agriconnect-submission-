@@ -3,39 +3,10 @@ import pool from "../config/database.js";
 import { generateTokens, verifyRefreshToken } from "../utils/tokenUtils.js";
 import { cacheSet, cacheDel } from "../config/redis.js";
 
-// POST /api/auth/signup - Create new user account
+// POST /api/auth/signup - Create new user account (validated by Zod middleware)
 export const signup = async (req, res) => {
   try {
     const { username, phone, password, role } = req.body;
-
-    // Validation
-    if (!username || !phone || !password || !role) {
-      return res.status(400).json({
-        success: false,
-        error: "All fields are required (username, phone, password, role).",
-      });
-    }
-
-    if (!/^\d{10}$/.test(phone)) {
-      return res.status(400).json({
-        success: false,
-        error: "Phone number must be exactly 10 digits.",
-      });
-    }
-
-    if (password.length < 8) {
-      return res.status(400).json({
-        success: false,
-        error: "Password must be at least 8 characters.",
-      });
-    }
-
-    if (!["farmer", "customer"].includes(role)) {
-      return res.status(400).json({
-        success: false,
-        error: "Role must be 'farmer' or 'customer'.",
-      });
-    }
 
     // Check if user already exists
     const existingUser = await pool.query(
@@ -78,25 +49,10 @@ export const signup = async (req, res) => {
   }
 };
 
-// POST /login - Authenticate user
+// POST /login - Authenticate user (validated by Zod middleware)
 export const login = async (req, res) => {
   try {
     const { phone, password, role } = req.body;
-
-    // Validation
-    if (!phone || !password || !role) {
-      return res.status(400).json({
-        success: false,
-        error: "Phone, password, and role are required.",
-      });
-    }
-
-    if (!["farmer", "customer"].includes(role)) {
-      return res.status(400).json({
-        success: false,
-        error: "Role must be 'farmer' or 'customer'.",
-      });
-    }
 
     // Find user
     const result = await pool.query(
@@ -143,17 +99,10 @@ export const login = async (req, res) => {
   }
 };
 
-// POST /refresh - Generate new access token
+// POST /refresh - Generate new access token (validated by Zod middleware)
 export const refresh = async (req, res) => {
   try {
     const { refreshToken } = req.body;
-
-    if (!refreshToken) {
-      return res.status(400).json({
-        success: false,
-        error: "Refresh token is required.",
-      });
-    }
 
     // Check if token is blacklisted (logged out)
     const { cacheGet } = await import("../config/redis.js");
@@ -250,31 +199,15 @@ export const verifyAuth = async (req, res) => {
   }
 };
 
-// PUT /api/auth/profile - Update user profile
+// PUT /api/auth/profile - Update user profile (validated by Zod middleware)
 export const updateProfile = async (req, res) => {
   try {
     const userId = req.user.userId;
     const { username } = req.body;
 
-    if (!username || !username.trim()) {
-      return res.status(400).json({
-        success: false,
-        error: "Username is required.",
-      });
-    }
-
-    const trimmedName = username.trim();
-
-    if (trimmedName.length < 2 || trimmedName.length > 50) {
-      return res.status(400).json({
-        success: false,
-        error: "Username must be between 2 and 50 characters.",
-      });
-    }
-
     const result = await pool.query(
       "UPDATE users SET username = $1 WHERE id = $2 RETURNING id, username, phone_no, role",
-      [trimmedName, userId]
+      [username, userId]
     );
 
     if (result.rows.length === 0) {

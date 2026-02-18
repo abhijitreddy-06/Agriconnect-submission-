@@ -1,30 +1,13 @@
 import pool from "../config/database.js";
 import { cacheGet, cacheSet, cacheInvalidatePattern } from "../config/redis.js";
 
-// POST /api/orders - Create a new order
+// POST /api/orders - Create a new order (validated by Zod middleware)
 export const createOrder = async (req, res) => {
   const client = await pool.connect();
 
   try {
     const customerId = req.user.userId;
     const { product_id, quantity, delivery_address } = req.body;
-
-    if (!product_id || !quantity) {
-      client.release();
-      return res.status(400).json({
-        success: false,
-        error: "Product ID and quantity are required.",
-      });
-    }
-
-    const qty = parseFloat(quantity);
-    if (isNaN(qty) || qty <= 0) {
-      client.release();
-      return res.status(400).json({
-        success: false,
-        error: "Quantity must be a positive number.",
-      });
-    }
 
     await client.query("BEGIN");
 
@@ -52,7 +35,7 @@ export const createOrder = async (req, res) => {
       });
     }
 
-    if (parseFloat(product.stock) < qty) {
+    if (parseFloat(product.stock) < quantity) {
       await client.query("ROLLBACK");
       return res.status(400).json({
         success: false,
@@ -60,19 +43,19 @@ export const createOrder = async (req, res) => {
       });
     }
 
-    const totalPrice = parseFloat(product.price) * qty;
+    const totalPrice = parseFloat(product.price) * quantity;
 
     const orderResult = await client.query(
       `INSERT INTO orders (customer_id, product_id, quantity, total_price, status, delivery_address)
        VALUES ($1, $2, $3, $4, 'pending', $5)
        RETURNING id`,
-      [customerId, product_id, qty, totalPrice, delivery_address || null]
+      [customerId, product_id, quantity, totalPrice, delivery_address || null]
     );
 
     // Reduce product stock
     await client.query(
       "UPDATE products SET quantity = quantity - $1 WHERE id = $2",
-      [qty, product_id]
+      [quantity, product_id]
     );
 
     await client.query("COMMIT");
@@ -268,27 +251,12 @@ export const cancelOrder = async (req, res) => {
   }
 };
 
-// PUT /api/orders/:id - Update order status (farmers only)
+// PUT /api/orders/:id - Update order status (validated by Zod middleware, farmer-only via requireRole)
 export const updateOrder = async (req, res) => {
   try {
     const userId = req.user.userId;
-    const role = req.user.role;
     const orderId = req.params.id;
     const { status } = req.body;
-
-    if (role !== "farmer") {
-      return res.status(403).json({
-        success: false,
-        error: "Only farmers can update orders.",
-      });
-    }
-
-    if (!["pending", "accepted", "shipped", "delivered"].includes(status)) {
-      return res.status(400).json({
-        success: false,
-        error: "Invalid status. Must be: pending, accepted, shipped, or delivered.",
-      });
-    }
 
     // Verify farmer owns the product and get current order status
     const orderResult = await pool.query(

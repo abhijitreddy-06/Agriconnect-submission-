@@ -15,20 +15,15 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-// Memory storage for all uploads (product images go to Supabase, predictions to HF API)
-const memoryStorage = multer.memoryStorage();
-
+// Single shared multer instance — memory storage for all uploads
+// (product images go to Supabase, predictions to HF API)
 const upload = multer({
-  storage: memoryStorage,
+  storage: multer.memoryStorage(),
   fileFilter,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
 });
 
-// Named export for prediction uploads (same config)
-export const predictUpload = multer({
-  storage: memoryStorage,
-  fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
-});
+// Re-export for prediction routes (same config, no need for separate instance)
+export const predictUpload = upload;
 
 export default upload;
