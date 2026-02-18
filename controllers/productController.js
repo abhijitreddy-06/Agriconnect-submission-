@@ -35,7 +35,9 @@ const uploadToSupabase = async (fileBuffer, originalname, mimetype, userId) => {
 // Helper: Delete image from Supabase Storage
 const deleteFromSupabase = async (storagePath) => {
   if (!supabase || !storagePath || !storagePath.startsWith("products/")) return;
-  await supabase.storage.from(BUCKET).remove([storagePath]).catch(() => { });
+  await supabase.storage.from(BUCKET).remove([storagePath]).catch((err) => {
+    console.error("Failed to delete image from Supabase:", storagePath, err.message);
+  });
 };
 
 // Extract storage path from a Supabase public URL
@@ -128,11 +130,12 @@ export const createProduct = async (req, res) => {
   }
 };
 
-// GET /api/products - Get all products (with optional filters)
+// GET /api/products - Get all products (with optional filters and search)
 export const getAllProducts = async (req, res) => {
   try {
     const farmerId = req.query.farmer_id;
     const category = req.query.category;
+    const search = req.query.search;
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
     const offset = (page - 1) * limit;
@@ -148,6 +151,11 @@ export const getAllProducts = async (req, res) => {
     if (category) {
       params.push(category);
       conditions.push(`category = $${params.length}`);
+    }
+
+    if (search) {
+      params.push(`%${search}%`);
+      conditions.push(`product_name ILIKE $${params.length}`);
     }
 
     const whereClause = conditions.length > 0 ? " WHERE " + conditions.join(" AND ") : "";
@@ -224,6 +232,24 @@ export const updateProduct = async (req, res) => {
       imageUpdate = publicUrl;
     }
 
+    // Validate price and quantity limits on update
+    const parsedPrice = price != null ? parseFloat(price) : null;
+    const parsedQuantity = quantity != null ? parseFloat(quantity) : null;
+
+    if (parsedPrice !== null && (isNaN(parsedPrice) || parsedPrice < 0 || parsedPrice > 20000)) {
+      return res.status(400).json({
+        success: false,
+        error: "Price must be between 0 and 20000.",
+      });
+    }
+
+    if (parsedQuantity !== null && (isNaN(parsedQuantity) || parsedQuantity < 0 || parsedQuantity > 2000)) {
+      return res.status(400).json({
+        success: false,
+        error: "Quantity must be between 0 and 2000.",
+      });
+    }
+
     // Update product
     const updateQuery = `
       UPDATE products
@@ -240,8 +266,8 @@ export const updateProduct = async (req, res) => {
 
     const params = [
       product_name,
-      price ? parseFloat(price) : null,
-      quantity ? parseFloat(quantity) : null,
+      parsedPrice,
+      parsedQuantity,
       quality,
       description,
       quantity_unit,

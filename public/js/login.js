@@ -1,7 +1,9 @@
-// ─── Farmer Login (AJAX) ───────────────────────────────────────
+// ─── Login (shared — auto-detects role from URL) ─────────────────
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.querySelector(".login-form");
   if (!form) return;
+
+  const role = window.location.pathname.includes("/customer") ? "customer" : "farmer";
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -23,7 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (submitBtn) submitBtn.disabled = true;
 
     try {
-      const result = await Auth.login(phone, password, "farmer");
+      const result = await Auth.login(phone, password, role);
       if (!result.success) {
         showError(result.error || "Login failed. Please try again.");
       }

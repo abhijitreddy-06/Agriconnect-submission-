@@ -1,7 +1,9 @@
-// ─── Farmer Signup (AJAX) ──────────────────────────────────────
+// ─── Signup (shared — auto-detects role from URL) ─────────────────
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.querySelector(".signup-form");
   if (!form) return;
+
+  const role = window.location.pathname.includes("/customer") ? "customer" : "farmer";
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -20,8 +22,8 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    if (password.length < 6) {
-      showError("Password must be at least 6 characters.");
+    if (password.length < 8) {
+      showError("Password must be at least 8 characters.");
       return;
     }
 
@@ -29,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (submitBtn) submitBtn.disabled = true;
 
     try {
-      const result = await Auth.signup(username, phone, password, "farmer");
+      const result = await Auth.signup(username, phone, password, role);
       if (!result.success) {
         showError(result.error || "Signup failed. Please try again.");
       }

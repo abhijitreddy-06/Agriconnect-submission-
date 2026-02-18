@@ -26,13 +26,25 @@ app.set("trust proxy", 1);
 // Security headers
 app.use(
   helmet({
-    contentSecurityPolicy: false,
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://cdn.jsdelivr.net"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://cdnjs.cloudflare.com", "https://fonts.gstatic.com"],
+        imgSrc: ["'self'", "data:", "blob:", "https://*.supabase.co"],
+        connectSrc: ["'self'"],
+      },
+    },
     crossOriginEmbedderPolicy: false,
   })
 );
 
 // CORS
-app.use(cors());
+app.use(cors({
+  origin: process.env.NODE_ENV === "production" ? process.env.BASE_URL : true,
+  credentials: true,
+}));
 
 // Gzip compression
 app.use(compression());
@@ -41,10 +53,10 @@ app.use(compression());
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 
 // Body parsing (built-in Express, no need for body-parser)
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 
-// Rate limiting on auth routes
+// Rate limiting
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 20,
@@ -53,8 +65,19 @@ const authLimiter = rateLimit({
 app.use("/api/auth/login", authLimiter);
 app.use("/api/auth/signup", authLimiter);
 app.use("/api/auth/refresh", authLimiter);
+app.use("/api/auth/logout", authLimiter);
 app.use("/signup", authLimiter);
 app.use("/login", authLimiter);
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100,
+  message: { success: false, error: "Too many requests. Please try again later." },
+});
+app.use("/api/products", apiLimiter);
+app.use("/api/cart", apiLimiter);
+app.use("/api/orders", apiLimiter);
+app.use("/api/predict", apiLimiter);
 
 // Static files
 app.use(express.static(path.join(__dirname, "public")));

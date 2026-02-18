@@ -9,21 +9,100 @@ if (!process.env.DATABASE_URL) {
   process.exit(1);
 }
 
+// Parse DATABASE_URL to log connection target (without credentials)
+let dbHost = "unknown";
+try {
+  const parsed = new URL(process.env.DATABASE_URL);
+  dbHost = `${parsed.hostname}:${parsed.port || 5432}`;
+} catch {
+  // ignore parse errors
+}
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
-  max: 10,
+
+  // Supabase free-tier: max 3 connections (pooler allows ~15, but keep it small)
+  max: parseInt(process.env.DB_POOL_MAX) || 3,
+
+  // Close idle clients after 30 seconds
   idleTimeoutMillis: 30000,
+
+  // Timeout if a client cannot be acquired from pool in 10 seconds
   connectionTimeoutMillis: 10000,
+
+  // Keep TCP connections alive to prevent Supabase from dropping idle connections
+  keepAlive: true,
+  keepAliveInitialDelayMillis: 10000,
+
+  // SSL required for Supabase
+  ssl: {
+    rejectUnauthorized: process.env.NODE_ENV === "production",
+  },
+
+  // Statement timeout — kill queries running longer than 30 seconds
+  statement_timeout: parseInt(process.env.DB_STATEMENT_TIMEOUT) || 30000,
+
+  // Application name (visible in Supabase dashboard)
+  application_name: "AgriConnect",
 });
 
-pool.on("connect", () => {
-  console.log("PostgreSQL pool: new client connected");
+// --- Pool Event Handlers ---
+
+pool.on("connect", (client) => {
+  console.log(`[DB] New client connected (pool: ${pool.totalCount} total, ${pool.idleCount} idle)`);
+
+  // Set statement timeout per-connection as a safety net
+  client.query(`SET statement_timeout = '${parseInt(process.env.DB_STATEMENT_TIMEOUT) || 30000}'`).catch(() => {});
+});
+
+pool.on("acquire", () => {
+  // Client checked out from pool — no action needed
+});
+
+pool.on("remove", () => {
+  console.log(`[DB] Client removed from pool (${pool.totalCount} total, ${pool.idleCount} idle)`);
 });
 
 pool.on("error", (err) => {
-  console.error("Unexpected PostgreSQL pool error:", err.message);
+  const code = err.code || "";
+  const msg = err.message || "Unknown error";
+
+  // Transient errors that will auto-recover on next connect
+  const transient = ["ECONNRESET", "ETIMEDOUT", "EPIPE", "ECONNREFUSED", "57P01", "57P03"];
+
+  if (transient.includes(code)) {
+    console.warn(`[DB] Transient pool error (${code}): ${msg} — will auto-reconnect`);
+  } else {
+    console.error(`[DB] Unexpected pool error (${code}): ${msg}`);
+  }
 });
+
+// --- Pool Monitoring (every 30 seconds) ---
+
+let monitorInterval = null;
+
+function startPoolMonitor() {
+  monitorInterval = setInterval(() => {
+    console.log(
+      `[DB Monitor] total: ${pool.totalCount}, idle: ${pool.idleCount}, waiting: ${pool.waitingCount}`
+    );
+  }, 30000);
+
+  // Don't prevent process from exiting
+  if (monitorInterval.unref) {
+    monitorInterval.unref();
+  }
+}
+
+function stopPoolMonitor() {
+  if (monitorInterval) {
+    clearInterval(monitorInterval);
+    monitorInterval = null;
+  }
+}
+
+// Start monitoring
+startPoolMonitor();
 
 /**
  * Test the database connection and log the result.
@@ -32,10 +111,12 @@ pool.on("error", (err) => {
 export const testConnection = async () => {
   try {
     const result = await pool.query("SELECT NOW() AS server_time");
-    console.log(`Connected to Supabase PostgreSQL — server time: ${result.rows[0].server_time}`);
+    console.log(`[DB] Connected to Supabase PostgreSQL at ${dbHost}`);
+    console.log(`[DB] Server time: ${result.rows[0].server_time}`);
+    console.log(`[DB] Pool config — max: ${pool.options.max}, idleTimeout: ${pool.options.idleTimeoutMillis}ms, connectTimeout: ${pool.options.connectionTimeoutMillis}ms`);
     return true;
   } catch (err) {
-    console.error("Failed to connect to Supabase PostgreSQL!");
+    console.error("[DB] Failed to connect to Supabase PostgreSQL!");
     console.error("  Error:", err.message);
     if (err.code) console.error("  Code:", err.code);
     if (err.code === "ENOTFOUND") {
@@ -43,9 +124,9 @@ export const testConnection = async () => {
     } else if (err.code === "ECONNREFUSED") {
       console.error("  Cause: Connection refused. Check if database is running and port is correct.");
     } else if (err.code === "28P01") {
-      console.error("  Cause: Authentication failed. Check database username/password in DATABASE_URL.");
+      console.error("  Cause: Authentication failed. Check database username/password.");
     } else if (err.code === "3D000") {
-      console.error("  Cause: Database does not exist. Check database name in DATABASE_URL.");
+      console.error("  Cause: Database does not exist. Check database name.");
     } else if (err.code === "ETIMEDOUT") {
       console.error("  Cause: Connection timed out. Check network/firewall or if Supabase project is paused.");
     }
@@ -53,4 +134,39 @@ export const testConnection = async () => {
   }
 };
 
+/**
+ * Get pool health information for the /db-health endpoint.
+ */
+export const getPoolHealth = async () => {
+  const stats = {
+    totalCount: pool.totalCount,
+    idleCount: pool.idleCount,
+    waitingCount: pool.waitingCount,
+    maxConnections: pool.options.max,
+  };
+
+  try {
+    const start = Date.now();
+    const result = await pool.query("SELECT NOW() AS server_time");
+    const latencyMs = Date.now() - start;
+
+    return {
+      status: "healthy",
+      latencyMs,
+      serverTime: result.rows[0].server_time,
+      pool: stats,
+      host: dbHost,
+    };
+  } catch (err) {
+    return {
+      status: "unhealthy",
+      error: err.message,
+      code: err.code,
+      pool: stats,
+      host: dbHost,
+    };
+  }
+};
+
+export { stopPoolMonitor };
 export default pool;

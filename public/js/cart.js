@@ -1,6 +1,11 @@
 // ─── Cart Page JS ───────────────────────────────────────────────
 
-
+function escapeHtml(str) {
+    if (!str) return "";
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+}
 
 function showToast(message, type = "success") {
     const existing = document.querySelector(".toast");
@@ -8,7 +13,7 @@ function showToast(message, type = "success") {
 
     const toast = document.createElement("div");
     toast.className = `toast ${type}`;
-    toast.innerHTML = `<i class="fas ${type === "success" ? "fa-check-circle" : "fa-exclamation-circle"}"></i> ${message}`;
+    toast.innerHTML = `<i class="fas ${type === "success" ? "fa-check-circle" : "fa-exclamation-circle"}"></i> ${escapeHtml(message)}`;
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
 }
@@ -63,16 +68,16 @@ function renderCart() {
         onerror="this.style.display='none'"
       />
       <div class="cart-item-details">
-        <h3>${item.product_name}</h3>
-        <p class="farmer-name">Sold by: ${item.farmer_name || "Farmer"}</p>
-        <p class="item-price">₹${parseFloat(item.price).toFixed(2)} / ${item.quantity_unit || "unit"}</p>
+        <h3>${escapeHtml(item.product_name)}</h3>
+        <p class="farmer-name">Sold by: ${escapeHtml(item.farmer_name || "Farmer")}</p>
+        <p class="item-price">₹${parseFloat(item.price).toFixed(2)} / ${escapeHtml(item.quantity_unit || "unit")}</p>
         <p class="item-subtotal">Subtotal: ₹${item.subtotal.toFixed(2)}</p>
       </div>
       <div class="cart-item-actions">
         <div class="quantity-controls">
-          <button onclick="changeQuantity(${item.id}, ${parseFloat(item.quantity) - 1})">−</button>
+          <button onclick="changeQuantity(${item.id}, ${parseFloat(item.quantity) - 1})" aria-label="Decrease quantity">−</button>
           <span class="qty-value">${parseFloat(item.quantity)}</span>
-          <button onclick="changeQuantity(${item.id}, ${parseFloat(item.quantity) + 1})">+</button>
+          <button onclick="changeQuantity(${item.id}, ${parseFloat(item.quantity) + 1})" aria-label="Increase quantity">+</button>
         </div>
         <button class="remove-btn" onclick="removeItem(${item.id})">
           <i class="fas fa-trash-alt"></i> Remove

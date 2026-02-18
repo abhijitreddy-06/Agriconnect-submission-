@@ -33,9 +33,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         } else {
           // Fallback: render as markdown (old records)
           const raw = data.details || data.gemini_details || "No analysis available";
-          let rendered = raw;
-          if (typeof marked !== "undefined") {
+          let rendered = "";
+          if (typeof marked !== "undefined" && typeof DOMPurify !== "undefined") {
             rendered = DOMPurify.sanitize(marked.parse(raw));
+          } else {
+            // Fallback: plain text if libraries not loaded
+            const div = document.createElement("div");
+            div.textContent = raw;
+            rendered = div.innerHTML;
           }
           html = `
             <div class="formatted-content">
@@ -48,12 +53,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         analysisResults.innerHTML = html;
       }
     } catch (error) {
-      analysisResults.innerHTML = `
-        <div class="error-message">
-          <h3>Error Loading Analysis</h3>
-          <p>${error.message}</p>
-        </div>
-      `;
+      const errorDiv = document.createElement("div");
+      errorDiv.className = "error-message";
+      const h3 = document.createElement("h3");
+      h3.textContent = "Error Loading Analysis";
+      const p = document.createElement("p");
+      p.textContent = error.message;
+      errorDiv.appendChild(h3);
+      errorDiv.appendChild(p);
+      analysisResults.innerHTML = "";
+      analysisResults.appendChild(errorDiv);
     } finally {
       if (loadingOverlay) loadingOverlay.style.display = "none";
       document.body.classList.add("loaded");

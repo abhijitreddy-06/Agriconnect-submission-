@@ -23,10 +23,10 @@ export const signup = async (req, res) => {
       });
     }
 
-    if (password.length < 6) {
+    if (password.length < 8) {
       return res.status(400).json({
         success: false,
-        error: "Password must be at least 6 characters.",
+        error: "Password must be at least 8 characters.",
       });
     }
 

@@ -290,9 +290,9 @@ export const updateOrder = async (req, res) => {
       });
     }
 
-    // Verify farmer owns the product
+    // Verify farmer owns the product and get current order status
     const orderResult = await pool.query(
-      `SELECT p.farmer_id FROM orders o
+      `SELECT o.status AS current_status, p.farmer_id FROM orders o
        JOIN products p ON o.product_id = p.id
        WHERE o.id = $1`,
       [orderId]
@@ -309,6 +309,23 @@ export const updateOrder = async (req, res) => {
       return res.status(403).json({
         success: false,
         error: "You do not have permission to update this order.",
+      });
+    }
+
+    // Enforce valid forward-only transitions
+    const validTransitions = {
+      pending: ["accepted"],
+      accepted: ["shipped"],
+      shipped: ["delivered"],
+    };
+
+    const currentStatus = orderResult.rows[0].current_status;
+    const allowed = validTransitions[currentStatus] || [];
+
+    if (!allowed.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        error: `Cannot transition from '${currentStatus}' to '${status}'.`,
       });
     }
 

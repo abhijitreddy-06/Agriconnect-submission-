@@ -86,14 +86,19 @@ export const cacheDel = async (...keys) => {
 
 /**
  * Invalidate all keys matching a pattern (e.g., "products:*")
+ * Uses SCAN instead of KEYS to avoid blocking Redis in production.
  */
 export const cacheInvalidatePattern = async (pattern) => {
     if (!redis || !isRedisConnected) return;
     try {
-        const keys = await redis.keys(pattern);
-        if (keys.length > 0) {
-            await redis.del(...keys);
-        }
+        let cursor = "0";
+        do {
+            const [nextCursor, keys] = await redis.scan(cursor, "MATCH", pattern, "COUNT", 100);
+            cursor = nextCursor;
+            if (keys.length > 0) {
+                await redis.del(...keys);
+            }
+        } while (cursor !== "0");
     } catch (err) {
         console.error("Redis pattern invalidation error:", err.message);
     }

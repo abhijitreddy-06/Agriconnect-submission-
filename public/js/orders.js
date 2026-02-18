@@ -65,15 +65,18 @@ async function loadOrders(page) {
             .map((order) => {
                 const statusClass = `status-${order.status}`;
 
-                // Farmer: status dropdown (exclude cancelled/delivered from editing)
+                // Farmer: status dropdown — only show valid forward transitions
+                const validTransitions = {
+                    pending: ["pending", "accepted"],
+                    accepted: ["accepted", "shipped"],
+                    shipped: ["shipped", "delivered"],
+                };
                 let statusActions = "";
                 if (role === "farmer" && !["cancelled", "delivered"].includes(order.status)) {
-                    statusActions = `<select class="status-select" onchange="updateStatus(${order.id}, this.value)">
-                <option value="pending" ${order.status === "pending" ? "selected" : ""}>Pending</option>
-                <option value="accepted" ${order.status === "accepted" ? "selected" : ""}>Accepted</option>
-                <option value="shipped" ${order.status === "shipped" ? "selected" : ""}>Shipped</option>
-                <option value="delivered" ${order.status === "delivered" ? "selected" : ""}>Delivered</option>
-              </select>`;
+                    const options = (validTransitions[order.status] || [])
+                        .map(s => `<option value="${s}" ${s === order.status ? "selected" : ""}>${s.charAt(0).toUpperCase() + s.slice(1)}</option>`)
+                        .join("");
+                    statusActions = `<select class="status-select" onchange="updateStatus(${order.id}, this.value)">${options}</select>`;
                 }
 
                 // Customer: cancel button (only for pending/accepted)

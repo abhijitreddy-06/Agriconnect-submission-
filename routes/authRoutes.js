@@ -1,21 +1,22 @@
 import express from "express";
 import { signup, login, refresh, logout, verifyAuth, updateProfile } from "../controllers/authController.js";
 import { verifyToken } from "../middleware/auth.js";
+import { validate, signupSchema, loginSchema, refreshSchema, updateProfileSchema } from "../middleware/validate.js";
 
 const router = express.Router();
 
 // Public auth routes
-router.post("/api/auth/signup", signup);
-router.post("/api/auth/login", login);
-router.post("/api/auth/refresh", refresh);
+router.post("/api/auth/signup", validate(signupSchema), signup);
+router.post("/api/auth/login", validate(loginSchema), login);
+router.post("/api/auth/refresh", validate(refreshSchema), refresh);
 router.post("/api/auth/logout", logout);
 
 // Protected auth routes
 router.get("/api/auth/verify", verifyToken, verifyAuth);
-router.put("/api/auth/profile", verifyToken, updateProfile);
+router.put("/api/auth/profile", verifyToken, validate(updateProfileSchema), updateProfile);
 
 // Legacy routes (redirect to new API — keeps old form actions working during transition)
-router.post("/signup", signup);
-router.post("/login", login);
+router.post("/signup", validate(signupSchema), signup);
+router.post("/login", validate(loginSchema), login);
 
 export default router;

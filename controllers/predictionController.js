@@ -61,7 +61,9 @@ export const analyzeImage = async (req, res) => {
     if (predictionId) {
       await pool
         .query("UPDATE predictions SET status = $1 WHERE id = $2", ["failed", predictionId])
-        .catch(() => {});
+        .catch((dbErr) => {
+          console.error("Failed to mark prediction as failed:", dbErr.message);
+        });
     }
 
     console.error("Error in /api/predict/analyze:", error.message);

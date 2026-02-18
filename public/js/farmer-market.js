@@ -4,10 +4,11 @@ let currentCategory = "";
 let currentPage = 1;
 const PAGE_LIMIT = window.innerWidth <= 768 ? 6 : 20;
 
-async function fetchProducts(category, page) {
+async function fetchProducts(category, page, search) {
   try {
     const params = new URLSearchParams();
     if (category) params.set("category", category);
+    if (search) params.set("search", search);
     params.set("page", page || 1);
     params.set("limit", PAGE_LIMIT);
 
@@ -183,6 +184,7 @@ function showToast(message, type = "success") {
 }
 
 // Category pills + search + init
+let searchDebounceTimer = null;
 document.addEventListener("DOMContentLoaded", () => {
   const filtersEl = document.getElementById("categoryFilters");
   if (filtersEl) {
@@ -200,13 +202,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchInput = document.getElementById("searchInput");
   if (searchInput) {
     searchInput.addEventListener("input", (e) => {
-      const query = e.target.value.toLowerCase().trim();
-      if (!query) {
-        renderProducts(allProducts);
-        return;
-      }
-      const filtered = allProducts.filter((p) => p.product_name.toLowerCase().includes(query));
-      renderProducts(filtered);
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(() => {
+        currentPage = 1;
+        fetchProducts(currentCategory, currentPage, e.target.value.trim());
+      }, 300);
     });
   }
 
