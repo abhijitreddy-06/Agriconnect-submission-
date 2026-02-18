@@ -20,31 +20,19 @@ try {
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-
-  // Supabase free-tier: max 3 connections (pooler allows ~15, but keep it small)
   max: parseInt(process.env.DB_POOL_MAX) || 3,
-
-  // Close idle clients after 30 seconds
   idleTimeoutMillis: 30000,
-
-  // Timeout if a client cannot be acquired from pool in 10 seconds
   connectionTimeoutMillis: 10000,
-
-  // Keep TCP connections alive to prevent Supabase from dropping idle connections
   keepAlive: true,
   keepAliveInitialDelayMillis: 10000,
-
-  // SSL required for Supabase — rejectUnauthorized must be false for Supabase pooler
-  ssl: {
-    rejectUnauthorized: false,
-  },
-
-  // Statement timeout — kill queries running longer than 30 seconds
   statement_timeout: parseInt(process.env.DB_STATEMENT_TIMEOUT) || 30000,
-
-  // Application name (visible in Supabase dashboard)
   application_name: "AgriConnect",
+
+  ssl: process.env.NODE_ENV === "production"
+    ? { rejectUnauthorized: false }
+    : false,
 });
+
 
 // --- Pool Event Handlers ---
 
