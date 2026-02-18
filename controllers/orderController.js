@@ -3,43 +3,83 @@ import { cacheGet, cacheSet, cacheInvalidatePattern } from "../config/redis.js";
 
 // POST /api/orders - Create a new order
 export const createOrder = async (req, res) => {
+  const client = await pool.connect();
+
   try {
     const customerId = req.user.userId;
-    const { product_id, quantity } = req.body;
+    const { product_id, quantity, delivery_address } = req.body;
 
     if (!product_id || !quantity) {
+      client.release();
       return res.status(400).json({
         success: false,
         error: "Product ID and quantity are required.",
       });
     }
 
-    // Get product details
-    const productResult = await pool.query(
-      "SELECT price FROM products WHERE id = $1",
+    const qty = parseFloat(quantity);
+    if (isNaN(qty) || qty <= 0) {
+      client.release();
+      return res.status(400).json({
+        success: false,
+        error: "Quantity must be a positive number.",
+      });
+    }
+
+    await client.query("BEGIN");
+
+    // Get product details with row lock
+    const productResult = await client.query(
+      "SELECT price, quantity AS stock, farmer_id FROM products WHERE id = $1 FOR UPDATE",
       [product_id]
     );
 
     if (productResult.rows.length === 0) {
+      await client.query("ROLLBACK");
       return res.status(404).json({
         success: false,
         error: "Product not found.",
       });
     }
 
-    const price = productResult.rows[0].price;
-    const totalPrice = parseFloat(price) * parseFloat(quantity);
+    const product = productResult.rows[0];
 
-    // Create order
-    const orderResult = await pool.query(
-      `INSERT INTO orders (customer_id, product_id, quantity, total_price, status)
-       VALUES ($1, $2, $3, $4, 'pending')
+    if (product.farmer_id === customerId) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({
+        success: false,
+        error: "You cannot order your own product.",
+      });
+    }
+
+    if (parseFloat(product.stock) < qty) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({
+        success: false,
+        error: `Insufficient stock. Only ${product.stock} available.`,
+      });
+    }
+
+    const totalPrice = parseFloat(product.price) * qty;
+
+    const orderResult = await client.query(
+      `INSERT INTO orders (customer_id, product_id, quantity, total_price, status, delivery_address)
+       VALUES ($1, $2, $3, $4, 'pending', $5)
        RETURNING id`,
-      [customerId, product_id, parseFloat(quantity), totalPrice]
+      [customerId, product_id, qty, totalPrice, delivery_address || null]
     );
 
-    // Invalidate order caches for both customer and related farmer
+    // Reduce product stock
+    await client.query(
+      "UPDATE products SET quantity = quantity - $1 WHERE id = $2",
+      [qty, product_id]
+    );
+
+    await client.query("COMMIT");
+
+    // Invalidate caches
     await cacheInvalidatePattern("orders:*");
+    await cacheInvalidatePattern("products:*");
 
     return res.status(201).json({
       success: true,
@@ -47,54 +87,69 @@ export const createOrder = async (req, res) => {
       message: "Order created successfully.",
     });
   } catch (error) {
+    await client.query("ROLLBACK");
     console.error("Error creating order:", error.message);
     return res.status(500).json({
       success: false,
       error: "Failed to create order.",
     });
+  } finally {
+    client.release();
   }
 };
 
-// GET /api/orders - Get orders for user (cached 2 min)
+// GET /api/orders - Get orders for user (cached 2 min, with pagination)
 export const getOrders = async (req, res) => {
   try {
     const userId = req.user.userId;
     const role = req.user.role;
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 15));
+    const offset = (page - 1) * limit;
 
     // Check cache
-    const cacheKey = `orders:${role}:${userId}`;
+    const cacheKey = `orders:${role}:${userId}:page:${page}:limit:${limit}`;
     const cached = await cacheGet(cacheKey);
     if (cached) {
-      return res.json({ success: true, data: cached });
+      return res.json({ success: true, ...cached });
     }
 
-    let query = "";
+    let baseWhere = "";
     let params = [];
 
     if (role === "customer") {
-      query = `SELECT o.*, p.product_name, p.price, u.username FROM orders o
-               JOIN products p ON o.product_id = p.id
-               JOIN users u ON p.farmer_id = u.id
-               WHERE o.customer_id = $1
-               ORDER BY o.id DESC`;
+      baseWhere = "WHERE o.customer_id = $1";
       params = [userId];
     } else if (role === "farmer") {
-      query = `SELECT o.*, p.product_name, p.price, u.username FROM orders o
-               JOIN products p ON o.product_id = p.id
-               JOIN users u ON o.customer_id = u.id
-               WHERE p.farmer_id = $1
-               ORDER BY o.id DESC`;
+      baseWhere = "WHERE p.farmer_id = $1";
       params = [userId];
     }
 
-    const result = await pool.query(query, params);
+    // Count total
+    const countQuery = `SELECT COUNT(*) FROM orders o JOIN products p ON o.product_id = p.id ${baseWhere}`;
+    const countResult = await pool.query(countQuery, params.slice());
+    const total = parseInt(countResult.rows[0].count);
+
+    // Fetch paginated data
+    const dataQuery = `SELECT o.*, p.product_name, p.price, u.username FROM orders o
+             JOIN products p ON o.product_id = p.id
+             JOIN users u ON ${role === "customer" ? "p.farmer_id" : "o.customer_id"} = u.id
+             ${baseWhere}
+             ORDER BY o.id DESC
+             LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+    params.push(limit, offset);
+
+    const result = await pool.query(dataQuery, params);
+
+    const totalPages = Math.ceil(total / limit);
+    const responseData = { data: result.rows, total, page, limit, totalPages };
 
     // Cache for 2 minutes
-    await cacheSet(cacheKey, result.rows, 120);
+    await cacheSet(cacheKey, responseData, 120);
 
     return res.json({
       success: true,
-      data: result.rows,
+      ...responseData,
     });
   } catch (error) {
     console.error("Error fetching orders:", error.message);

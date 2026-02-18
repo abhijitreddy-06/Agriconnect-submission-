@@ -1,18 +1,16 @@
-import dns from "dns";
-// Force IPv4 DNS resolution — Render free-tier cannot reach Supabase over IPv6
-dns.setDefaultResultOrder("ipv4first");
-
-import dotenv from "dotenv";
-dotenv.config();
+import "dotenv/config"; // Must be FIRST — loads .env before any other module reads process.env
 
 import app from "./app.js";
-import pool from "./config/database.js";
+import pool, { testConnection } from "./config/database.js";
 import { closeRedis } from "./config/redis.js";
 
 const port = process.env.PORT || 8080;
 
-const server = app.listen(port, () => {
+const server = app.listen(port, async () => {
   console.log(`Server is running on port ${port}`);
+
+  // Test database connection at startup
+  await testConnection();
 });
 
 // Graceful shutdown

@@ -1,67 +1,189 @@
 /* ===================================================
-   profile.css — User profile page styles
+   profile.css -- Profile dashboard page styles
    Global styles handled by global.css
    =================================================== */
 
+/* -- Page Layout -- */
 .profile-page {
-  max-width: 640px;
+  max-width: 720px;
   margin: 2rem auto;
   padding: 0 1.5rem;
 }
 
 /* -- Profile Header Card -- */
 .profile-header-card {
-  background: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 60%, var(--color-accent) 100%);
   border-radius: var(--radius-xl);
-  padding: 2.5rem 2rem 2rem;
+  padding: 3rem 2rem 2.5rem;
   text-align: center;
   margin-bottom: 1.5rem;
   box-shadow: var(--shadow-lg);
   position: relative;
+  overflow: hidden;
+  animation: fadeIn 0.6s ease forwards;
+}
+
+.profile-header-card::before {
+  content: '';
+  position: absolute;
+  top: -60px;
+  right: -40px;
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.profile-header-card::after {
+  content: '';
+  position: absolute;
+  bottom: -40px;
+  left: -30px;
+  width: 150px;
+  height: 150px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 50%;
+  pointer-events: none;
 }
 
 .profile-avatar {
-  width: 80px;
-  height: 80px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 1rem;
-  font-size: 2rem;
-  color: var(--color-secondary);
-  border: 3px solid rgba(255, 255, 255, 0.2);
+  border: 3px solid rgba(255, 255, 255, 0.25);
+  position: relative;
+  z-index: 1;
+}
+
+.avatar-emoji {
+  font-size: 2.75rem;
+  line-height: 1;
 }
 
 .profile-display-name {
   color: #ffffff;
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
+  position: relative;
+  z-index: 1;
 }
 
 .profile-header-card .role-badge {
   display: inline-block;
-  padding: 0.3rem 1rem;
+  padding: 0.35rem 1.1rem;
   border-radius: var(--radius-full);
   font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  position: relative;
+  z-index: 1;
 }
 
 .role-badge.farmer {
-  background: rgba(93, 163, 153, 0.2);
+  background: rgba(93, 163, 153, 0.25);
   color: #7edccc;
 }
 
 .role-badge.customer {
-  background: rgba(196, 164, 132, 0.2);
+  background: rgba(196, 164, 132, 0.25);
   color: var(--color-secondary-light);
 }
 
-/* -- Info Card -- */
+.member-since {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+  margin-top: 0.75rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* -- Quick Stats Row -- */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  animation: fadeIn 0.6s ease 0.1s forwards;
+  opacity: 0;
+}
+
+.stat-card {
+  background: var(--color-surface-solid);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+}
+
+.stat-icon.accent-icon {
+  background: rgba(93, 163, 153, 0.12);
+  color: var(--color-accent);
+}
+
+.stat-icon.warm-icon {
+  background: rgba(255, 126, 103, 0.12);
+  color: var(--color-accent-warm);
+}
+
+.stat-icon.secondary-icon {
+  background: rgba(196, 164, 132, 0.15);
+  color: var(--color-secondary);
+}
+
+.stat-icon.primary-icon {
+  background: rgba(26, 45, 64, 0.1);
+  color: var(--color-primary);
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--color-text-light);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* -- Profile Cards -- */
 .profile-card {
   background: var(--color-surface-solid);
   border-radius: var(--radius-lg);
@@ -69,50 +191,101 @@
   box-shadow: var(--shadow-sm);
   margin-bottom: 1.25rem;
   border: 1px solid var(--color-border);
+  animation: fadeIn 0.6s ease 0.15s forwards;
+  opacity: 0;
 }
 
 .profile-card h2 {
   color: var(--color-primary);
   margin-bottom: 1.25rem;
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
 .profile-card h2 i {
-  font-size: 1rem;
+  font-size: 0.95rem;
   opacity: 0.6;
 }
 
+/* -- Profile Fields -- */
 .profile-field {
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .profile-field:last-of-type {
   margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
 }
 
 .profile-field label {
   display: block;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--color-text-light);
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.4rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.profile-field .field-value {
-  font-size: 1rem;
-  color: var(--color-text);
-  padding: 0.6rem 0.85rem;
-  background: var(--color-bg);
-  border-radius: var(--radius-sm);
-  border: 1px solid transparent;
+.field-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
-.profile-field input {
+.field-value {
+  font-size: 1rem;
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.field-readonly-badge {
+  font-size: 0.7rem;
+  color: var(--color-text-light);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  opacity: 0.7;
+}
+
+.field-readonly-badge i {
+  font-size: 0.6rem;
+}
+
+/* -- Inline Edit Button -- */
+.btn-inline-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: transparent;
+  border: 1.5px solid var(--color-border);
+  color: var(--color-text-light);
+  padding: 0.35rem 0.85rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: "Nunito", sans-serif;
+  transition: all var(--transition);
+}
+
+.btn-inline-edit:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* -- Edit Row -- */
+.field-edit {
+  margin-top: 0.5rem;
+}
+
+.field-edit input {
   width: 100%;
   padding: 0.65rem 0.85rem;
   font-size: 1rem;
@@ -122,57 +295,27 @@
   transition: border-color var(--transition);
   background: var(--color-surface-solid);
   color: var(--color-text);
+  margin-bottom: 0.6rem;
+  box-sizing: border-box;
 }
 
-.profile-field input:focus {
+.field-edit input:focus {
   outline: none;
   border-color: var(--color-accent);
   box-shadow: 0 0 0 3px rgba(93, 163, 153, 0.1);
 }
 
-/* -- Edit Row -- */
-.edit-row {
-  margin-top: 0.5rem;
-}
-
-.edit-row input {
-  margin-bottom: 0.6rem;
-}
-
-/* -- Buttons -- */
-.profile-actions {
+.edit-actions {
   display: flex;
   gap: 0.5rem;
-}
-
-.btn-edit {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  margin-top: 1rem;
-  background: transparent;
-  border: 1.5px solid var(--color-border);
-  color: var(--color-text);
-  padding: 0.5rem 1rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-family: "Nunito", sans-serif;
-  transition: all var(--transition);
-}
-
-.btn-edit:hover {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
 }
 
 .btn-save {
   background: var(--color-accent);
   color: #ffffff;
   border: none;
-  padding: 0.55rem 1.25rem;
-  font-size: 0.9rem;
+  padding: 0.5rem 1.2rem;
+  font-size: 0.85rem;
   font-weight: 700;
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -194,12 +337,12 @@
   transform: none;
 }
 
-.btn-cancel {
+.btn-cancel-edit {
   background: transparent;
   border: 1.5px solid var(--color-border);
   color: var(--color-text-light);
-  padding: 0.55rem 1rem;
-  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
   font-weight: 600;
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -207,48 +350,213 @@
   transition: all var(--transition);
 }
 
-.btn-cancel:hover {
+.btn-cancel-edit:hover {
   border-color: var(--color-text-light);
   color: var(--color-text);
 }
 
-/* -- Stats -- */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 0.75rem;
-  margin-top: 0.25rem;
+/* -- Recent Activity -- */
+.activity-loading {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-light);
+  font-size: 0.9rem;
 }
 
-.stat-card {
+.activity-empty {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-light);
+}
+
+.activity-empty i {
+  font-size: 2rem;
+  color: var(--color-border);
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
   background: var(--color-bg);
   border-radius: var(--radius-md);
-  padding: 1.25rem;
-  text-align: center;
-  border: 1px solid var(--color-border);
-  transition: transform 0.2s;
+  transition: transform 0.2s ease;
 }
 
-.stat-card:hover {
-  transform: translateY(-2px);
+.activity-item:hover {
+  transform: translateX(4px);
 }
 
-.stat-card .stat-value {
-  font-size: 1.75rem;
-  font-weight: 700;
+.activity-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  background: rgba(26, 45, 64, 0.08);
   color: var(--color-primary);
 }
 
-.stat-card .stat-label {
-  font-size: 0.75rem;
-  color: var(--color-text-light);
-  margin-top: 0.2rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
+.activity-details {
+  flex: 1;
+  min-width: 0;
 }
 
-/* -- Responsive -- */
+.activity-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.activity-meta {
+  font-size: 0.78rem;
+  color: var(--color-text-light);
+}
+
+.activity-status {
+  flex-shrink: 0;
+}
+
+/* -- Status Badges -- */
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.7rem;
+  border-radius: var(--radius-full);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-pending {
+  background: rgba(243, 156, 18, 0.15);
+  color: #f39c12;
+}
+
+.status-accepted {
+  background: rgba(52, 152, 219, 0.15);
+  color: #3498db;
+}
+
+.status-shipped {
+  background: rgba(155, 89, 182, 0.15);
+  color: #9b59b6;
+}
+
+.status-delivered {
+  background: rgba(39, 174, 96, 0.15);
+  color: var(--color-success);
+}
+
+.status-cancelled {
+  background: rgba(231, 76, 60, 0.15);
+  color: var(--color-danger);
+}
+
+.activity-view-all {
+  display: block;
+  text-align: center;
+  margin-top: 0.75rem;
+  padding: 0.6rem;
+  color: var(--color-accent);
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition);
+  text-decoration: none;
+}
+
+.activity-view-all:hover {
+  background: rgba(93, 163, 153, 0.08);
+}
+
+/* -- Account Actions -- */
+.account-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.btn-action {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: "Nunito", sans-serif;
+  cursor: pointer;
+  transition: all var(--transition);
+  border: 1.5px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text);
+  text-align: left;
+}
+
+.btn-action i {
+  width: 1.2rem;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.btn-action:hover:not(:disabled) {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background: rgba(93, 163, 153, 0.04);
+}
+
+.btn-password:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.coming-soon-badge {
+  margin-left: auto;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: var(--color-bg);
+  color: var(--color-text-light);
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-full);
+}
+
+.btn-logout {
+  border-color: rgba(231, 76, 60, 0.3);
+  color: var(--color-danger);
+}
+
+.btn-logout:hover {
+  border-color: var(--color-danger) !important;
+  color: var(--color-danger) !important;
+  background: rgba(231, 76, 60, 0.06) !important;
+}
+
+/* -- Toast -- */
+@keyframes slideUp {
+  from { transform: translateY(16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* -- Responsive: 768px -- */
 @media (max-width: 768px) {
   .profile-page {
     margin: 1rem auto;
@@ -256,26 +564,86 @@
   }
 
   .profile-header-card {
-    padding: 2rem 1.5rem 1.5rem;
+    padding: 2.5rem 1.5rem 2rem;
+    border-radius: var(--radius-lg);
+  }
+
+  .profile-avatar {
+    width: 84px;
+    height: 84px;
+  }
+
+  .avatar-emoji {
+    font-size: 2.25rem;
+  }
+
+  .profile-display-name {
+    font-size: 1.5rem;
+  }
+
+  .stats-row {
+    grid-template-columns: 1fr 1fr;
   }
 
   .profile-card {
     padding: 1.25rem;
   }
 
-  .profile-actions {
+  .edit-actions {
     flex-direction: column;
+  }
+
+  .activity-item {
+    padding: 0.75rem;
   }
 }
 
+/* -- Responsive: 480px -- */
 @media (max-width: 480px) {
+  .profile-page {
+    padding: 0 0.75rem;
+  }
+
+  .profile-header-card {
+    padding: 2rem 1rem 1.5rem;
+    border-radius: var(--radius-md);
+  }
+
   .profile-avatar {
-    width: 64px;
-    height: 64px;
-    font-size: 1.5rem;
+    width: 72px;
+    height: 72px;
+  }
+
+  .avatar-emoji {
+    font-size: 2rem;
   }
 
   .profile-display-name {
-    font-size: 1.25rem;
+    font-size: 1.3rem;
+  }
+
+  .stats-row {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .stat-card {
+    padding: 1.15rem;
+  }
+
+  .field-display {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+
+  .activity-item {
+    gap: 0.75rem;
+  }
+
+  .activity-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 0.8rem;
   }
 }

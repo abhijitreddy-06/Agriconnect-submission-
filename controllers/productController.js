@@ -56,6 +56,7 @@ export const createProduct = async (req, res) => {
       quality,
       description,
       quantity_unit,
+      category,
     } = req.body;
 
     // Validation
@@ -104,10 +105,10 @@ export const createProduct = async (req, res) => {
 
     // Insert product with farmer_id
     const result = await pool.query(
-      `INSERT INTO products (farmer_id, product_name, price, quantity, quality, description, image, quantity_unit)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `INSERT INTO products (farmer_id, product_name, price, quantity, quality, description, image, quantity_unit, category)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING id`,
-      [farmerId, product_name, parsedPrice, parsedQuantity, quality || "", description || "", imagePath, quantity_unit || ""]
+      [farmerId, product_name, parsedPrice, parsedQuantity, quality || "", description || "", imagePath, quantity_unit || "", category || ""]
     );
 
     // Invalidate product cache
@@ -131,26 +132,45 @@ export const createProduct = async (req, res) => {
 export const getAllProducts = async (req, res) => {
   try {
     const farmerId = req.query.farmer_id;
+    const category = req.query.category;
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
     const offset = (page - 1) * limit;
 
-    let query = "SELECT * FROM products";
+    const conditions = [];
     const params = [];
 
     if (farmerId) {
-      query += " WHERE farmer_id = $1";
       params.push(parseInt(farmerId));
+      conditions.push(`farmer_id = $${params.length}`);
     }
 
-    query += " ORDER BY id DESC LIMIT $" + (params.length + 1) + " OFFSET $" + (params.length + 2);
-    params.push(limit, offset);
+    if (category) {
+      params.push(category);
+      conditions.push(`category = $${params.length}`);
+    }
 
-    const result = await pool.query(query, params);
+    const whereClause = conditions.length > 0 ? " WHERE " + conditions.join(" AND ") : "";
+
+    // Count total matching rows
+    const countResult = await pool.query(
+      `SELECT COUNT(*) FROM products${whereClause}`,
+      params.slice()
+    );
+    const total = parseInt(countResult.rows[0].count);
+
+    // Fetch paginated results
+    params.push(limit, offset);
+    const dataQuery = `SELECT * FROM products${whereClause} ORDER BY id DESC LIMIT $${params.length - 1} OFFSET $${params.length}`;
+    const result = await pool.query(dataQuery, params);
 
     return res.json({
       success: true,
       data: result.rows,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
     });
   } catch (error) {
     console.error("Error fetching products:", error.message);
@@ -166,7 +186,7 @@ export const updateProduct = async (req, res) => {
   try {
     const farmerId = req.user.userId;
     const productId = req.params.id;
-    const { product_name, price, quantity, quality, description, quantity_unit } = req.body;
+    const { product_name, price, quantity, quality, description, quantity_unit, category } = req.body;
 
     // Verify ownership
     const product = await pool.query(
@@ -212,9 +232,10 @@ export const updateProduct = async (req, res) => {
           quantity = COALESCE($3, quantity),
           quality = COALESCE($4, quality),
           description = COALESCE($5, description),
-          quantity_unit = COALESCE($6, quantity_unit)
-          ${req.file ? ", image = $8" : ""}
-      WHERE id = $7
+          quantity_unit = COALESCE($6, quantity_unit),
+          category = COALESCE($7, category)
+          ${req.file ? ", image = $9" : ""}
+      WHERE id = $8
     `;
 
     const params = [
@@ -224,6 +245,7 @@ export const updateProduct = async (req, res) => {
       quality,
       description,
       quantity_unit,
+      category,
       productId,
     ];
 

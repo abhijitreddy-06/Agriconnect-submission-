@@ -1,5 +1,5 @@
 import express from "express";
-import { signup, login, refresh, logout, verifyAuth } from "../controllers/authController.js";
+import { signup, login, refresh, logout, verifyAuth, updateProfile } from "../controllers/authController.js";
 import { verifyToken } from "../middleware/auth.js";
 
 const router = express.Router();
@@ -12,6 +12,7 @@ router.post("/api/auth/logout", logout);
 
 // Protected auth routes
 router.get("/api/auth/verify", verifyToken, verifyAuth);
+router.put("/api/auth/profile", verifyToken, updateProfile);
 
 // Legacy routes (redirect to new API — keeps old form actions working during transition)
 router.post("/signup", signup);

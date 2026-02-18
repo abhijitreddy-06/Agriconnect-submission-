@@ -22,39 +22,75 @@
     <header></header>
 
     <main class="profile-page">
+        <!-- Profile Header -->
         <div class="profile-header-card">
             <div class="profile-avatar" id="profileAvatar">
-                <i class="fas fa-user"></i>
+                <span class="avatar-emoji" id="avatarEmoji"></span>
             </div>
             <h1 class="profile-display-name" id="profileNameDisplay">Loading...</h1>
             <span class="role-badge" id="profileRole">--</span>
+            <p class="member-since" id="memberSince"></p>
         </div>
 
+        <!-- Quick Stats -->
+        <div class="stats-row" id="statsRow"></div>
+
+        <!-- Personal Info -->
         <div class="profile-card">
-            <h2><i class="fas fa-id-card"></i> Personal Info</h2>
+            <h2><i class="fas fa-id-card"></i> Personal Information</h2>
             <div class="profile-field">
                 <label>Full Name</label>
-                <div class="field-value" id="profileNameValue">Loading...</div>
-                <div class="edit-row" id="editNameRow" style="display: none;">
-                    <input type="text" id="profileName" placeholder="Enter your name">
-                    <div class="profile-actions">
-                        <button class="btn-save" onclick="saveProfile()"><i class="fas fa-check"></i> Save</button>
-                        <button class="btn-cancel" onclick="cancelEdit()">Cancel</button>
+                <div class="field-display" id="nameDisplay">
+                    <span class="field-value" id="profileNameValue">Loading...</span>
+                    <button class="btn-inline-edit" id="editNameBtn" onclick="toggleEdit()">
+                        <i class="fas fa-pen"></i> Edit
+                    </button>
+                </div>
+                <div class="field-edit" id="nameEditRow" style="display: none;">
+                    <input type="text" id="profileNameInput" placeholder="Enter your name" maxlength="50">
+                    <div class="edit-actions">
+                        <button class="btn-save" id="saveBtn" onclick="saveProfile()">
+                            <i class="fas fa-check"></i> Save
+                        </button>
+                        <button class="btn-cancel-edit" onclick="cancelEdit()">Cancel</button>
                     </div>
                 </div>
             </div>
             <div class="profile-field">
                 <label>Phone Number</label>
-                <div class="field-value" id="profilePhone">Loading...</div>
+                <div class="field-display">
+                    <span class="field-value" id="profilePhone">Loading...</span>
+                    <span class="field-readonly-badge"><i class="fas fa-lock"></i> Read-only</span>
+                </div>
             </div>
-            <button class="btn-edit" id="editBtn" onclick="toggleEdit()">
-                <i class="fas fa-pen"></i> Edit Name
-            </button>
+            <div class="profile-field">
+                <label>Role</label>
+                <div class="field-display">
+                    <span class="field-value" id="profileRoleText">Loading...</span>
+                </div>
+            </div>
         </div>
 
+        <!-- Recent Activity -->
         <div class="profile-card">
-            <h2><i class="fas fa-chart-bar"></i> Overview</h2>
-            <div class="stats-grid" id="statsGrid"></div>
+            <h2><i class="fas fa-clock"></i> Recent Activity</h2>
+            <div id="recentActivity">
+                <div class="activity-loading">Loading recent orders...</div>
+            </div>
+        </div>
+
+        <!-- Account Actions -->
+        <div class="profile-card account-actions-card">
+            <h2><i class="fas fa-cog"></i> Account</h2>
+            <div class="account-actions">
+                <button class="btn-action btn-password" disabled>
+                    <i class="fas fa-key"></i> Change Password
+                    <span class="coming-soon-badge">Coming Soon</span>
+                </button>
+                <button class="btn-action btn-logout" id="profileLogoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Log Out
+                </button>
+            </div>
         </div>
     </main>
 

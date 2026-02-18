@@ -31,8 +31,24 @@
             <input type="text" class="search-input" id="searchInput" placeholder="Search products..." />
         </div>
 
+        <!-- Category Filter Pills -->
+        <div class="category-filters" id="categoryFilters">
+            <button class="category-pill active" data-category="">All</button>
+            <button class="category-pill" data-category="Vegetables">Vegetables</button>
+            <button class="category-pill" data-category="Fruits">Fruits</button>
+            <button class="category-pill" data-category="Grains & Cereals">Grains & Cereals</button>
+            <button class="category-pill" data-category="Pulses & Legumes">Pulses & Legumes</button>
+            <button class="category-pill" data-category="Spices">Spices</button>
+            <button class="category-pill" data-category="Dairy">Dairy</button>
+            <button class="category-pill" data-category="Nuts & Seeds">Nuts & Seeds</button>
+            <button class="category-pill" data-category="Organic">Organic</button>
+        </div>
+
         <div class="container">
             <div class="marketplace" id="marketplace"></div>
+
+            <!-- Pagination -->
+            <div class="pagination" id="pagination"></div>
         </div>
 
         <div id="productModal" class="modal">

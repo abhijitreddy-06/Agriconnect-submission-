@@ -109,6 +109,20 @@
   font-size: 1.1rem;
 }
 
+/* ── Order Address ── */
+.order-address {
+  font-size: 0.8rem;
+  color: var(--color-text-light);
+  margin-top: 0.35rem;
+  line-height: 1.4;
+}
+
+.order-address i {
+  color: var(--color-accent);
+  margin-right: 0.3rem;
+  font-size: 0.75rem;
+}
+
 /* ── Order Status Section ── */
 .order-status-section {
   text-align: right;
@@ -211,6 +225,56 @@
 .status-select:focus {
   outline: none;
   border-color: var(--color-accent);
+}
+
+/* ── Pagination ── */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 1.5rem 0 0.5rem;
+  flex-wrap: wrap;
+}
+
+.page-btn {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 0.5rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-solid);
+  color: var(--color-text);
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-btn:hover:not(:disabled):not(.active) {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.page-btn.active {
+  background: var(--color-accent);
+  color: #ffffff;
+  border-color: var(--color-accent);
+}
+
+.page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.page-ellipsis {
+  padding: 0 0.3rem;
+  color: var(--color-text-light);
+  font-weight: 600;
 }
 
 /* ── Animations ── */

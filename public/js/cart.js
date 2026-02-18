@@ -149,12 +149,22 @@ async function handleClearCart() {
 
 async function handleCheckout() {
     const btn = document.getElementById("checkoutBtn");
+    const addressEl = document.getElementById("deliveryAddress");
+    const address = addressEl ? addressEl.value.trim() : "";
+
+    if (!address) {
+        showToast("Please enter a delivery address", "error");
+        if (addressEl) addressEl.focus();
+        return;
+    }
+
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
 
     try {
         const res = await Auth.authFetch("/api/cart/checkout", {
             method: "POST",
+            body: JSON.stringify({ delivery_address: address }),
         });
         const data = await res.json();
 

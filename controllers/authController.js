@@ -249,3 +249,60 @@ export const verifyAuth = async (req, res) => {
     return res.status(500).json({ success: false, error: "Verification failed." });
   }
 };
+
+// PUT /api/auth/profile - Update user profile
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { username } = req.body;
+
+    if (!username || !username.trim()) {
+      return res.status(400).json({
+        success: false,
+        error: "Username is required.",
+      });
+    }
+
+    const trimmedName = username.trim();
+
+    if (trimmedName.length < 2 || trimmedName.length > 50) {
+      return res.status(400).json({
+        success: false,
+        error: "Username must be between 2 and 50 characters.",
+      });
+    }
+
+    const result = await pool.query(
+      "UPDATE users SET username = $1 WHERE id = $2 RETURNING id, username, phone_no, role",
+      [trimmedName, userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: "User not found.",
+      });
+    }
+
+    await cacheDel(`user:profile:${userId}`);
+
+    const user = result.rows[0];
+
+    return res.json({
+      success: true,
+      message: "Profile updated successfully.",
+      user: {
+        id: user.id,
+        username: user.username,
+        phone: user.phone_no,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.error("Profile Update Error:", error.message);
+    return res.status(500).json({
+      success: false,
+      error: "Failed to update profile.",
+    });
+  }
+};

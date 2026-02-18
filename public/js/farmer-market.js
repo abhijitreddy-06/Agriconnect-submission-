@@ -1,17 +1,33 @@
 // --- Farmer Market Page ---
 let allProducts = [];
+let currentCategory = "";
+let currentPage = 1;
+const PAGE_LIMIT = 20;
 
-async function fetchProducts() {
+async function fetchProducts(category, page) {
   try {
-    const res = await fetch("/api/products");
+    const params = new URLSearchParams();
+    if (category) params.set("category", category);
+    params.set("page", page || 1);
+    params.set("limit", PAGE_LIMIT);
+
+    const res = await fetch("/api/products?" + params.toString());
     const result = await res.json();
-    allProducts = result.data || result;
+    allProducts = result.data || [];
     renderProducts(allProducts);
+    renderPagination(result);
   } catch (error) {
     console.error("Error fetching products:", error);
     const marketplace = document.getElementById("marketplace");
     if (marketplace) marketplace.innerHTML = '<p class="empty-state">Failed to load products.</p>';
   }
+}
+
+function escapeHtml(str) {
+  if (!str) return "";
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
 }
 
 function renderProducts(products) {
@@ -31,16 +47,57 @@ function renderProducts(products) {
     card.onclick = () => openModal(product);
 
     const isOwner = currentUserId && product.farmer_id === currentUserId;
+    const categoryBadge = product.category ? `<span class="category-badge">${escapeHtml(product.category)}</span>` : "";
 
     card.innerHTML = `
-      <img src="${product.image || ""}" alt="${product.product_name}" onerror="this.style.display='none'">
-      <h3>${product.product_name}</h3>
+      ${categoryBadge}
+      <img src="${product.image || ""}" alt="${escapeHtml(product.product_name)}" onerror="this.style.display='none'">
+      <h3>${escapeHtml(product.product_name)}</h3>
       <div class="price">${product.currency ?? "\u20b9"}${product.price}</div>
       <div class="reviews">Quality: ${product.quality || "N/A"}</div>
       ${isOwner ? '<button class="delete-product-btn" onclick="event.stopPropagation(); deleteProduct(' + product.id + ', this)"><i class="fas fa-trash-alt"></i> Delete</button>' : ""}
     `;
     marketplace.appendChild(card);
   });
+}
+
+function renderPagination(result) {
+  const container = document.getElementById("pagination");
+  if (!container) return;
+  const { page, totalPages } = result;
+  if (!totalPages || totalPages <= 1) {
+    container.innerHTML = "";
+    return;
+  }
+
+  let html = "";
+  html += `<button class="page-btn" ${page <= 1 ? "disabled" : ""} onclick="goToPage(${page - 1})"><i class="fas fa-chevron-left"></i></button>`;
+
+  const start = Math.max(1, page - 2);
+  const end = Math.min(totalPages, page + 2);
+
+  if (start > 1) {
+    html += `<button class="page-btn" onclick="goToPage(1)">1</button>`;
+    if (start > 2) html += `<span class="page-ellipsis">...</span>`;
+  }
+
+  for (let i = start; i <= end; i++) {
+    html += `<button class="page-btn ${i === page ? "active" : ""}" onclick="goToPage(${i})">${i}</button>`;
+  }
+
+  if (end < totalPages) {
+    if (end < totalPages - 1) html += `<span class="page-ellipsis">...</span>`;
+    html += `<button class="page-btn" onclick="goToPage(${totalPages})">${totalPages}</button>`;
+  }
+
+  html += `<button class="page-btn" ${page >= totalPages ? "disabled" : ""} onclick="goToPage(${page + 1})"><i class="fas fa-chevron-right"></i></button>`;
+  container.innerHTML = html;
+}
+
+function goToPage(page) {
+  currentPage = page;
+  fetchProducts(currentCategory, currentPage);
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function openModal(product) {
@@ -90,7 +147,7 @@ async function deleteProduct(productId, btnEl) {
     if (data.success) {
       showToast("Product deleted successfully.");
       closeModal();
-      fetchProducts();
+      fetchProducts(currentCategory, currentPage);
     } else {
       showToast(data.error || "Failed to delete product.", "error");
     }
@@ -125,15 +182,33 @@ function showToast(message, type = "success") {
   }, 3000);
 }
 
-// Search filter
+// Category pills + search + init
 document.addEventListener("DOMContentLoaded", () => {
-  fetchProducts();
+  const filtersEl = document.getElementById("categoryFilters");
+  if (filtersEl) {
+    filtersEl.addEventListener("click", (e) => {
+      const pill = e.target.closest(".category-pill");
+      if (!pill) return;
+      filtersEl.querySelectorAll(".category-pill").forEach((p) => p.classList.remove("active"));
+      pill.classList.add("active");
+      currentCategory = pill.dataset.category || "";
+      currentPage = 1;
+      fetchProducts(currentCategory, currentPage);
+    });
+  }
+
   const searchInput = document.getElementById("searchInput");
   if (searchInput) {
     searchInput.addEventListener("input", (e) => {
       const query = e.target.value.toLowerCase().trim();
+      if (!query) {
+        renderProducts(allProducts);
+        return;
+      }
       const filtered = allProducts.filter((p) => p.product_name.toLowerCase().includes(query));
       renderProducts(filtered);
     });
   }
+
+  fetchProducts(currentCategory, currentPage);
 });

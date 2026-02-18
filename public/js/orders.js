@@ -1,6 +1,7 @@
 // ─── Orders Page JS ─────────────────────────────────────────────
 
-
+let currentOrderPage = 1;
+const ORDER_LIMIT = 15;
 
 function showToast(message, type = "success") {
     const existing = document.querySelector(".toast");
@@ -19,14 +20,25 @@ function showToast(message, type = "success") {
     setTimeout(() => toast.remove(), 3000);
 }
 
+function escapeHtml(str) {
+    if (!str) return "";
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+}
+
 // ─── Load Orders ────────────────────────────────────────────────
-async function loadOrders() {
+async function loadOrders(page) {
     const listEl = document.getElementById("ordersList");
     const emptyEl = document.getElementById("emptyOrders");
     const role = Auth.getRole();
 
     try {
-        const res = await Auth.authFetch("/api/orders");
+        const params = new URLSearchParams();
+        params.set("page", page || 1);
+        params.set("limit", ORDER_LIMIT);
+
+        const res = await Auth.authFetch("/api/orders?" + params.toString());
         const result = await res.json();
 
         if (!result.success) {
@@ -36,9 +48,10 @@ async function loadOrders() {
 
         const orders = result.data || [];
 
-        if (orders.length === 0) {
+        if (orders.length === 0 && page === 1) {
             emptyEl.style.display = "block";
             listEl.style.display = "none";
+            renderOrderPagination({ page: 1, totalPages: 0 });
             if (role === "farmer") {
                 document.getElementById("emptyMessage").textContent = "No orders received yet.";
             }
@@ -71,19 +84,25 @@ async function loadOrders() {
               </button>`;
                 }
 
+                // Delivery address display
+                const addressHtml = order.delivery_address
+                    ? `<p class="order-address"><i class="fas fa-map-marker-alt"></i> ${escapeHtml(order.delivery_address)}</p>`
+                    : "";
+
                 return `
         <div class="order-card ${order.status === "cancelled" ? "order-cancelled" : ""}">
           <img class="order-image"
                src="${order.image || ""}"
-               alt="${order.product_name}"
+               alt="${escapeHtml(order.product_name)}"
                onerror="this.style.display='none'" />
           <div class="order-details">
-            <h3>${order.product_name}</h3>
+            <h3>${escapeHtml(order.product_name)}</h3>
             <p class="order-meta">
-              ${role === "customer" ? "Seller" : "Buyer"}: ${order.username || "N/A"} &middot;
+              ${role === "customer" ? "Seller" : "Buyer"}: ${escapeHtml(order.username) || "N/A"} &middot;
               Qty: ${order.quantity}
             </p>
             <p class="order-total">₹${parseFloat(order.total_price).toFixed(2)}</p>
+            ${addressHtml}
           </div>
           <div class="order-status-section">
             <span class="status-badge ${statusClass}">${order.status}</span>
@@ -94,10 +113,52 @@ async function loadOrders() {
       `;
             })
             .join("");
+
+        renderOrderPagination(result);
     } catch (err) {
         console.error("Error loading orders:", err);
         showToast("Failed to load orders", "error");
     }
+}
+
+// ─── Order Pagination ──────────────────────────────────────────
+function renderOrderPagination(result) {
+    const container = document.getElementById("ordersPagination");
+    if (!container) return;
+    const { page, totalPages } = result;
+    if (!totalPages || totalPages <= 1) {
+        container.innerHTML = "";
+        return;
+    }
+
+    let html = "";
+    html += `<button class="page-btn" ${page <= 1 ? "disabled" : ""} onclick="goToOrderPage(${page - 1})"><i class="fas fa-chevron-left"></i></button>`;
+
+    const start = Math.max(1, page - 2);
+    const end = Math.min(totalPages, page + 2);
+
+    if (start > 1) {
+        html += `<button class="page-btn" onclick="goToOrderPage(1)">1</button>`;
+        if (start > 2) html += `<span class="page-ellipsis">...</span>`;
+    }
+
+    for (let i = start; i <= end; i++) {
+        html += `<button class="page-btn ${i === page ? "active" : ""}" onclick="goToOrderPage(${i})">${i}</button>`;
+    }
+
+    if (end < totalPages) {
+        if (end < totalPages - 1) html += `<span class="page-ellipsis">...</span>`;
+        html += `<button class="page-btn" onclick="goToOrderPage(${totalPages})">${totalPages}</button>`;
+    }
+
+    html += `<button class="page-btn" ${page >= totalPages ? "disabled" : ""} onclick="goToOrderPage(${page + 1})"><i class="fas fa-chevron-right"></i></button>`;
+    container.innerHTML = html;
+}
+
+function goToOrderPage(page) {
+    currentOrderPage = page;
+    loadOrders(currentOrderPage);
+    window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 // ─── Update Order Status (Farmer) ───────────────────────────────
@@ -112,11 +173,11 @@ async function updateStatus(orderId, newStatus) {
             showToast(`Order updated to "${newStatus}"`);
         } else {
             showToast(data.error || "Failed to update", "error");
-            await loadOrders(); // Revert UI
+            await loadOrders(currentOrderPage);
         }
     } catch (err) {
         showToast("Failed to update order", "error");
-        await loadOrders();
+        await loadOrders(currentOrderPage);
     }
 }
 
@@ -134,7 +195,7 @@ async function cancelOrder(orderId, btnEl) {
         const data = await res.json();
         if (data.success) {
             showToast("Order cancelled successfully");
-            await loadOrders();
+            await loadOrders(currentOrderPage);
         } else {
             showToast(data.error || "Failed to cancel order", "error");
             btnEl.disabled = false;
@@ -149,7 +210,5 @@ async function cancelOrder(orderId, btnEl) {
 
 // ─── Init ───────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
-    loadOrders();
+    loadOrders(currentOrderPage);
 });
-
-// Loader

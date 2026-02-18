@@ -175,6 +175,7 @@ export const checkout = async (req, res) => {
 
     try {
         const customerId = req.user.userId;
+        const { delivery_address } = req.body || {};
 
         await client.query("BEGIN");
 
@@ -208,9 +209,9 @@ export const checkout = async (req, res) => {
 
             // Create order
             const orderResult = await client.query(
-                `INSERT INTO orders (customer_id, product_id, quantity, total_price, status)
-         VALUES ($1, $2, $3, $4, 'pending') RETURNING id`,
-                [customerId, item.product_id, item.quantity, totalPrice]
+                `INSERT INTO orders (customer_id, product_id, quantity, total_price, status, delivery_address)
+         VALUES ($1, $2, $3, $4, 'pending', $5) RETURNING id`,
+                [customerId, item.product_id, item.quantity, totalPrice, delivery_address || null]
             );
 
             orderIds.push(orderResult.rows[0].id);

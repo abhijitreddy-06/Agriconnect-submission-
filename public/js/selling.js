@@ -51,6 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
     formData.append("quality", form.querySelector("#productQuality")?.value || form.querySelector('[name="productQuality"]')?.value || "");
     formData.append("description", form.querySelector("#productDescription")?.value || form.querySelector('[name="productDescription"]')?.value || "");
     formData.append("quantity_unit", document.getElementById("quantityUnit")?.value || "kilogram");
+    formData.append("category", form.querySelector("#productCategory")?.value || "");
 
     const imageInput = form.querySelector("#productImage") || form.querySelector('[name="productImage"]');
     if (imageInput && imageInput.files[0]) {

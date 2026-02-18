@@ -242,6 +242,46 @@
   padding-top: 1rem;
 }
 
+/* ── Delivery Address ── */
+.delivery-address-group {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.delivery-address-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 0.5rem;
+}
+
+.delivery-address-group label i {
+  color: var(--color-accent);
+  margin-right: 0.3rem;
+}
+
+.delivery-address-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 0.95rem;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  resize: vertical;
+  background: var(--color-surface-solid);
+  color: var(--color-text);
+  box-sizing: border-box;
+  transition: border-color var(--transition);
+}
+
+.delivery-address-group textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(93, 163, 153, 0.1);
+}
+
 /* ── Buttons ── */
 .btn {
   display: inline-flex;

@@ -17,9 +17,10 @@ router.get(
     cacheMiddleware(
         (req) => {
             const farmerId = req.query.farmer_id || "all";
+            const category = req.query.category || "all";
             const page = req.query.page || "1";
             const limit = req.query.limit || "20";
-            return `products:${farmerId}:page:${page}:limit:${limit}`;
+            return `products:${farmerId}:cat:${category}:page:${page}:limit:${limit}`;
         },
         300 // 5 minutes
     ),
