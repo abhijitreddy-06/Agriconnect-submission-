@@ -33,7 +33,7 @@ app.use(
         scriptSrcAttr: ["'unsafe-inline'"],
         styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://fonts.googleapis.com"],
         fontSrc: ["'self'", "https://cdnjs.cloudflare.com", "https://fonts.gstatic.com"],
-        imgSrc: ["'self'", "data:", "blob:", "https://*.supabase.co"],
+        imgSrc: ["'self'", "data:", "blob:", "https://*.supabase.co", "https://images.unsplash.com", "https://source.unsplash.com"],
         connectSrc: ["'self'"],
       },
     },

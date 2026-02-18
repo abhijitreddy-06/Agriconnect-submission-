@@ -4,15 +4,12 @@
  * Usage:  node scripts/seed-products.js
  *
  * - Creates a demo farmer account (phone: 9999999999, password: demo1234)
- * - Downloads placeholder images from picsum.photos
- * - Uploads them to Supabase Storage
+ * - Uses deterministic Unsplash image URLs per product
  * - Inserts 50 products × 8 categories = 400 products
  */
 
 import "dotenv/config";
 import pg from "pg";
-import { createClient } from "@supabase/supabase-js";
-import axios from "axios";
 import bcrypt from "bcrypt";
 
 const { Pool } = pg;
@@ -23,15 +20,242 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false },
 });
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
-const BUCKET = process.env.SUPABASE_BUCKET || "uploads";
-
 const DEMO_FARMER = {
   username: "DemoFarmer",
   phone: "9999999999",
   password: "demo1234",
   role: "farmer",
 };
+
+// ─── Deterministic Image Mapping ────────────────────────────────
+
+const PRODUCT_IMAGE_MAP = {
+  // ── Vegetables ──
+  tomato:      "https://images.unsplash.com/photo-1546094096-0df4bcaaa337?w=400&h=300&fit=crop",
+  potato:      "https://images.unsplash.com/photo-1518977676601-b53f82ber630?w=400&h=300&fit=crop",
+  onion:       "https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=400&h=300&fit=crop",
+  carrot:      "https://images.unsplash.com/photo-1447175008436-054170c2e979?w=400&h=300&fit=crop",
+  broccoli:    "https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=400&h=300&fit=crop",
+  cauliflower: "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=400&h=300&fit=crop",
+  spinach:     "https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=400&h=300&fit=crop",
+  cabbage:     "https://images.unsplash.com/photo-1594282486552-05b4d80fbb9f?w=400&h=300&fit=crop",
+  bell:        "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=400&h=300&fit=crop",
+  cucumber:    "https://images.unsplash.com/photo-1449300079323-02e209d9d3a6?w=400&h=300&fit=crop",
+  lettuce:     "https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1?w=400&h=300&fit=crop",
+  eggplant:    "https://images.unsplash.com/photo-1615484477778-ca3b77940c25?w=400&h=300&fit=crop",
+  zucchini:    "https://images.unsplash.com/photo-1563252722-6434563a985d?w=400&h=300&fit=crop",
+  peas:        "https://images.unsplash.com/photo-1587735243615-c03f25aaff15?w=400&h=300&fit=crop",
+  corn:        "https://images.unsplash.com/photo-1551754655-cd27e38d2076?w=400&h=300&fit=crop",
+  radish:      "https://images.unsplash.com/photo-1585183835949-b3076be8e1be?w=400&h=300&fit=crop",
+  beetroot:    "https://images.unsplash.com/photo-1593105544559-ecb03bf76f82?w=400&h=300&fit=crop",
+  celery:      "https://images.unsplash.com/photo-1580391564590-aeca65c5e2d3?w=400&h=300&fit=crop",
+  asparagus:   "https://images.unsplash.com/photo-1515471209610-dae1c92d8777?w=400&h=300&fit=crop",
+  kale:        "https://images.unsplash.com/photo-1524179091875-bf99a9a6af57?w=400&h=300&fit=crop",
+  brussels:    "https://images.unsplash.com/photo-1438118907704-7718ee9a191a?w=400&h=300&fit=crop",
+  sweet:       "https://images.unsplash.com/photo-1596097635121-14b63a7a2e19?w=400&h=300&fit=crop",
+  turnip:      "https://images.unsplash.com/photo-1594282486756-13c5357c0852?w=400&h=300&fit=crop",
+  mushroom:    "https://images.unsplash.com/photo-1504545102780-26774c1bb073?w=400&h=300&fit=crop",
+  garlic:      "https://images.unsplash.com/photo-1540148426945-6cf22a6b2851?w=400&h=300&fit=crop",
+  ginger:      "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=400&h=300&fit=crop",
+  chilli:      "https://images.unsplash.com/photo-1588252303782-cb80119abd6d?w=400&h=300&fit=crop",
+  capsicum:    "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=400&h=300&fit=crop",
+  bitter:      "https://images.unsplash.com/photo-1604240885249-eda2039cef50?w=400&h=300&fit=crop",
+  okra:        "https://images.unsplash.com/photo-1604977042946-1eecc30f269e?w=400&h=300&fit=crop",
+  coriander:   "https://images.unsplash.com/photo-1526346698789-22fd84314424?w=400&h=300&fit=crop",
+  mint:        "https://images.unsplash.com/photo-1628556270448-4d4e4148e1b1?w=400&h=300&fit=crop",
+  curry:       "https://images.unsplash.com/photo-1606471191009-63994c53433b?w=400&h=300&fit=crop",
+  fenugreek:   "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=400&h=300&fit=crop",
+  pumpkin:     "https://images.unsplash.com/photo-1509622905150-fa66d3906e09?w=400&h=300&fit=crop",
+  spring:      "https://images.unsplash.com/photo-1591261731048-0f28e0c0921b?w=400&h=300&fit=crop",
+  drumstick:   "https://images.unsplash.com/photo-1573246123716-6b1782bfc499?w=400&h=300&fit=crop",
+
+  // ── Fruits ──
+  apple:       "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400&h=300&fit=crop",
+  banana:      "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=400&h=300&fit=crop",
+  mango:       "https://images.unsplash.com/photo-1553279768-865429fa0078?w=400&h=300&fit=crop",
+  grape:       "https://images.unsplash.com/photo-1537640538966-79f369143f8f?w=400&h=300&fit=crop",
+  orange:      "https://images.unsplash.com/photo-1547514701-42782101795e?w=400&h=300&fit=crop",
+  watermelon:  "https://images.unsplash.com/photo-1563114773-84221bd62daa?w=400&h=300&fit=crop",
+  papaya:      "https://images.unsplash.com/photo-1526318472351-c75fcf070305?w=400&h=300&fit=crop",
+  pineapple:   "https://images.unsplash.com/photo-1550258987-190a2d41a8ba?w=400&h=300&fit=crop",
+  guava:       "https://images.unsplash.com/photo-1536511132770-e5058c7e8c46?w=400&h=300&fit=crop",
+  pomegranate: "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=400&h=300&fit=crop",
+  litchi:      "https://images.unsplash.com/photo-1577234286642-fc512a5f8f11?w=400&h=300&fit=crop",
+  strawberry:  "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=400&h=300&fit=crop",
+  blueberry:   "https://images.unsplash.com/photo-1498557850523-fd3d118b962e?w=400&h=300&fit=crop",
+  kiwi:        "https://images.unsplash.com/photo-1585059895524-72359e06133a?w=400&h=300&fit=crop",
+  dragon:      "https://images.unsplash.com/photo-1527325678964-54921661f888?w=400&h=300&fit=crop",
+  avocado:     "https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=400&h=300&fit=crop",
+  coconut:     "https://images.unsplash.com/photo-1550005809-91ad75fb315f?w=400&h=300&fit=crop",
+  jackfruit:   "https://images.unsplash.com/photo-1599940824399-b87987ceb72a?w=400&h=300&fit=crop",
+  fig:         "https://images.unsplash.com/photo-1601379327928-bedfaf698774?w=400&h=300&fit=crop",
+  passion:     "https://images.unsplash.com/photo-1604495772376-9657f0035e5b?w=400&h=300&fit=crop",
+  custard:     "https://images.unsplash.com/photo-1568909344668-6f14a07b56a0?w=400&h=300&fit=crop",
+  pear:        "https://images.unsplash.com/photo-1514756331096-242fdeb70d4a?w=400&h=300&fit=crop",
+  plum:        "https://images.unsplash.com/photo-1502741338009-cac2772e18bc?w=400&h=300&fit=crop",
+  peach:       "https://images.unsplash.com/photo-1629828874514-67f2631bdaf0?w=400&h=300&fit=crop",
+  apricot:     "https://images.unsplash.com/photo-1592681814168-6df0fa93161b?w=400&h=300&fit=crop",
+  cherry:      "https://images.unsplash.com/photo-1528821128474-27f963b062bf?w=400&h=300&fit=crop",
+  raspberry:   "https://images.unsplash.com/photo-1577069861033-55d04cec4ef5?w=400&h=300&fit=crop",
+  blackberry:  "https://images.unsplash.com/photo-1615484477778-ca3b77940c25?w=400&h=300&fit=crop",
+  mulberry:    "https://images.unsplash.com/photo-1568909344668-6f14a07b56a0?w=400&h=300&fit=crop",
+  tamarind:    "https://images.unsplash.com/photo-1604240885249-eda2039cef50?w=400&h=300&fit=crop",
+  sugarcane:   "https://images.unsplash.com/photo-1597714026720-8f74c62310ba?w=400&h=300&fit=crop",
+  date:        "https://images.unsplash.com/photo-1612196808214-b8e1d6145a8c?w=400&h=300&fit=crop",
+  lemon:       "https://images.unsplash.com/photo-1590502593747-42a996133562?w=400&h=300&fit=crop",
+  grapefruit:  "https://images.unsplash.com/photo-1577234286642-fc512a5f8f11?w=400&h=300&fit=crop",
+  tangerine:   "https://images.unsplash.com/photo-1547514701-42782101795e?w=400&h=300&fit=crop",
+  persimmon:   "https://images.unsplash.com/photo-1604240885249-eda2039cef50?w=400&h=300&fit=crop",
+  melon:       "https://images.unsplash.com/photo-1571575173700-afb9492e6a50?w=400&h=300&fit=crop",
+  honeydew:    "https://images.unsplash.com/photo-1571575173700-afb9492e6a50?w=400&h=300&fit=crop",
+
+  // ── Grains & Cereals ──
+  basmati:     "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=300&fit=crop",
+  rice:        "https://images.unsplash.com/photo-1604908177522-0408e6e5f0b5?w=400&h=300&fit=crop",
+  wheat:       "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=300&fit=crop",
+  jowar:       "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=300&fit=crop",
+  bajra:       "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=300&fit=crop",
+  ragi:        "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=300&fit=crop",
+  maize:       "https://images.unsplash.com/photo-1551754655-cd27e38d2076?w=400&h=300&fit=crop",
+  barley:      "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=300&fit=crop",
+  oat:         "https://images.unsplash.com/photo-1614961233913-a5113e3b3c4b?w=400&h=300&fit=crop",
+  quinoa:      "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=300&fit=crop",
+  amaranth:    "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=300&fit=crop",
+  buckwheat:   "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=300&fit=crop",
+  foxtail:     "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=300&fit=crop",
+  semolina:    "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=300&fit=crop",
+  flour:       "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=300&fit=crop",
+  vermicelli:  "https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?w=400&h=300&fit=crop",
+  sago:        "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=300&fit=crop",
+  couscous:    "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=300&fit=crop",
+  polenta:     "https://images.unsplash.com/photo-1551754655-cd27e38d2076?w=400&h=300&fit=crop",
+  farro:       "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=300&fit=crop",
+
+  // ── Pulses & Legumes ──
+  toor:        "https://images.unsplash.com/photo-1613758947307-f3825f5ad859?w=400&h=300&fit=crop",
+  moong:       "https://images.unsplash.com/photo-1613758947307-f3825f5ad859?w=400&h=300&fit=crop",
+  masoor:      "https://images.unsplash.com/photo-1613758947307-f3825f5ad859?w=400&h=300&fit=crop",
+  chana:       "https://images.unsplash.com/photo-1515543904379-3d757abe528a?w=400&h=300&fit=crop",
+  urad:        "https://images.unsplash.com/photo-1613758947307-f3825f5ad859?w=400&h=300&fit=crop",
+  rajma:       "https://images.unsplash.com/photo-1551462147-ff29053bfc14?w=400&h=300&fit=crop",
+  kabuli:      "https://images.unsplash.com/photo-1515543904379-3d757abe528a?w=400&h=300&fit=crop",
+  lentil:      "https://images.unsplash.com/photo-1613758947307-f3825f5ad859?w=400&h=300&fit=crop",
+  bean:        "https://images.unsplash.com/photo-1551462147-ff29053bfc14?w=400&h=300&fit=crop",
+  soybean:     "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=300&fit=crop",
+  soy:         "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=300&fit=crop",
+  papad:       "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=400&h=300&fit=crop",
+  besan:       "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=300&fit=crop",
+
+  // ── Spices ──
+  turmeric:    "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=400&h=300&fit=crop",
+  chilli:      "https://images.unsplash.com/photo-1588252303782-cb80119abd6d?w=400&h=300&fit=crop",
+  cumin:       "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&h=300&fit=crop",
+  pepper:      "https://images.unsplash.com/photo-1599909631715-bc98a80ae53b?w=400&h=300&fit=crop",
+  cardamom:    "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&h=300&fit=crop",
+  cinnamon:    "https://images.unsplash.com/photo-1587049352851-8d4e89133924?w=400&h=300&fit=crop",
+  clove:       "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&h=300&fit=crop",
+  bay:         "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&h=300&fit=crop",
+  mustard:     "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&h=300&fit=crop",
+  fennel:      "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&h=300&fit=crop",
+  saffron:     "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=400&h=300&fit=crop",
+  nutmeg:      "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&h=300&fit=crop",
+  masala:       "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&h=300&fit=crop",
+  garam:       "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&h=300&fit=crop",
+  sambar:      "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&h=300&fit=crop",
+  salt:        "https://images.unsplash.com/photo-1518110925495-5fe2fda0442c?w=400&h=300&fit=crop",
+  kokum:       "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&h=300&fit=crop",
+  kasuri:      "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&h=300&fit=crop",
+  chai:        "https://images.unsplash.com/photo-1561336313-0bd5e0b27ec8?w=400&h=300&fit=crop",
+  pickle:      "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&h=300&fit=crop",
+
+  // ── Dairy ──
+  milk:        "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=300&fit=crop",
+  farm:        "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=300&fit=crop",
+  buffalo:     "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=300&fit=crop",
+  curd:        "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&h=300&fit=crop",
+  yogurt:      "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&h=300&fit=crop",
+  paneer:      "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=400&h=300&fit=crop",
+  cheese:      "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=400&h=300&fit=crop",
+  butter:      "https://images.unsplash.com/photo-1588165171080-c89acfa5ee83?w=400&h=300&fit=crop",
+  ghee:        "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=400&h=300&fit=crop",
+  cream:       "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&h=300&fit=crop",
+  lassi:       "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&h=300&fit=crop",
+  kefir:       "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&h=300&fit=crop",
+  condensed:   "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=300&fit=crop",
+  khoya:       "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=400&h=300&fit=crop",
+  shrikhand:   "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&h=300&fit=crop",
+  rabri:       "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=400&h=300&fit=crop",
+  basundi:     "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=400&h=300&fit=crop",
+  flavored:    "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=300&fit=crop",
+  badam:       "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=300&fit=crop",
+  thandai:     "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=300&fit=crop",
+
+  // ── Nuts & Seeds ──
+  almond:      "https://images.unsplash.com/photo-1508061253366-f7da158b6d46?w=400&h=300&fit=crop",
+  cashew:      "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=300&fit=crop",
+  walnut:      "https://images.unsplash.com/photo-1563412885-cbe4dbcdcf0f?w=400&h=300&fit=crop",
+  pistachio:   "https://images.unsplash.com/photo-1525e648-5d1e-48e8-a9b4-0e8d3f29f17e?w=400&h=300&fit=crop",
+  peanut:      "https://images.unsplash.com/photo-1567206563064-6f60f40a2b57?w=400&h=300&fit=crop",
+  brazil:      "https://images.unsplash.com/photo-1508061253366-f7da158b6d46?w=400&h=300&fit=crop",
+  macadamia:   "https://images.unsplash.com/photo-1508061253366-f7da158b6d46?w=400&h=300&fit=crop",
+  hazelnut:    "https://images.unsplash.com/photo-1508061253366-f7da158b6d46?w=400&h=300&fit=crop",
+  pecan:       "https://images.unsplash.com/photo-1508061253366-f7da158b6d46?w=400&h=300&fit=crop",
+  chestnut:    "https://images.unsplash.com/photo-1508061253366-f7da158b6d46?w=400&h=300&fit=crop",
+  chia:        "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=300&fit=crop",
+  flax:        "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=300&fit=crop",
+  sunflower:   "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=300&fit=crop",
+  hemp:        "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=300&fit=crop",
+  sesame:      "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=300&fit=crop",
+  mixed:       "https://images.unsplash.com/photo-1508061253366-f7da158b6d46?w=400&h=300&fit=crop",
+  trail:       "https://images.unsplash.com/photo-1508061253366-f7da158b6d46?w=400&h=300&fit=crop",
+  fox:         "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=300&fit=crop",
+  makhana:     "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=300&fit=crop",
+  raisin:      "https://images.unsplash.com/photo-1596097635121-14b63a7a2e19?w=400&h=300&fit=crop",
+  cranberry:   "https://images.unsplash.com/photo-1615484477778-ca3b77940c25?w=400&h=300&fit=crop",
+  lotus:       "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=300&fit=crop",
+
+  // ── Organic ──
+  organic:     "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=300&fit=crop",
+  honey:       "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400&h=300&fit=crop",
+  jaggery:     "https://images.unsplash.com/photo-1604240885249-eda2039cef50?w=400&h=300&fit=crop",
+  tea:         "https://images.unsplash.com/photo-1561336313-0bd5e0b27ec8?w=400&h=300&fit=crop",
+  coffee:      "https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=400&h=300&fit=crop",
+  sugar:       "https://images.unsplash.com/photo-1581006852262-e4307cf47072?w=400&h=300&fit=crop",
+  egg:         "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=400&h=300&fit=crop",
+  oil:         "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&h=300&fit=crop",
+  moringa:     "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=300&fit=crop",
+  spirulina:   "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=300&fit=crop",
+  ashwagandha: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=300&fit=crop",
+  neem:        "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=300&fit=crop",
+  aloe:        "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=300&fit=crop",
+  tulsi:       "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=300&fit=crop",
+  vinegar:     "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=300&fit=crop",
+  granola:     "https://images.unsplash.com/photo-1614961233913-a5113e3b3c4b?w=400&h=300&fit=crop",
+  muesli:      "https://images.unsplash.com/photo-1614961233913-a5113e3b3c4b?w=400&h=300&fit=crop",
+};
+
+/**
+ * Get a deterministic, relevant image URL for a product.
+ * Checks the mapping by first word, falls back to Unsplash search.
+ */
+function getProductImageUrl(productName) {
+  const cleaned = productName
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]/g, "")
+    .trim();
+
+  // Try each word in the name against the map (first match wins)
+  const words = cleaned.split(/\s+/);
+  for (const word of words) {
+    if (PRODUCT_IMAGE_MAP[word]) {
+      return PRODUCT_IMAGE_MAP[word];
+    }
+  }
+
+  // Fallback: Unsplash search with cleaned name as query
+  const fallbackQuery = cleaned.replace(/\s+/g, ",");
+  return `https://source.unsplash.com/400x300/?${encodeURIComponent(fallbackQuery)}`;
+}
 
 // ─── Product Data (50 per category) ─────────────────────────────
 const CATEGORIES = {
@@ -510,30 +734,6 @@ function randomFrom(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-async function downloadImage(seed) {
-  const url = `https://picsum.photos/seed/${encodeURIComponent(seed)}/400/300`;
-  const response = await axios.get(url, { responseType: "arraybuffer", timeout: 15000 });
-  return Buffer.from(response.data);
-}
-
-async function uploadImage(buffer, farmerId, productName) {
-  const safeName = productName.replace(/[^a-zA-Z0-9]/g, "_").toLowerCase();
-  const filename = `products/${farmerId}/demo_${safeName}_${Date.now()}.jpg`;
-
-  const { error } = await supabase.storage.from(BUCKET).upload(filename, buffer, {
-    contentType: "image/jpeg",
-    upsert: true,
-  });
-
-  if (error) {
-    console.error(`  Upload error for ${productName}:`, error.message);
-    return "";
-  }
-
-  const { data } = supabase.storage.from(BUCKET).getPublicUrl(filename);
-  return data.publicUrl;
-}
-
 // ─── Main Seed Function ─────────────────────────────────────────
 
 async function seed() {
@@ -569,38 +769,12 @@ async function seed() {
     const cat = CATEGORIES[categoryName];
     console.log(`\n2. Seeding "${categoryName}" (${cat.items.length} products)...`);
 
-    // Pre-download a pool of 10 images for this category and cycle through them
-    console.log(`   Downloading images for "${categoryName}"...`);
-    const imagePool = [];
-    for (let i = 0; i < 10; i++) {
-      try {
-        const seed = `${categoryName}_${i}_agriconnect`;
-        const buffer = await downloadImage(seed);
-        imagePool.push(buffer);
-      } catch (err) {
-        console.error(`   Failed to download image ${i}: ${err.message}`);
-        imagePool.push(null);
-      }
-    }
-    console.log(`   Downloaded ${imagePool.filter(Boolean).length}/10 images`);
-
-    // Insert products
     for (let i = 0; i < cat.items.length; i++) {
       const item = cat.items[i];
       const price = randomBetween(cat.priceRange[0], cat.priceRange[1]);
       const quantity = randomBetween(5, 500);
       const quality = randomFrom(cat.qualities);
-
-      // Upload image (cycle through the 10 downloaded)
-      let imageUrl = "";
-      const imgBuffer = imagePool[i % imagePool.length];
-      if (imgBuffer) {
-        try {
-          imageUrl = await uploadImage(imgBuffer, farmerId, `${categoryName}_${item.name}`);
-        } catch (err) {
-          console.error(`   Image upload failed for "${item.name}": ${err.message}`);
-        }
-      }
+      const imageUrl = getProductImageUrl(item.name);
 
       try {
         await pool.query(
