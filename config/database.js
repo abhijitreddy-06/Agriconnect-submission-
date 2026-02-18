@@ -20,18 +20,18 @@ try {
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  max: parseInt(process.env.DB_POOL_MAX) || 3,
+  max: 3,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,
   keepAlive: true,
   keepAliveInitialDelayMillis: 10000,
-  statement_timeout: parseInt(process.env.DB_STATEMENT_TIMEOUT) || 30000,
   application_name: "AgriConnect",
 
-  ssl: process.env.NODE_ENV === "production"
-    ? { rejectUnauthorized: false }
-    : false,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
+
 
 
 // --- Pool Event Handlers ---
