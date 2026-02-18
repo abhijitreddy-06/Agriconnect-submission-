@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           `;
         } else {
           // Fallback: render as markdown (old records)
-          const raw = data.details || data.gemini_details || "No analysis available";
+          const raw = data.details || data.prediction_result || "No analysis available";
           let rendered = "";
           if (typeof marked !== "undefined" && typeof DOMPurify !== "undefined") {
             rendered = DOMPurify.sanitize(marked.parse(raw));

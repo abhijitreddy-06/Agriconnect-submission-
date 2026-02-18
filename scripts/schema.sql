@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS predictions (
     language VARCHAR(10) DEFAULT 'en',
     status VARCHAR(20) DEFAULT 'analyzing'
         CHECK (status IN ('analyzing', 'complete', 'failed')),
-    gemini_details TEXT,
+    prediction_result TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

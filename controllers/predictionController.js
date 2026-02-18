@@ -40,9 +40,9 @@ export const analyzeImage = async (req, res) => {
       raw: hfResult,
     });
 
-    // Save analysis result to DB (reusing gemini_details column to avoid migration)
+    // Save analysis result to DB
     await pool.query(
-      "UPDATE predictions SET gemini_details = $1, status = $2 WHERE id = $3",
+      "UPDATE predictions SET prediction_result = $1, status = $2 WHERE id = $3",
       [diagnosisResult, "complete", predictionId]
     );
 
@@ -118,17 +118,17 @@ export const getPrediction = async (req, res) => {
     const cacheKey = `prediction:${predictionId}`;
     const cached = await cacheGet(cacheKey);
     if (cached) {
-      let diagnosis = cached.gemini_details;
+      let diagnosis = cached.prediction_result;
       let confidence = null;
       try {
-        const parsed = JSON.parse(cached.gemini_details);
-        diagnosis = parsed.disease || cached.gemini_details;
+        const parsed = JSON.parse(cached.prediction_result);
+        diagnosis = parsed.disease || cached.prediction_result;
         confidence = parsed.confidence || null;
       } catch { /* stored as plain text from old records */ }
 
       return res.json({
         success: true,
-        data: { ...cached, diagnosis, confidence, details: cached.gemini_details },
+        data: { ...cached, diagnosis, confidence, details: cached.prediction_result },
       });
     }
 
@@ -143,17 +143,17 @@ export const getPrediction = async (req, res) => {
         await cacheSet(cacheKey, data, 1800);
       }
 
-      let diagnosis = data.gemini_details;
+      let diagnosis = data.prediction_result;
       let confidence = null;
       try {
-        const parsed = JSON.parse(data.gemini_details);
-        diagnosis = parsed.disease || data.gemini_details;
+        const parsed = JSON.parse(data.prediction_result);
+        diagnosis = parsed.disease || data.prediction_result;
         confidence = parsed.confidence || null;
       } catch { /* stored as plain text from old records */ }
 
       res.json({
         success: true,
-        data: { ...data, diagnosis, confidence, details: data.gemini_details },
+        data: { ...data, diagnosis, confidence, details: data.prediction_result },
       });
     } else {
       res.status(404).json({ success: false, error: "Prediction not found." });
