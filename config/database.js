@@ -120,6 +120,25 @@ export const testConnection = async () => {
       console.warn("[DB] Auto-migration check failed:", migErr.message);
     }
 
+    // Auto-migrate: add unique constraint on cart_items(customer_id, product_id)
+    try {
+      await pool.query(`
+        DO $$ BEGIN
+          IF NOT EXISTS (
+            SELECT 1 FROM pg_constraint
+            WHERE conname = 'cart_items_customer_product_unique'
+          ) THEN
+            ALTER TABLE cart_items
+              ADD CONSTRAINT cart_items_customer_product_unique
+              UNIQUE (customer_id, product_id);
+            RAISE NOTICE 'Added unique constraint on cart_items(customer_id, product_id)';
+          END IF;
+        END $$;
+      `);
+    } catch (migErr) {
+      console.warn("[DB] Cart constraint migration failed:", migErr.message);
+    }
+
     return true;
   } catch (err) {
     console.error("[DB] Failed to connect to Supabase PostgreSQL!");

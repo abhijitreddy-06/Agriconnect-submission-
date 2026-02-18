@@ -202,6 +202,7 @@ const Auth = (() => {
         // Farmer-only pages
         "/dashboard/farmer": "farmer",
         "/sell": "farmer",
+        "/my-products": "farmer",
         "/marketplace/farmer": "farmer",
         "/plant-health": "farmer",
         "/diagnosis": "farmer",

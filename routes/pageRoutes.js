@@ -17,6 +17,7 @@ const pages = [
   ["/dashboard/farmer", "homepage.html"],
   ["/dashboard/customer", "homepage_cus.html"],
   ["/sell", "selling.html"],
+  ["/my-products", "my-products.html"],
   ["/marketplace/farmer", "farmer-market.html"],
   ["/marketplace/customer", "farmer-market_cus.html"],
   ["/cart", "cart.html"],

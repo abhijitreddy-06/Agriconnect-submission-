@@ -20,6 +20,7 @@
         { href: '/plant-health', label: 'Plant Health' },
         { href: '/marketplace/farmer', label: 'Market' },
         { href: '/sell', label: 'Sell' },
+        { href: '/my-products', label: 'My Products' },
         { href: '/orders', label: 'Orders' },
     ];
 
@@ -65,6 +66,7 @@
             </button>
             <div class="profile-menu" id="profileMenu">
               <a href="/profile"><i class="fas fa-user"></i> My Profile</a>
+              ${role === 'farmer' ? '<a href="/my-products"><i class="fas fa-box-open"></i> My Products</a>' : ''}
               ${role === 'customer' ? '<a href="/cart"><i class="fas fa-shopping-cart"></i> My Cart</a>' : ''}
               <a href="/orders"><i class="fas fa-box"></i> My Orders</a>
               <div class="divider"></div>

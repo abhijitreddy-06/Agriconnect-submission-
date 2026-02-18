@@ -145,31 +145,31 @@ export const getAllProducts = async (req, res) => {
 
     if (farmerId) {
       params.push(parseInt(farmerId));
-      conditions.push(`farmer_id = $${params.length}`);
+      conditions.push(`p.farmer_id = $${params.length}`);
     }
 
     if (category) {
       params.push(category);
-      conditions.push(`category = $${params.length}`);
+      conditions.push(`p.category = $${params.length}`);
     }
 
     if (search) {
       params.push(`%${search}%`);
-      conditions.push(`product_name ILIKE $${params.length}`);
+      conditions.push(`p.product_name ILIKE $${params.length}`);
     }
 
     const whereClause = conditions.length > 0 ? " WHERE " + conditions.join(" AND ") : "";
 
     // Count total matching rows
     const countResult = await pool.query(
-      `SELECT COUNT(*) FROM products${whereClause}`,
+      `SELECT COUNT(*) FROM products p${whereClause}`,
       params.slice()
     );
     const total = parseInt(countResult.rows[0].count);
 
-    // Fetch paginated results
+    // Fetch paginated results with farmer contact info
     params.push(limit, offset);
-    const dataQuery = `SELECT * FROM products${whereClause} ORDER BY id DESC LIMIT $${params.length - 1} OFFSET $${params.length}`;
+    const dataQuery = `SELECT p.*, u.phone_no AS contact_number, u.username AS farmer_name FROM products p LEFT JOIN users u ON p.farmer_id = u.id${whereClause} ORDER BY p.id DESC LIMIT $${params.length - 1} OFFSET $${params.length}`;
     const result = await pool.query(dataQuery, params);
 
     return res.json({
