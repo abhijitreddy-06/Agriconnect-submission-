@@ -4,6 +4,9 @@
   "description": "AgriConnect - Farming marketplace with AI plant health analysis",
   "license": "ISC",
   "author": "",
+  "engines": {
+    "node": "20.x"
+  },
   "type": "module",
   "main": "server.js",
   "scripts": {
