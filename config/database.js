@@ -102,6 +102,24 @@ export const testConnection = async () => {
     console.log(`[DB] Connected to Supabase PostgreSQL at ${dbHost}`);
     console.log(`[DB] Server time: ${result.rows[0].server_time}`);
     console.log(`[DB] Pool config — max: ${pool.options.max}, idleTimeout: ${pool.options.idleTimeoutMillis}ms, connectTimeout: ${pool.options.connectionTimeoutMillis}ms`);
+
+    // Auto-migrate: rename gemini_details → prediction_result if needed
+    try {
+      await pool.query(`
+        DO $$ BEGIN
+          IF EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_name = 'predictions' AND column_name = 'gemini_details'
+          ) THEN
+            ALTER TABLE predictions RENAME COLUMN gemini_details TO prediction_result;
+            RAISE NOTICE 'Migrated gemini_details → prediction_result';
+          END IF;
+        END $$;
+      `);
+    } catch (migErr) {
+      console.warn("[DB] Auto-migration check failed:", migErr.message);
+    }
+
     return true;
   } catch (err) {
     console.error("[DB] Failed to connect to Supabase PostgreSQL!");

@@ -33,10 +33,13 @@ export const analyzeImage = async (req, res) => {
     // Call HF API with retry
     const hfResult = await callHFWithRetry(req.file);
 
+    // Handle array response (many HF models return an array of predictions)
+    const hfData = Array.isArray(hfResult) ? (hfResult[0] || {}) : (hfResult || {});
+
     // Build structured result from HF response
     const diagnosisResult = JSON.stringify({
-      disease: hfResult.prediction || hfResult.class || hfResult.label || "Unknown",
-      confidence: hfResult.confidence || hfResult.score || null,
+      disease: hfData.prediction || hfData.class || hfData.label || "Unknown",
+      confidence: hfData.confidence || hfData.score || null,
       raw: hfResult,
     });
 
@@ -76,9 +79,9 @@ export const analyzeImage = async (req, res) => {
 };
 
 /**
- * Call HF API with one retry on timeout/503 (handles cold starts on free tier).
+ * Call HF API with retries on timeout/503 (handles cold starts on free tier).
  */
-async function callHFWithRetry(file, retries = 1) {
+async function callHFWithRetry(file, retries = 2) {
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
       const formData = new FormData();
@@ -101,8 +104,8 @@ async function callHFWithRetry(file, retries = 1) {
         (err.response && (err.response.status === 503 || err.response.status === 502));
 
       if (attempt < retries && isRetryable) {
-        console.log(`HF API attempt ${attempt + 1} failed (${err.message}), retrying in 5s...`);
-        await new Promise((r) => setTimeout(r, 5000));
+        console.log(`HF API attempt ${attempt + 1} failed (${err.message}), retrying in 10s...`);
+        await new Promise((r) => setTimeout(r, 10000));
         continue;
       }
       throw err;
