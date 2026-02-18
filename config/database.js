@@ -34,9 +34,9 @@ const pool = new Pool({
   keepAlive: true,
   keepAliveInitialDelayMillis: 10000,
 
-  // SSL required for Supabase
+  // SSL required for Supabase — rejectUnauthorized must be false for Supabase pooler
   ssl: {
-    rejectUnauthorized: process.env.NODE_ENV === "production",
+    rejectUnauthorized: false,
   },
 
   // Statement timeout — kill queries running longer than 30 seconds
@@ -129,6 +129,8 @@ export const testConnection = async () => {
       console.error("  Cause: Database does not exist. Check database name.");
     } else if (err.code === "ETIMEDOUT") {
       console.error("  Cause: Connection timed out. Check network/firewall or if Supabase project is paused.");
+    } else if (err.message?.includes("self-signed certificate") || err.code === "SELF_SIGNED_CERT_IN_CHAIN") {
+      console.error("  Cause: SSL certificate rejected. Ensure ssl.rejectUnauthorized is false for Supabase pooler.");
     }
     return false;
   }
