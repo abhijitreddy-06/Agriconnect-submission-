@@ -22,20 +22,6 @@ document.querySelectorAll(".unit-toggle").forEach((group) => {
   });
 });
 
-// Image source toggle
-document.querySelectorAll(".source-btn").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".source-btn").forEach((b) => b.classList.remove("active"));
-    btn.classList.add("active");
-    const fileInput = document.getElementById("productImage");
-    if (btn.dataset.source === "camera") {
-      fileInput.setAttribute("capture", "environment");
-    } else {
-      fileInput.removeAttribute("capture");
-    }
-  });
-});
-
 // Form submission with Auth
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("productForm");

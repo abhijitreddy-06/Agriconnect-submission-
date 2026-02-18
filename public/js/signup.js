@@ -3,6 +3,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const form = document.querySelector(".signup-form");
   if (!form) return;
 
+  // Password visibility toggle
+  const togglePassword = document.getElementById("togglePassword");
+  const passwordInput = document.getElementById("password");
+  if (togglePassword && passwordInput) {
+    togglePassword.addEventListener("click", () => {
+      const isPassword = passwordInput.type === "password";
+      passwordInput.type = isPassword ? "text" : "password";
+      togglePassword.classList.toggle("fa-eye-slash", !isPassword);
+      togglePassword.classList.toggle("fa-eye", isPassword);
+    });
+  }
+
   const role = window.location.pathname.includes("/customer") ? "customer" : "farmer";
 
   form.addEventListener("submit", async (e) => {

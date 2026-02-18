@@ -42,7 +42,10 @@
                         </div>
                         <div class="input-group">
                             <label for="password">Create Password</label>
-                            <input type="password" id="password" name="password" placeholder="Create a Password..." required>
+                            <div class="password-container">
+                                <input type="password" id="password" name="password" placeholder="Create a Password..." required>
+                                <i class="fas fa-eye-slash toggle-password" id="togglePassword"></i>
+                            </div>
                         </div>
                         <button type="submit" class="signup-btn">Sign Up</button>
                         <p>Already have an account? <a href="/login/customer" class="signup-link">Login</a></p>

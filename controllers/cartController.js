@@ -42,7 +42,7 @@ export const addToCart = async (req, res) => {
         });
     } catch (error) {
         console.error("Error adding to cart:", error.message);
-        return res.status(500).json({ success: false, error: "Failed to add to cart." });
+        return res.status(500).json({ success: false, error: "Failed to add to cart: " + error.message });
     }
 };
 
