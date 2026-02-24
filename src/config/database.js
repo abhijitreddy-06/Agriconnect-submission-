@@ -10,9 +10,7 @@ let dbHost = "unknown";
 try {
   const parsed = new URL(process.env.DATABASE_URL);
   dbHost = `${parsed.hostname}:${parsed.port || 5432}`;
-} catch {
-  // ignore parse errors
-}
+} catch {}
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -59,7 +57,6 @@ export const testConnection = async () => {
   try {
     await pool.query("SELECT NOW() AS server_time");
 
-    // Auto-migrate: rename gemini_details -> prediction_result if needed
     try {
       await pool.query(`
         DO $$ BEGIN
@@ -71,11 +68,8 @@ export const testConnection = async () => {
           END IF;
         END $$;
       `);
-    } catch {
-      // migration check failed silently
-    }
+    } catch {}
 
-    // Auto-migrate: add unique constraint on cart_items(customer_id, product_id)
     try {
       await pool.query(`
         DO $$ BEGIN
@@ -89,11 +83,8 @@ export const testConnection = async () => {
           END IF;
         END $$;
       `);
-    } catch {
-      // cart constraint migration failed silently
-    }
+    } catch {}
 
-    // Auto-migrate: add delivery_address column to users table
     try {
       await pool.query(`
         DO $$ BEGIN
@@ -105,11 +96,8 @@ export const testConnection = async () => {
           END IF;
         END $$;
       `);
-    } catch {
-      // delivery_address migration failed silently
-    }
+    } catch {}
 
-    // Auto-migrate: add payment columns to orders table
     try {
       await pool.query(`
         DO $$ BEGIN
@@ -124,11 +112,8 @@ export const testConnection = async () => {
           END IF;
         END $$;
       `);
-    } catch {
-      // payment columns migration failed silently
-    }
+    } catch {}
 
-    // Auto-migrate: create addresses table for customer address book
     try {
       await pool.query(`
         CREATE TABLE IF NOT EXISTS addresses (
@@ -147,9 +132,7 @@ export const testConnection = async () => {
           updated_at TIMESTAMP DEFAULT NOW()
         );
       `);
-    } catch {
-      // addresses table migration failed silently
-    }
+    } catch {}
 
     return true;
   } catch (err) {

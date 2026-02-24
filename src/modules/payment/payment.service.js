@@ -11,10 +11,6 @@ const razorpay = new Razorpay({
 
 const isTestMode = () => (process.env.RAZORPAY_KEY_ID || "").startsWith("rzp_test_");
 
-/**
- * Step 1: Create a Razorpay order from the current cart contents.
- * Validates stock but does NOT deduct it yet (that happens after payment verification).
- */
 export const createOrder = async (customerId, deliveryAddress) => {
   const cartItems = await PaymentModel.findCartItemsForPayment(customerId);
   if (cartItems.length === 0) throw new AppError("Cart is empty.", 400);
@@ -62,12 +58,7 @@ export const createOrder = async (customerId, deliveryAddress) => {
   };
 };
 
-/**
- * Step 2: Verify payment signature and create orders in the database.
- * This is called after Razorpay checkout succeeds on the frontend.
- */
 export const verifyAndComplete = async (customerId, { razorpay_order_id, razorpay_payment_id, razorpay_signature, delivery_address }) => {
-  // 1. Verify signature using HMAC SHA256
   const expectedSignature = crypto
     .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
     .update(`${razorpay_order_id}|${razorpay_payment_id}`)
@@ -77,7 +68,6 @@ export const verifyAndComplete = async (customerId, { razorpay_order_id, razorpa
     throw new AppError("Payment verification failed. Invalid signature.", 400);
   }
 
-  // 2. Fetch payment from Razorpay to confirm status
   const payment = await razorpay.payments.fetch(razorpay_payment_id);
 
   // Accept both "captured" and "authorized" (test mode may use either)
@@ -86,7 +76,6 @@ export const verifyAndComplete = async (customerId, { razorpay_order_id, razorpa
     throw new AppError(`Payment not successful. Status: ${payment.status}.`, 400);
   }
 
-  // 3. Check if this order was already processed (idempotency)
   const existingOrders = await PaymentModel.findOrdersByRazorpayOrderId(razorpay_order_id);
   if (existingOrders.length > 0) {
     return {
@@ -102,7 +91,6 @@ export const verifyAndComplete = async (customerId, { razorpay_order_id, razorpa
     };
   }
 
-  // 4. Create orders in a transaction
   const client = await PaymentModel.getClient();
 
   try {
@@ -168,11 +156,7 @@ export const verifyAndComplete = async (customerId, { razorpay_order_id, razorpa
   }
 };
 
-/**
- * Handle Razorpay webhook events for payment status updates.
- */
 export const handleWebhook = async (body, signature) => {
-  // Verify webhook signature
   const expectedSignature = crypto
     .createHmac("sha256", process.env.RAZORPAY_WEBHOOK_SECRET || process.env.RAZORPAY_KEY_SECRET)
     .update(JSON.stringify(body))
@@ -210,9 +194,6 @@ export const handleWebhook = async (body, signature) => {
   return { status: "processed", event };
 };
 
-/**
- * Fetch payment status from Razorpay for a given payment ID.
- */
 export const getPaymentStatus = async (paymentId) => {
   const payment = await razorpay.payments.fetch(paymentId);
   return {

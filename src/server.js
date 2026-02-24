@@ -13,8 +13,7 @@ const server = app.listen(port, async () => {
 
 const io = initSocket(server);
 
-// Graceful shutdown
-const shutdown = async (signal) => {
+const shutdown = async () => {
   const forceExitTimer = setTimeout(() => {
     process.exit(1);
   }, 10000);
@@ -24,18 +23,10 @@ const shutdown = async (signal) => {
   io.close();
 
   server.close(() => {});
-  try {
-    await pool.end();
-  } catch {
-    // pool close failed silently
-  }
-  try {
-    await closeRedis();
-  } catch {
-    // redis close failed silently
-  }
+  try { await pool.end(); } catch {}
+  try { await closeRedis(); } catch {}
   process.exit(0);
 };
 
-process.on("SIGTERM", () => shutdown("SIGTERM"));
-process.on("SIGINT", () => shutdown("SIGINT"));
+process.on("SIGTERM", () => shutdown());
+process.on("SIGINT", () => shutdown());

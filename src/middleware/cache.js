@@ -10,7 +10,6 @@ export const cacheMiddleware = (keyFn, ttlSeconds = 300) => {
         return res.json(cached);
       }
     } catch {
-      // Redis failed, continue without cache
     }
 
     const originalJson = res.json.bind(res);

@@ -116,8 +116,6 @@ export const initSocket = (httpServer) => {
         socket.emit("chat_error", "Failed to send message.");
       }
     });
-
-    socket.on("disconnect", () => {});
   });
 
   return io;

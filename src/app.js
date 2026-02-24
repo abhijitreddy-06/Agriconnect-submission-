@@ -27,7 +27,6 @@ const app = express();
 
 app.set("trust proxy", 1);
 
-// Security headers
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -46,23 +45,18 @@ app.use(
   })
 );
 
-// CORS
 app.use(cors({
   origin: process.env.NODE_ENV === "production" ? process.env.BASE_URL : true,
   credentials: true,
 }));
 
-// Gzip compression
 app.use(compression());
 
-// Request logging
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 
-// Body parsing
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 
-// Rate limiting
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 20,
@@ -86,11 +80,9 @@ app.use("/api/reviews", apiLimiter);
 app.use("/api/addresses", apiLimiter);
 app.use("/api/payment", apiLimiter);
 
-// Static files
 app.use(express.static(path.join(__dirname, "..", "public")));
 app.use("/uploads", express.static(path.join(__dirname, "..", "public", "uploads")));
 
-// API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
@@ -102,10 +94,8 @@ app.use("/api/payment", paymentRoutes);
 app.use("/api/addresses", addressRoutes);
 app.use("/health", healthRoutes);
 
-// Page routes
 app.use(pageRoutes);
 
-// Global error handler (must be last)
 app.use(errorHandler);
 
 export default app;

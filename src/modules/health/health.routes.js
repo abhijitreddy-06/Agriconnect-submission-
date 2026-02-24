@@ -4,7 +4,6 @@ import { isRedisAvailable, cacheGet, cacheSet } from "../../config/redis.js";
 
 const router = express.Router();
 
-// Global health endpoint — use this for Render health checks
 router.get("/", async (_req, res) => {
   const dbHealth = await getPoolHealth();
   const redisUp = isRedisAvailable();
@@ -22,7 +21,6 @@ router.get("/", async (_req, res) => {
   });
 });
 
-// Test database connectivity
 router.get("/db", async (_req, res) => {
   try {
     const start = Date.now();
@@ -44,7 +42,6 @@ router.get("/db", async (_req, res) => {
   }
 });
 
-// Test Redis connectivity
 router.get("/redis", async (_req, res) => {
   try {
     const testKey = "health:test";
@@ -68,7 +65,6 @@ router.get("/redis", async (_req, res) => {
   }
 });
 
-// Test auth token generation
 router.get("/auth", (_req, res) => {
   try {
     const jwt = process.env.JWT_SECRET ? "configured" : "missing";
@@ -89,7 +85,6 @@ router.get("/auth", (_req, res) => {
   }
 });
 
-// Test Supabase storage config
 router.get("/storage", (_req, res) => {
   const supabaseUrl = process.env.SUPABASE_URL ? "configured" : "missing";
   const supabaseKey = process.env.SUPABASE_KEY ? "configured" : "missing";
@@ -104,7 +99,6 @@ router.get("/storage", (_req, res) => {
   });
 });
 
-// Test environment config
 router.get("/env", (_req, res) => {
   res.json({
     success: true,
@@ -116,11 +110,9 @@ router.get("/env", (_req, res) => {
   });
 });
 
-// Test all services at once
 router.get("/all", async (_req, res) => {
   const results = {};
 
-  // Database test
   try {
     const start = Date.now();
     await pool.query("SELECT 1");
@@ -129,7 +121,6 @@ router.get("/all", async (_req, res) => {
     results.database = { status: "error", error: err.message };
   }
 
-  // Redis test
   try {
     results.redis = {
       status: isRedisAvailable() ? "ok" : "disconnected",
@@ -143,7 +134,6 @@ router.get("/all", async (_req, res) => {
     results.redis = { status: "error", error: err.message };
   }
 
-  // Config test
   results.config = {
     jwt: process.env.JWT_SECRET ? "ok" : "missing",
     jwtRefresh: process.env.JWT_REFRESH_SECRET ? "ok" : "missing",

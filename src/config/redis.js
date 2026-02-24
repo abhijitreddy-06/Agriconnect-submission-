@@ -31,9 +31,7 @@ try {
   });
 
   await redis.connect().catch(() => {});
-} catch {
-  // Redis setup failed, app will run without caching
-}
+} catch {}
 
 export const cacheGet = async (key) => {
   if (!redis || !isRedisConnected) return null;
@@ -49,18 +47,14 @@ export const cacheSet = async (key, value, ttlSeconds = 300) => {
   if (!redis || !isRedisConnected) return;
   try {
     await redis.set(key, JSON.stringify(value), "EX", ttlSeconds);
-  } catch {
-    // cache set failed silently
-  }
+  } catch {}
 };
 
 export const cacheDel = async (...keys) => {
   if (!redis || !isRedisConnected) return;
   try {
     await redis.del(...keys);
-  } catch {
-    // cache del failed silently
-  }
+  } catch {}
 };
 
 export const cacheInvalidatePattern = async (pattern) => {
@@ -74,20 +68,14 @@ export const cacheInvalidatePattern = async (pattern) => {
         await redis.del(...keys);
       }
     } while (cursor !== "0");
-  } catch {
-    // pattern invalidation failed silently
-  }
+  } catch {}
 };
 
 export const isRedisAvailable = () => isRedisConnected;
 
 export const closeRedis = async () => {
   if (redis) {
-    try {
-      await redis.quit();
-    } catch {
-      // close failed silently
-    }
+    try { await redis.quit(); } catch {}
   }
 };
 
