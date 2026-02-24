@@ -3,6 +3,7 @@ import "dotenv/config"; // Must be FIRST — loads .env before any other module 
 import app from "./app.js";
 import pool, { testConnection, getPoolHealth, stopPoolMonitor } from "./config/database.js";
 import { closeRedis } from "./config/redis.js";
+import { initSocket } from "./config/socket.js";
 
 const port = process.env.PORT || 8080;
 
@@ -20,6 +21,10 @@ const server = app.listen(port, async () => {
   await testConnection();
 });
 
+// Initialize Socket.IO on the HTTP server
+const io = initSocket(server);
+console.log("Socket.IO initialized for chat");
+
 // Graceful shutdown
 const shutdown = async (signal) => {
   console.log(`\n${signal} received. Shutting down gracefully...`);
@@ -33,6 +38,9 @@ const shutdown = async (signal) => {
 
   // Stop pool monitoring
   stopPoolMonitor();
+
+  // Close Socket.IO
+  io.close();
 
   server.close(() => {
     console.log("HTTP server closed.");

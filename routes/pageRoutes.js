@@ -22,6 +22,7 @@ const pages = [
   ["/marketplace/customer", "farmer-market_cus.html"],
   ["/cart", "cart.html"],
   ["/orders", "orders.html"],
+  ["/chat", "chat.html"],
   ["/diagnosis", "prediction.html"],
   ["/plant-health", "symptom.html"],
   ["/get-started", "whichusers.html"],

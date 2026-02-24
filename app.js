@@ -12,6 +12,8 @@ import productRoutes from "./routes/productRoutes.js";
 import predictionRoutes from "./routes/predictionRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
+import chatRoutes from "./routes/chatRoutes.js";
+import reviewRoutes from "./routes/reviewRoutes.js";
 import pageRoutes from "./routes/pageRoutes.js";
 import errorHandler from "./middleware/errorHandler.js";
 
@@ -29,12 +31,12 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://cdn.jsdelivr.net"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://cdn.jsdelivr.net", "https://cdn.socket.io"],
         scriptSrcAttr: ["'unsafe-inline'"],
         styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://fonts.googleapis.com"],
         fontSrc: ["'self'", "https://cdnjs.cloudflare.com", "https://fonts.gstatic.com"],
         imgSrc: ["'self'", "data:", "blob:", "https://*.supabase.co", "https://images.unsplash.com", "https://source.unsplash.com"],
-        connectSrc: ["'self'"],
+        connectSrc: ["'self'", "ws:", "wss:"],
       },
     },
     crossOriginEmbedderPolicy: false,
@@ -76,7 +78,8 @@ const apiLimiter = rateLimit({
 app.use("/api/products", apiLimiter);
 app.use("/api/cart", apiLimiter);
 app.use("/api/orders", apiLimiter);
-app.use("/api/predict", apiLimiter);
+app.use("/api/chat", apiLimiter);
+app.use("/api/reviews", apiLimiter);
 
 // Static files
 app.use(express.static(path.join(__dirname, "public")));
@@ -87,6 +90,8 @@ app.use(authRoutes);
 app.use(productRoutes);
 app.use(orderRoutes);
 app.use(cartRoutes);
+app.use(chatRoutes);
+app.use(reviewRoutes);
 app.use(predictionRoutes);
 app.use(pageRoutes);
 

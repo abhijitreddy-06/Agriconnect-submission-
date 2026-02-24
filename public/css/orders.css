@@ -200,6 +200,214 @@
   cursor: not-allowed;
 }
 
+/* ── Chat Button ── */
+.btn-chat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.9rem;
+  border: 2px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-accent);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--transition);
+}
+
+.btn-chat:hover {
+  background: var(--color-accent);
+  color: var(--color-surface-solid);
+}
+
+/* ── Review Button ── */
+.btn-review {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.9rem;
+  border: 2px solid #f39c12;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: #f39c12;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.btn-review:hover {
+  background: #f39c12;
+  color: var(--color-surface-solid);
+}
+
+/* ── Review Modal ── */
+.review-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.2s ease;
+  padding: 1rem;
+}
+
+.review-modal {
+  background: var(--color-surface-solid);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+  overflow: hidden;
+}
+
+.review-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.review-modal-header h3 {
+  font-size: 1.1rem;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.review-modal-header h3 i {
+  color: #f39c12;
+  margin-right: 0.4rem;
+}
+
+.review-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--color-text-light);
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: color var(--transition);
+}
+
+.review-modal-close:hover {
+  color: var(--color-danger);
+}
+
+.review-modal-body {
+  padding: 1.5rem;
+  text-align: center;
+}
+
+/* ── Star Rating ── */
+.star-rating {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.star-rating .star {
+  font-size: 2rem;
+  color: var(--color-border);
+  cursor: pointer;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.star-rating .star:hover {
+  transform: scale(1.15);
+}
+
+.star-rating .star.active {
+  color: #f39c12;
+}
+
+.rating-label {
+  font-size: 0.9rem;
+  color: var(--color-text-light);
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+/* ── Review Textarea ── */
+.review-modal-body textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  background: var(--color-bg);
+  resize: vertical;
+  transition: border-color var(--transition);
+}
+
+.review-modal-body textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.review-char-count {
+  text-align: right;
+  font-size: 0.75rem;
+  color: var(--color-text-light);
+  margin-top: 0.3rem;
+}
+
+/* ── Review Submit Button ── */
+.review-modal-footer {
+  padding: 0 1.5rem 1.5rem;
+}
+
+.btn-submit-review {
+  width: 100%;
+  padding: 0.75rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--color-accent);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--transition), opacity var(--transition);
+}
+
+.btn-submit-review:hover:not(:disabled) {
+  background: var(--color-primary);
+}
+
+.btn-submit-review:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Modal Animations ── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* ── Cancelled Order State ── */
 .order-cancelled {
   opacity: 0.65;

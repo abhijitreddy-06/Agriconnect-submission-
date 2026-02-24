@@ -87,6 +87,22 @@ async function loadOrders(page) {
               </button>`;
                 }
 
+                // Chat button — only for pending orders
+                let chatAction = "";
+                if (order.status === "pending") {
+                    chatAction = `<a href="/chat?orderId=${order.id}" class="btn-chat">
+                <i class="fas fa-comments"></i> Chat
+              </a>`;
+                }
+
+                // Review button — only for customers with delivered orders
+                let reviewAction = "";
+                if (role === "customer" && order.status === "delivered") {
+                    reviewAction = `<button class="btn-review" onclick="openReviewModal(${order.id}, ${order.product_id}, '${escapeHtml(order.product_name).replace(/'/g, "\\'")}')">
+                <i class="fas fa-star"></i> Review
+              </button>`;
+                }
+
                 // Delivery address display
                 const addressHtml = order.delivery_address
                     ? `<p class="order-address"><i class="fas fa-map-marker-alt"></i> ${escapeHtml(order.delivery_address)}</p>`
@@ -110,7 +126,9 @@ async function loadOrders(page) {
           <div class="order-status-section">
             <span class="status-badge ${statusClass}">${order.status}</span>
             ${statusActions}
+            ${chatAction}
             ${cancelAction}
+            ${reviewAction}
           </div>
         </div>
       `;
@@ -174,6 +192,7 @@ async function updateStatus(orderId, newStatus) {
         const data = await res.json();
         if (data.success) {
             showToast(`Order updated to "${newStatus}"`);
+            await loadOrders(currentOrderPage);
         } else {
             showToast(data.error || "Failed to update", "error");
             await loadOrders(currentOrderPage);
@@ -208,6 +227,142 @@ async function cancelOrder(orderId, btnEl) {
         showToast("Failed to cancel order", "error");
         btnEl.disabled = false;
         btnEl.innerHTML = '<i class="fas fa-times-circle"></i> Cancel';
+    }
+}
+
+// ─── Review Modal ───────────────────────────────────────────────
+let reviewOrderId = null;
+let reviewProductId = null;
+let selectedRating = 0;
+
+function openReviewModal(orderId, productId, productName) {
+    reviewOrderId = orderId;
+    reviewProductId = productId;
+    selectedRating = 0;
+
+    // Check if already reviewed
+    Auth.authFetch(`/api/reviews/check/${orderId}`).then(r => r.json()).then(data => {
+        if (data.success && data.reviewed) {
+            showToast("You have already reviewed this order.");
+            return;
+        }
+        showModal(productName);
+    }).catch(() => showModal(productName));
+}
+
+function showModal(productName) {
+    // Remove existing modal
+    const existing = document.getElementById("reviewModal");
+    if (existing) existing.remove();
+
+    const modal = document.createElement("div");
+    modal.id = "reviewModal";
+    modal.className = "review-modal-overlay";
+    modal.innerHTML = `
+        <div class="review-modal">
+            <div class="review-modal-header">
+                <h3><i class="fas fa-star"></i> Review: ${escapeHtml(productName)}</h3>
+                <button class="review-modal-close" onclick="closeReviewModal()">&times;</button>
+            </div>
+            <div class="review-modal-body">
+                <div class="star-rating" id="starRating">
+                    <span class="star" data-rating="1"><i class="fas fa-star"></i></span>
+                    <span class="star" data-rating="2"><i class="fas fa-star"></i></span>
+                    <span class="star" data-rating="3"><i class="fas fa-star"></i></span>
+                    <span class="star" data-rating="4"><i class="fas fa-star"></i></span>
+                    <span class="star" data-rating="5"><i class="fas fa-star"></i></span>
+                </div>
+                <p class="rating-label" id="ratingLabel">Select a rating</p>
+                <textarea id="reviewFeedback" placeholder="Write your feedback (optional, max 500 chars)" maxlength="500" rows="3"></textarea>
+                <div class="review-char-count"><span id="reviewCharCount">0</span>/500</div>
+            </div>
+            <div class="review-modal-footer">
+                <button class="btn-submit-review" id="submitReviewBtn" onclick="submitReview()" disabled>Submit Review</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Close on overlay click
+    modal.addEventListener("click", (e) => {
+        if (e.target === modal) closeReviewModal();
+    });
+
+    // Star click handlers
+    const stars = modal.querySelectorAll(".star");
+    const ratingLabels = ["", "Poor", "Fair", "Good", "Very Good", "Excellent"];
+    stars.forEach((star) => {
+        star.addEventListener("click", () => {
+            selectedRating = parseInt(star.dataset.rating);
+            updateStars(stars, selectedRating);
+            document.getElementById("ratingLabel").textContent = ratingLabels[selectedRating];
+            document.getElementById("submitReviewBtn").disabled = false;
+        });
+        star.addEventListener("mouseenter", () => {
+            updateStars(stars, parseInt(star.dataset.rating));
+        });
+    });
+
+    const starContainer = modal.querySelector(".star-rating");
+    starContainer.addEventListener("mouseleave", () => {
+        updateStars(stars, selectedRating);
+    });
+
+    // Feedback char count
+    const feedbackEl = document.getElementById("reviewFeedback");
+    feedbackEl.addEventListener("input", () => {
+        document.getElementById("reviewCharCount").textContent = feedbackEl.value.length;
+    });
+}
+
+function updateStars(stars, rating) {
+    stars.forEach((s) => {
+        const val = parseInt(s.dataset.rating);
+        s.classList.toggle("active", val <= rating);
+    });
+}
+
+function closeReviewModal() {
+    const modal = document.getElementById("reviewModal");
+    if (modal) modal.remove();
+    reviewOrderId = null;
+    reviewProductId = null;
+    selectedRating = 0;
+}
+
+async function submitReview() {
+    if (!selectedRating || !reviewOrderId) return;
+
+    const feedback = document.getElementById("reviewFeedback").value.trim();
+    const btn = document.getElementById("submitReviewBtn");
+    btn.disabled = true;
+    btn.textContent = "Submitting...";
+
+    try {
+        const res = await Auth.authFetch("/api/reviews", {
+            method: "POST",
+            body: JSON.stringify({
+                order_id: reviewOrderId,
+                rating: selectedRating,
+                feedback: feedback || undefined,
+            }),
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            showToast("Review submitted successfully!");
+            closeReviewModal();
+            await loadOrders(currentOrderPage);
+        } else {
+            showToast(data.error || "Failed to submit review", "error");
+            btn.disabled = false;
+            btn.textContent = "Submit Review";
+        }
+    } catch {
+        showToast("Failed to submit review", "error");
+        btn.disabled = false;
+        btn.textContent = "Submit Review";
     }
 }
 

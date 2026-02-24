@@ -212,6 +212,7 @@ const Auth = (() => {
         "/cart": "customer",
         // Any authenticated role
         "/orders": "any",
+        "/chat": "any",
         "/profile": "any",
     };
 
