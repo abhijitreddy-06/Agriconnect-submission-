@@ -152,6 +152,8 @@ async function handleClearCart() {
     }
 }
 
+// ─── Razorpay Payment Flow ─────────────────────────────────────
+
 async function handleCheckout() {
     const btn = document.getElementById("checkoutBtn");
     const addressEl = document.getElementById("deliveryAddress");
@@ -163,33 +165,211 @@ async function handleCheckout() {
         return;
     }
 
+    if (address.length < 10) {
+        showToast("Delivery address must be at least 10 characters", "error");
+        if (addressEl) addressEl.focus();
+        return;
+    }
+
     btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating order...';
 
     try {
-        const res = await Auth.authFetch("/api/cart/checkout", {
+        // Step 1: Create Razorpay order on backend
+        const res = await Auth.authFetch("/api/payment/create-order", {
             method: "POST",
             body: JSON.stringify({ delivery_address: address }),
+        });
+        const result = await res.json();
+
+        if (!result.success) {
+            showToast(result.error || "Failed to create payment order", "error");
+            resetCheckoutBtn();
+            return;
+        }
+
+        const orderData = result.data;
+
+        // Show test mode banner if applicable
+        if (orderData.test_mode) {
+            const banner = document.getElementById("testModeBanner");
+            if (banner) banner.style.display = "flex";
+        }
+
+        // Step 2: Open Razorpay checkout
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Opening payment...';
+        openRazorpayCheckout(orderData, address);
+    } catch (err) {
+        console.error("Checkout error:", err);
+        showToast("Failed to initiate payment: " + err.message, "error");
+        resetCheckoutBtn();
+    }
+}
+
+function openRazorpayCheckout(orderData, deliveryAddress) {
+    const options = {
+        key: orderData.key_id,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "AgriConnect",
+        description: `Payment for ${orderData.item_count} item(s) - ₹${orderData.total.toFixed(2)}`,
+        order_id: orderData.razorpay_order_id,
+        handler: function (response) {
+            // Payment successful on Razorpay side — verify on backend
+            verifyPayment(response, deliveryAddress);
+        },
+        prefill: {
+            name: Auth.getUser ? Auth.getUser() : "",
+        },
+        theme: {
+            color: "#5da399",
+        },
+        modal: {
+            ondismiss: function () {
+                showToast("Payment cancelled. You can try again anytime.", "error");
+                resetCheckoutBtn();
+            },
+        },
+    };
+
+    try {
+        const rzp = new Razorpay(options);
+
+        rzp.on("payment.failed", function (response) {
+            // Show failure modal with details
+            showFailureModal(response.error);
+            resetCheckoutBtn();
+        });
+
+        rzp.open();
+    } catch (err) {
+        console.error("Razorpay open error:", err);
+        showToast("Failed to open payment window. Please try again.", "error");
+        resetCheckoutBtn();
+    }
+}
+
+// ─── Payment Verification ──────────────────────────────────────
+
+async function verifyPayment(razorpayResponse, deliveryAddress) {
+    const btn = document.getElementById("checkoutBtn");
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying payment...';
+
+    try {
+        const res = await Auth.authFetch("/api/payment/verify", {
+            method: "POST",
+            body: JSON.stringify({
+                razorpay_order_id: razorpayResponse.razorpay_order_id,
+                razorpay_payment_id: razorpayResponse.razorpay_payment_id,
+                razorpay_signature: razorpayResponse.razorpay_signature,
+                delivery_address: deliveryAddress,
+            }),
         });
         const data = await res.json();
 
         if (data.success) {
-            // Show success modal
-            const modal = document.getElementById("checkoutModal");
-            const msg = document.getElementById("checkoutMessage");
-            msg.textContent = data.message + (data.warnings ? " Note: " + data.warnings.join(" ") : "");
-            modal.style.display = "flex";
-
-            // Reload cart (should be empty now)
+            showSuccessModal(data);
             await loadCart();
         } else {
-            showToast(data.error || "Checkout failed", "error");
+            showFailureModal({
+                description: data.error || "Payment verification failed on server.",
+                reason: "verification_failed",
+            });
         }
     } catch (err) {
-        showToast("Checkout failed: " + err.message, "error");
+        console.error("Verify error:", err);
+        showFailureModal({
+            description: "Could not verify payment with server. If money was deducted, it will be refunded automatically.",
+            reason: "network_error",
+        });
     } finally {
+        resetCheckoutBtn();
+    }
+}
+
+// ─── Success Modal ─────────────────────────────────────────────
+
+function showSuccessModal(data) {
+    const modal = document.getElementById("checkoutModal");
+    const detailsEl = document.getElementById("paymentDetails");
+    const msgEl = document.getElementById("checkoutMessage");
+
+    // Build payment details
+    const payment = data.payment || {};
+    const orderCount = data.orderIds ? data.orderIds.length : 0;
+    const methodLabel = formatPaymentMethod(payment.method);
+
+    let detailsHtml = `
+        <p style="margin:0.3rem 0;"><strong>Amount Paid:</strong> ₹${payment.amount ? payment.amount.toFixed(2) : "N/A"}</p>
+        <p style="margin:0.3rem 0;"><strong>Payment Method:</strong> ${escapeHtml(methodLabel)}</p>
+        <p style="margin:0.3rem 0;"><strong>Payment ID:</strong> <code style="font-size:0.8rem;background:#e8f5e9;padding:2px 6px;border-radius:4px;">${escapeHtml(payment.id || "N/A")}</code></p>
+        <p style="margin:0.3rem 0;"><strong>Orders Created:</strong> ${orderCount}</p>
+        <p style="margin:0.3rem 0;"><strong>Status:</strong> <span style="color:#5da399;font-weight:600;">${escapeHtml(payment.status || "paid")}</span></p>
+    `;
+    detailsEl.innerHTML = detailsHtml;
+
+    // Message
+    let message = data.message || `${orderCount} order(s) placed successfully.`;
+    if (data.warnings && data.warnings.length > 0) {
+        message += " Note: " + data.warnings.join(" ");
+    }
+    msgEl.textContent = message;
+
+    modal.style.display = "flex";
+}
+
+// ─── Failure Modal ─────────────────────────────────────────────
+
+function showFailureModal(error) {
+    const modal = document.getElementById("failModal");
+    const detailsEl = document.getElementById("failDetails");
+
+    const description = error?.description || "An unknown error occurred during payment.";
+    const code = error?.code || error?.reason || "UNKNOWN";
+    const source = error?.source || "";
+    const step = error?.step || "";
+
+    let detailsHtml = `
+        <p style="margin:0.3rem 0;"><strong>Reason:</strong> ${escapeHtml(description)}</p>
+        <p style="margin:0.3rem 0;"><strong>Error Code:</strong> <code style="font-size:0.8rem;background:#fce4e4;padding:2px 6px;border-radius:4px;">${escapeHtml(String(code))}</code></p>
+    `;
+    if (source) {
+        detailsHtml += `<p style="margin:0.3rem 0;"><strong>Source:</strong> ${escapeHtml(source)}</p>`;
+    }
+    if (step) {
+        detailsHtml += `<p style="margin:0.3rem 0;"><strong>Failed At:</strong> ${escapeHtml(step)}</p>`;
+    }
+
+    detailsEl.innerHTML = detailsHtml;
+    modal.style.display = "flex";
+}
+
+function closeFailModal() {
+    const modal = document.getElementById("failModal");
+    if (modal) modal.style.display = "none";
+}
+
+// ─── Helpers ───────────────────────────────────────────────────
+
+function formatPaymentMethod(method) {
+    if (!method) return "N/A";
+    const map = {
+        card: "Credit/Debit Card",
+        upi: "UPI",
+        netbanking: "Net Banking",
+        wallet: "Wallet",
+        emi: "EMI",
+        bank_transfer: "Bank Transfer",
+    };
+    return map[method] || method.charAt(0).toUpperCase() + method.slice(1);
+}
+
+function resetCheckoutBtn() {
+    const btn = document.getElementById("checkoutBtn");
+    if (btn) {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-lock"></i> Proceed to Checkout';
+        btn.innerHTML = '<i class="fas fa-lock"></i> Pay & Place Order';
     }
 }
 
@@ -197,5 +377,3 @@ async function handleCheckout() {
 document.addEventListener("DOMContentLoaded", () => {
     loadCart();
 });
-
-// Loader

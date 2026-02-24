@@ -108,6 +108,12 @@ async function loadOrders(page) {
                     ? `<p class="order-address"><i class="fas fa-map-marker-alt"></i> ${escapeHtml(order.delivery_address)}</p>`
                     : "";
 
+                // Payment status badge
+                const paymentStatus = order.payment_status || "pending";
+                const paymentIcon = paymentStatus === "paid" ? "fa-check-circle" : paymentStatus === "failed" ? "fa-times-circle" : "fa-clock";
+                const paymentColor = paymentStatus === "paid" ? "#5da399" : paymentStatus === "failed" ? "#e74c3c" : "#f39c12";
+                const paymentBadgeHtml = `<span style="font-size:0.75rem;color:${paymentColor};margin-top:0.25rem;display:inline-block;"><i class="fas ${paymentIcon}"></i> Payment: ${paymentStatus}</span>`;
+
                 return `
         <div class="order-card ${order.status === "cancelled" ? "order-cancelled" : ""}">
           <img class="order-image"
@@ -125,6 +131,7 @@ async function loadOrders(page) {
           </div>
           <div class="order-status-section">
             <span class="status-badge ${statusClass}">${order.status}</span>
+            ${paymentBadgeHtml}
             ${statusActions}
             ${chatAction}
             ${cancelAction}

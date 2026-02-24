@@ -8,10 +8,9 @@
     "node": "20.x"
   },
   "type": "module",
-  "main": "server.js",
+  "main": "src/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node --dns-result-order=ipv4first server.js",
+    "start": "node --dns-result-order=ipv4first src/server.js",
     "install:prod": "npm install --omit=dev"
   },
   "dependencies": {
@@ -30,6 +29,7 @@
     "morgan": "^1.10.1",
     "multer": "^1.4.5-lts.1",
     "pg": "^8.13.1",
+    "razorpay": "^2.9.6",
     "socket.io": "^4.8.3",
     "zod": "^4.3.6"
   }

@@ -10,6 +10,22 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/global.css">
     <link rel="stylesheet" href="/css/cart.css">
+    <style>
+        .test-mode-banner {
+            background: linear-gradient(135deg, #fff3cd, #ffeeba);
+            color: #856404;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            border: 1px solid #ffc107;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.875rem;
+        }
+        .test-mode-banner i { font-size: 1.25rem; }
+        .test-mode-banner strong { font-family: monospace; letter-spacing: 1px; }
+    </style>
 </head>
 <body>
     <div id="global-loader">
@@ -21,6 +37,14 @@
 
     <!-- Cart Content -->
     <main class="cart-page">
+        <!-- Test Mode Banner -->
+        <div class="test-mode-banner" id="testModeBanner" style="display:none;">
+            <i class="fas fa-flask"></i>
+            <span>Razorpay Test Mode — No real money will be charged.
+              Use card <strong>4111 1111 1111 1111</strong>, any future expiry, any CVV.
+            </span>
+        </div>
+
         <div class="cart-header">
             <h1><i class="fas fa-shopping-cart"></i> My Cart</h1>
             <span class="cart-count" id="cartCount">0 items</span>
@@ -56,7 +80,7 @@
                     <textarea id="deliveryAddress" placeholder="Enter your full delivery address..." rows="3" required></textarea>
                 </div>
                 <button class="btn btn-checkout" id="checkoutBtn" onclick="handleCheckout()">
-                    <i class="fas fa-lock"></i> Proceed to Checkout
+                    <i class="fas fa-lock"></i> Pay & Place Order
                 </button>
                 <button class="btn btn-clear" onclick="handleClearCart()">
                     <i class="fas fa-trash"></i> Clear Cart
@@ -68,11 +92,30 @@
     <!-- Checkout Success Modal -->
     <div class="modal" id="checkoutModal" style="display:none;">
         <div class="modal-content checkout-success">
-            <i class="fas fa-check-circle"></i>
-            <h2>Order Placed!</h2>
-            <p id="checkoutMessage"></p>
+            <i class="fas fa-check-circle" style="font-size:3rem;color:#5da399;"></i>
+            <h2>Payment Successful!</h2>
+            <div id="paymentDetails" style="text-align:left;background:rgba(93,163,153,0.1);border-radius:8px;padding:1rem;margin:1rem 0;font-size:0.9rem;">
+                <!-- Filled by JS -->
+            </div>
+            <p id="checkoutMessage" style="color:#666;font-size:0.9rem;"></p>
             <div class="modal-actions">
                 <a href="/orders" class="btn btn-primary">View Orders</a>
+                <a href="/marketplace/customer" class="btn btn-secondary">Continue Shopping</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Failed Modal -->
+    <div class="modal" id="failModal" style="display:none;">
+        <div class="modal-content checkout-success">
+            <i class="fas fa-times-circle" style="font-size:3rem;color:#e74c3c;"></i>
+            <h2>Payment Failed</h2>
+            <div id="failDetails" style="text-align:left;background:rgba(231,76,60,0.1);border-radius:8px;padding:1rem;margin:1rem 0;font-size:0.9rem;">
+                <!-- Filled by JS -->
+            </div>
+            <p style="color:#666;font-size:0.85rem;">No money has been deducted from your account. Your cart items are still saved.</p>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="closeFailModal()">Try Again</button>
                 <a href="/marketplace/customer" class="btn btn-secondary">Continue Shopping</a>
             </div>
         </div>
@@ -81,6 +124,7 @@
     <!-- Footer -->
 <footer class="footer"></footer>
 
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="/js/auth.js"></script>
     <script src="/js/components.js"></script>
     <script src="/js/cart.js"></script>
