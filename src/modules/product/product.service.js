@@ -98,6 +98,14 @@ export const getAllProducts = async (query) => {
   return { data: rows, total, page, limit, totalPages: Math.ceil(total / limit) };
 };
 
+export const getProductById = async (productId) => {
+  const product = await ProductModel.findById(productId);
+  if (!product) {
+    throw new AppError("Product not found.", 404);
+  }
+  return product;
+};
+
 export const updateProduct = async (farmerId, productId, body, file) => {
   const product = await ProductModel.findById(productId);
   if (!product) throw new AppError("Product not found.", 404);

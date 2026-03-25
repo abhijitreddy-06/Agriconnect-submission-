@@ -28,7 +28,12 @@ export const findAll = async ({ conditions, params, limit, offset }) => {
 
 export const findById = async (id) => {
   const result = await pool.query(
-    "SELECT farmer_id, image FROM products WHERE id = $1",
+    `SELECT p.id, p.farmer_id, p.product_name, p.price, p.quantity, p.quality,
+            p.description, p.image, p.quantity_unit, p.category,
+            u.username AS farmer_name, u.phone_no AS contact_number
+     FROM products p
+     LEFT JOIN users u ON p.farmer_id = u.id
+     WHERE p.id = $1`,
     [id]
   );
   return result.rows[0] || null;

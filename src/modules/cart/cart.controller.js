@@ -1,38 +1,37 @@
 import catchAsync from "../../utils/catchAsync.js";
 import * as CartService from "./cart.service.js";
+import sendResponse from "../../utils/sendResponse.js";
 
 export const addToCart = catchAsync(async (req, res) => {
   const cartItem = await CartService.addToCart(req.user.userId, req.body);
-  return res.status(201).json({ success: true, message: "Added to cart.", cartItem });
+  return sendResponse(res, 201, "Added to cart.", { cartItem });
 });
 
 export const getCart = catchAsync(async (req, res) => {
   const data = await CartService.getCart(req.user.userId);
-  return res.json({ success: true, data });
+  return sendResponse(res, 200, "Cart fetched successfully.", data);
 });
 
 export const updateCartItem = catchAsync(async (req, res) => {
   await CartService.updateCartItem(req.user.userId, req.params.id, req.body.quantity);
-  return res.json({ success: true, message: "Cart updated." });
+  return sendResponse(res, 200, "Cart updated.", null);
 });
 
 export const removeCartItem = catchAsync(async (req, res) => {
   await CartService.removeCartItem(req.user.userId, req.params.id);
-  return res.json({ success: true, message: "Item removed from cart." });
+  return sendResponse(res, 200, "Item removed from cart.", null);
 });
 
 export const clearCart = catchAsync(async (req, res) => {
   await CartService.clearCart(req.user.userId);
-  return res.json({ success: true, message: "Cart cleared." });
+  return sendResponse(res, 200, "Cart cleared.", null);
 });
 
 export const checkout = catchAsync(async (req, res) => {
   const { delivery_address } = req.body || {};
   const result = await CartService.checkout(req.user.userId, delivery_address);
-  return res.status(201).json({
-    success: true,
-    message: `${result.orderIds.length} order(s) placed successfully.`,
+  return sendResponse(res, 201, `${result.orderIds.length} order(s) placed successfully.`, {
     orderIds: result.orderIds,
-    warnings: result.warnings,
+    warnings: result.warnings || null,
   });
 });

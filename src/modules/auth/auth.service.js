@@ -16,17 +16,32 @@ export const signup = async ({ username, phone, password, role }) => {
   const { accessToken, refreshToken } = generateTokens(user.id, role);
 
   return {
-    token: accessToken,
-    refreshToken,
-    userId: user.id,
-    username,
-    role,
+    user: {
+      id: user.id,
+      username,
+      phone,
+      role,
+      delivery_address: null,
+      profileComplete: false,
+    },
+    tokens: {
+      accessToken,
+      refreshToken,
+    },
   };
 };
 
 export const login = async ({ phone, password, role }) => {
   const user = await AuthModel.findByPhoneAndRole(phone, role);
   if (!user) {
+    const existingUser = await AuthModel.findByPhone(phone);
+    if (existingUser && existingUser.role !== role) {
+      throw new AppError(
+        `This account is already created as ${existingUser.role}. Please log in as ${existingUser.role}.`,
+        409
+      );
+    }
+
     throw new AppError("Invalid phone or password.", 401);
   }
 
@@ -38,15 +53,26 @@ export const login = async ({ phone, password, role }) => {
   const { accessToken, refreshToken } = generateTokens(user.id, user.role);
 
   return {
-    token: accessToken,
-    refreshToken,
-    userId: user.id,
-    username: user.username,
-    role: user.role,
+    user: {
+      id: user.id,
+      username: user.username,
+      phone,
+      role: user.role,
+      delivery_address: user.delivery_address || null,
+      profileComplete: Boolean(user.delivery_address),
+    },
+    tokens: {
+      accessToken,
+      refreshToken,
+    },
   };
 };
 
 export const refresh = async (refreshToken) => {
+  if (!refreshToken) {
+    throw new AppError("Refresh token is required.", 400);
+  }
+
   const isBlacklisted = await cacheGet(`blacklist:${refreshToken}`);
   if (isBlacklisted) {
     throw new AppError("Token has been revoked. Please log in again.", 401);
@@ -60,7 +86,25 @@ export const refresh = async (refreshToken) => {
     decoded.role
   );
 
-  return { token: accessToken, refreshToken: newRefreshToken };
+  const row = await AuthModel.findById(decoded.userId);
+  if (!row) {
+    throw new AppError("User not found.", 401);
+  }
+
+  return {
+    user: {
+      id: row.id,
+      username: row.username,
+      phone: row.phone_no,
+      role: row.role,
+      delivery_address: row.delivery_address || null,
+      profileComplete: Boolean(row.delivery_address),
+    },
+    tokens: {
+      accessToken,
+      refreshToken: newRefreshToken,
+    },
+  };
 };
 
 export const logout = async (refreshToken) => {
@@ -85,6 +129,7 @@ export const verify = async (userId) => {
     phone: row.phone_no,
     role: row.role,
     delivery_address: row.delivery_address || null,
+    profileComplete: Boolean(row.delivery_address),
   };
 
   await cacheSet(cacheKey, user, 600);
@@ -105,5 +150,6 @@ export const updateProfile = async (userId, { username, delivery_address }) => {
     phone: row.phone_no,
     role: row.role,
     delivery_address: row.delivery_address || null,
+    profileComplete: Boolean(row.delivery_address),
   };
 };

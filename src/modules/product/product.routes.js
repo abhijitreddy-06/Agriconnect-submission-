@@ -4,7 +4,7 @@ import { verifyToken, requireRole } from "../../middleware/auth.js";
 import { cacheMiddleware } from "../../middleware/cache.js";
 import { validate } from "../../middleware/validate.js";
 import { productQuerySchema, idParamSchema } from "./product.validation.js";
-import { createProduct, getAllProducts, updateProduct, deleteProduct } from "./product.controller.js";
+import { createProduct, getAllProducts, getProductById, updateProduct, deleteProduct } from "./product.controller.js";
 
 const router = express.Router();
 
@@ -32,6 +32,8 @@ router.post(
   upload.single("productImage"),
   createProduct
 );
+
+router.get("/:id", validate(idParamSchema), getProductById);
 
 router.put(
   "/:id",

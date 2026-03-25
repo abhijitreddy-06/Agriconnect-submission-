@@ -2,15 +2,15 @@ import pool from "../../config/database.js";
 
 export const findByPhone = async (phone) => {
   const result = await pool.query(
-    "SELECT 1 FROM users WHERE phone_no = $1",
+    "SELECT id, username, role, phone_no FROM users WHERE phone_no = $1",
     [phone]
   );
-  return result.rows.length > 0;
+  return result.rows[0] || null;
 };
 
 export const findByPhoneAndRole = async (phone, role) => {
   const result = await pool.query(
-    "SELECT id, username, password, role FROM users WHERE phone_no = $1 AND role = $2",
+    "SELECT id, username, password, role, delivery_address FROM users WHERE phone_no = $1 AND role = $2",
     [phone, role]
   );
   return result.rows[0] || null;

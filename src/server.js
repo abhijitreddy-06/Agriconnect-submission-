@@ -1,14 +1,29 @@
-import "dotenv/config";
+import path from "path";
+import { fileURLToPath } from "url";
+import dotenv from "dotenv";
 
-import app from "./app.js";
-import pool, { testConnection, stopPoolMonitor } from "./config/database.js";
-import { closeRedis } from "./config/redis.js";
-import { initSocket } from "./config/socket.js";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: path.resolve(__dirname, "..", ".env") });
+
+const { default: app } = await import("./app.js");
+const { default: pool, testConnection, stopPoolMonitor } = await import("./config/database.js");
+const { closeRedis } = await import("./config/redis.js");
+const { initSocket } = await import("./config/socket.js");
 
 const port = process.env.PORT || 8080;
 
 const server = app.listen(port, async () => {
-  await testConnection();
+  const dbOk = await testConnection();
+  if (!dbOk) {
+    console.error("[Startup] Database connection check failed. Verify DATABASE_URL in .env.");
+  }
+});
+
+server.on("error", (error) => {
+  console.error("[Startup] Server failed to start:", error.message);
+  process.exit(1);
 });
 
 const io = initSocket(server);

@@ -30,7 +30,11 @@ export const validate = (schemas) => {
     }
 
     if (errors.length > 0) {
-      return res.status(400).json({ success: false, error: errors[0] });
+      return res.status(400).json({
+        success: false,
+        message: errors[0],
+        data: null,
+      });
     }
 
     next();

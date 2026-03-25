@@ -1,6 +1,6 @@
 # AgriConnect
 
-A full-stack farming marketplace platform with AI-powered plant health analysis, real-time chat, and secure payment processing via Razorpay. Built with Node.js, Express, PostgreSQL, Redis, and Socket.io following MVC architecture.
+A full-stack farming marketplace platform with AI-powered plant health analysis, real-time chat, and secure order workflows. Built with Node.js, Express, PostgreSQL, Redis, and Socket.io following MVC architecture.
 
 ---
 
@@ -13,7 +13,6 @@ A full-stack farming marketplace platform with AI-powered plant health analysis,
 - [Authentication & Token Flow](#authentication--token-flow)
 - [Product Flow](#product-flow)
 - [Add to Cart to Checkout Flow](#add-to-cart-to-checkout-flow)
-- [Payment & Checkout (Razorpay)](#payment--checkout-razorpay)
 - [Order Management](#order-management)
 - [Real-Time Chat (Socket.io)](#real-time-chat-socketio)
 - [AI Plant Health Prediction](#ai-plant-health-prediction)
@@ -38,7 +37,6 @@ A full-stack farming marketplace platform with AI-powered plant health analysis,
 | **PostgreSQL** | - | Primary relational database |
 | **Redis (ioredis)** | 5.9.3 | Caching layer & token blacklisting |
 | **Socket.io** | 4.8.3 | Real-time bidirectional WebSocket communication |
-| **Razorpay** | 2.9.6 | Payment gateway (INR) |
 | **Supabase** | 2.96.0 | File storage (product images) |
 | **JSON Web Tokens** | 9.0.3 | Authentication (access + refresh tokens) |
 | **bcrypt** | 5.1.1 | Password hashing (10 salt rounds) |
@@ -59,7 +57,6 @@ A full-stack farming marketplace platform with AI-powered plant health analysis,
 |---|---|
 | **Vanilla HTML/CSS/JS** | 18 pages, 19 CSS files, 10+ JS files |
 | **Socket.io Client** | Real-time chat on frontend |
-| **Razorpay Checkout.js** | Hosted payment form |
 | **CDN Libraries** | Font Awesome, Google Fonts |
 
 ### External Services
@@ -67,7 +64,6 @@ A full-stack farming marketplace platform with AI-powered plant health analysis,
 | Service | Purpose |
 |---|---|
 | **Supabase** | PostgreSQL database hosting + file storage bucket |
-| **Razorpay** | Payment processing gateway |
 | **Hugging Face API** | AI plant disease detection model |
 | **Render** | Deployment platform |
 
@@ -151,7 +147,6 @@ AgriConnect/
 │   │   ├── product/                 # CRUD for farmer products
 │   │   ├── cart/                    # Cart management + checkout
 │   │   ├── order/                   # Order lifecycle management
-│   │   ├── payment/                 # Razorpay integration + webhooks
 │   │   ├── chat/                    # REST endpoints for chat history
 │   │   ├── review/                  # Product reviews & ratings
 │   │   ├── prediction/             # AI plant health analysis
@@ -212,7 +207,7 @@ AgriConnect/
 | `PUT` | `/api/cart/:id` | Yes | Customer | Update item quantity (max 9999) |
 | `DELETE` | `/api/cart/:id` | Yes | Customer | Remove single cart item |
 | `DELETE` | `/api/cart` | Yes | Customer | Clear entire cart |
-| `POST` | `/api/cart/checkout` | Yes | Customer | Checkout cart without payment gateway |
+| `POST` | `/api/cart/checkout` | Yes | Customer | Checkout cart and create orders |
 
 ### Orders (`/api/orders`)
 
@@ -223,15 +218,6 @@ AgriConnect/
 | `GET` | `/api/orders/:id` | Yes | Any | Get order details (participant only) |
 | `PUT` | `/api/orders/:id` | Yes | Farmer | Update order status (validated transitions) |
 | `PUT` | `/api/orders/:id/cancel` | Yes | Customer | Cancel order + restore stock |
-
-### Payment (`/api/payment`)
-
-| Method | Endpoint | Auth | Role | Description |
-|---|---|---|---|---|
-| `POST` | `/api/payment/create-order` | Yes | Customer | Create Razorpay order from cart |
-| `POST` | `/api/payment/verify` | Yes | Customer | Verify payment signature + create orders |
-| `GET` | `/api/payment/status/:paymentId` | Yes | Any | Get payment status from Razorpay |
-| `POST` | `/api/payment/webhook` | No | - | Razorpay webhook (HMAC-SHA256 verified) |
 
 ### Reviews (`/api/reviews`)
 
@@ -561,147 +547,34 @@ DELETE /api/cart
   -> Invalidate cache
 ```
 
-### Step 4: Checkout (Payment Flow)
+### Step 4: Checkout
 
 ```
-Customer clicks "Pay & Place Order"
+Customer confirms checkout
   |
   v
-POST /api/payment/create-order { delivery_address: "..." }
+POST /api/cart/checkout { delivery_address: "..." }
   |
   v
 Backend:
   1. Fetch all cart items with product details
   2. Validate: cart not empty, no self-purchase, stock available
-  3. Calculate total amount
-  4. Create Razorpay order:
-     razorpay.orders.create({
-       amount: totalAmount * 100,  // Convert to paise
-       currency: "INR",
-       receipt: "cart_{customerId}_{timestamp}"
-     })
-  5. Return razorpay_order_id + amount + key_id to frontend
-  |
-  v
-Frontend opens Razorpay Checkout form
-  -> Customer enters payment details (card/UPI/netbanking/wallet)
-  -> Razorpay processes payment
-  -> Returns: { razorpay_order_id, razorpay_payment_id, razorpay_signature }
-  |
-  v
-POST /api/payment/verify { razorpay_order_id, razorpay_payment_id, razorpay_signature }
-  |
-  v
-Backend Verification:
-  1. HMAC-SHA256 signature verification:
-     expected = HMAC("sha256", KEY_SECRET, "order_id|payment_id")
-     Compare expected === received signature
-  2. Fetch payment from Razorpay API: razorpay.payments.fetch(payment_id)
-  3. Validate status: "captured" or "authorized"
-  4. Idempotency check: existing orders with same razorpay_order_id?
-  |
-  v
-Database Transaction (BEGIN):
-  5. Lock cart items: SELECT ... FOR UPDATE (prevents race conditions)
-  6. For each cart item:
-     a. Validate stock availability
-     b. INSERT INTO orders (customer_id, product_id, quantity, total_price,
-                            status='pending', razorpay_order_id, razorpay_payment_id,
-                            payment_status='paid')
-     c. UPDATE products SET quantity = quantity - ordered_qty
-  7. Clear cart: DELETE FROM cart_items WHERE customer_id = $1
+  3. Group items and create orders
+  4. Lock rows and validate stock in transaction
+  5. INSERT orders with status='pending'
+  6. UPDATE products SET quantity = quantity - ordered_qty
+  7. Clear cart for customer
   8. COMMIT
   |
   v
 Cache Invalidation: cart:*, orders:*, products:*
   |
   v
-Response: { orderIds: [101, 102], payment: { amount, method, status } }
+Response: { orderIds: [101, 102] }
   |
   v
-Frontend: Show success modal with payment details
-         -> "View Orders" button
+Frontend: Show success state -> "View Orders"
 ```
-
-### Checkout Without Payment (Alternative Path)
-
-```
-POST /api/cart/checkout { delivery_address: "..." }
-  |
-  v
-Same flow but without Razorpay:
-  - Groups cart items by farmer (one order per farmer)
-  - Transaction: validate stock -> create orders -> reduce stock -> clear cart
-  - No payment verification step
-```
-
----
-
-## Payment & Checkout (Razorpay)
-
-### Integration Architecture
-
-```
-                    ┌─────────────┐
-                    │   Frontend   │
-                    └──────┬──────┘
-                           |
-              1. Create    |  4. Verify
-                 Order     |     Payment
-                           |
-                    ┌──────┴──────┐
-                    │   Backend    │
-                    └──────┬──────┘
-                           |
-              2. Create    |  3. Payment    5. Webhook
-                 Order     |     Response      Events
-                           |
-                    ┌──────┴──────┐
-                    │   Razorpay   │
-                    └─────────────┘
-```
-
-### Amount Handling
-
-```
-Frontend Amount:  Rs 500.00
-  -> Backend:     500 * 100 = 50000 paise
-  -> Razorpay:    50000 (smallest currency unit)
-  -> Response:    50000 / 100 = Rs 500.00 (display)
-```
-
-### Signature Verification
-
-```javascript
-// Payment verification (order_id|payment_id format)
-expected = crypto.createHmac("sha256", RAZORPAY_KEY_SECRET)
-  .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-  .digest("hex");
-
-// Webhook verification (full body JSON)
-expected = crypto.createHmac("sha256", RAZORPAY_WEBHOOK_SECRET)
-  .update(JSON.stringify(body))
-  .digest("hex");
-```
-
-### Webhook Events Handled
-
-| Event | Action |
-|---|---|
-| `payment.captured` | Set `payment_status = 'paid'` |
-| `payment.authorized` | Set `payment_status = 'paid'` |
-| `payment.failed` | Set `payment_status = 'failed'` |
-| Other events | Ignored |
-
-### Idempotency
-
-Duplicate payment prevention:
-- Before creating orders, check: `SELECT id FROM orders WHERE razorpay_order_id = $1`
-- If orders exist, return `{ alreadyProcessed: true }` without re-processing
-
-### Supported Payment Methods
-
-Card, UPI, Net Banking, Wallet, EMI, Bank Transfer (via Razorpay hosted checkout)
 
 ---
 
@@ -986,9 +859,6 @@ ALTER TABLE cart_items ADD CONSTRAINT cart_items_customer_product_unique
 
 -- Add columns
 ALTER TABLE users ADD COLUMN delivery_address TEXT;
-ALTER TABLE orders ADD COLUMN razorpay_order_id VARCHAR(255);
-ALTER TABLE orders ADD COLUMN razorpay_payment_id VARCHAR(255);
-ALTER TABLE orders ADD COLUMN payment_status VARCHAR(50) DEFAULT 'pending';
 
 -- Create tables
 CREATE TABLE IF NOT EXISTS addresses (
@@ -1021,8 +891,8 @@ CREATE TABLE IF NOT EXISTS addresses (
 │ role         │     │ quality      │     │ total_price  │
 │ delivery_addr│     │ description  │     │ status       │
 └──────┬───────┘     │ image        │     │ delivery_addr│
-       │             │ quantity_unit│     │ razorpay_*   │
-       │             │ category     │     │ payment_status│
+      │             │ quantity_unit│     │ created_at   │
+      │             │ category     │     │ updated_at   │
        │             └──────────────┘     └──────────────┘
        │
        │             ┌──────────────┐     ┌──────────────┐
@@ -1290,11 +1160,11 @@ X-XSS-Protection: 1; mode=block
 Strict-Transport-Security (HSTS)
 Content-Security-Policy (CSP):
   - defaultSrc: 'self'
-  - scriptSrc: 'self', approved CDNs, Razorpay
+  - scriptSrc: 'self', approved CDNs
   - styleSrc: 'self', approved CDNs
   - imgSrc: 'self', Supabase, Unsplash
-  - connectSrc: 'self', WebSocket, Razorpay API
-  - frameSrc: 'self', Razorpay checkout
+  - connectSrc: 'self', WebSocket
+  - frameSrc: 'self'
 ```
 
 ### 6. Rate Limiting
@@ -1302,20 +1172,8 @@ Content-Security-Policy (CSP):
 | Endpoint Group | Limit | Window |
 |---|---|---|
 | Auth (login, signup, refresh, logout) | 20 requests | 15 minutes |
-| API (products, cart, orders, chat, reviews, addresses, payment) | 100 requests | 15 minutes |
+| API (products, cart, orders, chat, reviews, addresses, prediction) | 100 requests | 15 minutes |
 | Chat messages (customers) | 1 message | per hour per order |
-
-### 7. Payment Security (Razorpay)
-
-| Measure | Implementation |
-|---|---|
-| Signature verification | HMAC-SHA256 on payment response |
-| Webhook verification | HMAC-SHA256 on webhook body |
-| Server-side secret | KEY_SECRET never exposed to frontend |
-| Idempotency | Duplicate order check before processing |
-| Amount verification | Server calculates total, not from client |
-| Status validation | Only "captured"/"authorized" accepted |
-| Transaction safety | FOR UPDATE locks + atomic commit |
 
 ### 8. CORS Configuration
 
@@ -1376,11 +1234,6 @@ SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_KEY=your-service-role-key
 SUPABASE_BUCKET=uploads
 
-# Razorpay (Payment Gateway)
-RAZORPAY_KEY_ID=rzp_test_xxxx (test) | rzp_live_xxxx (production)
-RAZORPAY_KEY_SECRET=your-key-secret
-RAZORPAY_WEBHOOK_SECRET=your-webhook-secret
-
 # AI / ML
 HF_API_URL=https://api-inference.huggingface.co/models/your-model
 
@@ -1397,7 +1250,6 @@ BASE_URL=https://your-domain.com
 - Node.js 20.x
 - PostgreSQL database (or Supabase project)
 - Redis instance
-- Razorpay account (test mode available)
 - Supabase project (for file storage)
 
 ### Installation

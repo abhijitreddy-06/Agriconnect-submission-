@@ -3,7 +3,7 @@ import pg from "pg";
 const { Pool } = pg;
 
 if (!process.env.DATABASE_URL) {
-  process.exit(1);
+  throw new Error("DATABASE_URL is not set. Ensure .env is loaded before importing database config.");
 }
 
 let dbHost = "unknown";
@@ -93,22 +93,6 @@ export const testConnection = async () => {
             WHERE table_name = 'users' AND column_name = 'delivery_address'
           ) THEN
             ALTER TABLE users ADD COLUMN delivery_address TEXT DEFAULT NULL;
-          END IF;
-        END $$;
-      `);
-    } catch {}
-
-    try {
-      await pool.query(`
-        DO $$ BEGIN
-          IF NOT EXISTS (
-            SELECT 1 FROM information_schema.columns
-            WHERE table_name = 'orders' AND column_name = 'razorpay_order_id'
-          ) THEN
-            ALTER TABLE orders
-              ADD COLUMN razorpay_order_id VARCHAR(255) DEFAULT NULL,
-              ADD COLUMN razorpay_payment_id VARCHAR(255) DEFAULT NULL,
-              ADD COLUMN payment_status VARCHAR(20) DEFAULT 'pending';
           END IF;
         END $$;
       `);
