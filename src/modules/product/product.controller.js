@@ -17,6 +17,16 @@ export const getProductById = catchAsync(async (req, res) => {
   return sendResponse(res, 200, "Product fetched successfully.", product);
 });
 
+export const getRecommendations = catchAsync(async (req, res) => {
+  const data = await ProductService.getRecommendations(req.params.id, req.query.limit);
+  return sendResponse(res, 200, "Product recommendations fetched successfully.", data);
+});
+
+export const getSeasonalSuggestions = catchAsync(async (req, res) => {
+  const data = await ProductService.getSeasonalSuggestions(req.query.limit);
+  return sendResponse(res, 200, "Seasonal suggestions fetched successfully.", data);
+});
+
 export const updateProduct = catchAsync(async (req, res) => {
   await ProductService.updateProduct(req.user.userId, req.params.id, req.body, req.file);
   return sendResponse(res, 200, "Product updated successfully.", null);

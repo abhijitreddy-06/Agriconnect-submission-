@@ -4,7 +4,15 @@ import { verifyToken, requireRole } from "../../middleware/auth.js";
 import { cacheMiddleware } from "../../middleware/cache.js";
 import { validate } from "../../middleware/validate.js";
 import { productQuerySchema, idParamSchema } from "./product.validation.js";
-import { createProduct, getAllProducts, getProductById, updateProduct, deleteProduct } from "./product.controller.js";
+import {
+  createProduct,
+  getAllProducts,
+  getProductById,
+  updateProduct,
+  deleteProduct,
+  getRecommendations,
+  getSeasonalSuggestions,
+} from "./product.controller.js";
 
 const router = express.Router();
 
@@ -31,6 +39,14 @@ router.post(
   requireRole("farmer"),
   upload.single("productImage"),
   createProduct
+);
+
+router.get("/seasonal/suggestions", getSeasonalSuggestions);
+
+router.get(
+  "/:id/recommendations",
+  validate(idParamSchema),
+  getRecommendations
 );
 
 router.get("/:id", validate(idParamSchema), getProductById);
