@@ -6,17 +6,46 @@ import {
   saveMessage,
 } from "../modules/chat/chat.socket.service.js";
 
+const parseAllowedOrigins = () => {
+  const configured = [
+    process.env.CORS_ORIGINS,
+    process.env.FRONTEND_URL,
+    process.env.BASE_URL,
+  ]
+    .filter(Boolean)
+    .flatMap((value) => String(value).split(","))
+    .map((origin) => origin.trim().replace(/\/+$/, ""))
+    .filter(Boolean);
+
+  return Array.from(new Set(configured));
+};
+
+const allowedOrigins = parseAllowedOrigins();
+
 export const initSocket = (httpServer) => {
   const io = new Server(httpServer, {
     cors: {
-      origin: process.env.NODE_ENV === "production" ? process.env.BASE_URL : true,
+      origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        if (process.env.NODE_ENV !== "production") return callback(null, true);
+
+        const normalizedOrigin = origin.replace(/\/+$/, "");
+        if (allowedOrigins.includes(normalizedOrigin)) {
+          return callback(null, true);
+        }
+
+        return callback(new Error("Not allowed by CORS"));
+      },
       credentials: true,
     },
   });
 
   io.use((socket, next) => {
     try {
-      const token = socket.handshake.auth?.token;
+      const token = {
+        accessToken: socket.handshake.auth?.token,
+        cookieHeader: socket.handshake.headers?.cookie,
+      };
       socket.user = authenticateSocketUser(token);
       next();
     } catch (error) {
@@ -59,6 +88,30 @@ export const initSocket = (httpServer) => {
       } catch (error) {
         socket.emit("chat_error", error.message || "Failed to send message.");
       }
+    });
+
+    socket.on("typing_start", async ({ orderId }) => {
+      try {
+        const access = await validateOrderChatAccess(socket.user.userId, orderId);
+        socket.to(`order_${access.parsedOrderId}`).emit("typing", {
+          orderId: access.parsedOrderId,
+          userId: socket.user.userId,
+          role: socket.user.role,
+          active: true,
+        });
+      } catch {}
+    });
+
+    socket.on("typing_stop", async ({ orderId }) => {
+      try {
+        const access = await validateOrderChatAccess(socket.user.userId, orderId);
+        socket.to(`order_${access.parsedOrderId}`).emit("typing", {
+          orderId: access.parsedOrderId,
+          userId: socket.user.userId,
+          role: socket.user.role,
+          active: false,
+        });
+      } catch {}
     });
   });
 

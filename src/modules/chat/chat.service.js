@@ -7,8 +7,8 @@ export const getMessages = async (userId, orderId) => {
   if (userId !== order.customer_id && userId !== order.farmer_id) {
     throw new AppError("You are not part of this order.", 403);
   }
-  if (order.status !== "pending") {
-    throw new AppError("Chat is only available for pending orders.", 400);
+  if (order.status === "cancelled") {
+    throw new AppError("Chat is unavailable for cancelled orders.", 400);
   }
 
   return await ChatModel.findMessages(orderId);

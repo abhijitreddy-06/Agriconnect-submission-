@@ -2,6 +2,23 @@ import pool from "../../config/database.js";
 import { verifyAccessToken } from "../../utils/tokenUtils.js";
 import AppError from "../../utils/AppError.js";
 
+const ACCESS_COOKIE = "accessToken";
+
+const parseCookieHeader = (cookieHeader = "") => {
+  return cookieHeader
+    .split(";")
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .reduce((acc, item) => {
+      const separatorIndex = item.indexOf("=");
+      if (separatorIndex === -1) return acc;
+      const key = decodeURIComponent(item.slice(0, separatorIndex).trim());
+      const value = decodeURIComponent(item.slice(separatorIndex + 1).trim());
+      acc[key] = value;
+      return acc;
+    }, {});
+};
+
 const parseOrderId = (orderId) => {
   const parsed = Number(orderId);
   if (!Number.isInteger(parsed) || parsed <= 0) {
@@ -11,12 +28,19 @@ const parseOrderId = (orderId) => {
 };
 
 export const authenticateSocketUser = (token) => {
-  if (!token) {
+  const cookieToken = token?.cookieHeader
+    ? parseCookieHeader(token.cookieHeader)[ACCESS_COOKIE]
+    : null;
+
+  const providedToken = typeof token === "string" ? token : token?.accessToken;
+  const resolvedToken = cookieToken || providedToken || null;
+
+  if (!resolvedToken) {
     throw new AppError("Authentication required", 401);
   }
 
   try {
-    const decoded = verifyAccessToken(token);
+    const decoded = verifyAccessToken(resolvedToken);
     return { userId: decoded.userId, role: decoded.role };
   } catch {
     throw new AppError("Invalid or expired token", 401);
@@ -43,8 +67,8 @@ export const validateOrderChatAccess = async (userId, orderId) => {
     throw new AppError("You are not part of this order.", 403);
   }
 
-  if (order.status !== "pending") {
-    throw new AppError("Chat is only available for pending orders.", 400);
+  if (order.status === "cancelled") {
+    throw new AppError("Chat is unavailable for cancelled orders.", 400);
   }
 
   return { order, parsedOrderId };
@@ -60,16 +84,16 @@ export const ensureMessageAllowed = async (userId, role, parsedOrderId, message)
     throw new AppError("Message must be 1-300 characters.", 400);
   }
 
-  if (role === "customer") {
+  if (["customer", "farmer"].includes(role)) {
     const rateCheck = await pool.query(
       `SELECT id FROM chat_messages
-       WHERE sender_id = $1 AND order_id = $2 AND created_at > NOW() - INTERVAL '1 hour'
+       WHERE sender_id = $1 AND order_id = $2 AND created_at > NOW() - INTERVAL '2 seconds'
        LIMIT 1`,
       [userId, parsedOrderId]
     );
 
     if (rateCheck.rows.length > 0) {
-      throw new AppError("You can only send 1 message per hour. Please wait.", 429);
+      throw new AppError("Please wait a moment before sending another message.", 429);
     }
   }
 
