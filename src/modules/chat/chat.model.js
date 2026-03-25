@@ -36,3 +36,14 @@ export const findChatInfo = async (orderId) => {
   );
   return result.rows[0] || null;
 };
+
+export const createMessage = async (orderId, senderId, senderRole, message) => {
+  const result = await pool.query(
+    `INSERT INTO chat_messages (order_id, sender_id, sender_role, message)
+     VALUES ($1, $2, $3, $4)
+     RETURNING id, order_id, sender_id, sender_role, message, created_at`,
+    [orderId, senderId, senderRole, message]
+  );
+
+  return result.rows[0];
+};
