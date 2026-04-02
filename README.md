@@ -1,6 +1,6 @@
 # AgriConnect
 
-A full-stack farming marketplace platform with AI-powered plant health analysis, real-time chat, and secure order workflows. Built with Node.js, Express, PostgreSQL, Redis, and Socket.io following MVC architecture.
+A full-stack farming marketplace platform with AI-powered plant health analysis, order chat, and secure order workflows. Built with Node.js, Express, PostgreSQL, and Redis following MVC architecture.
 
 ---
 
@@ -14,7 +14,7 @@ A full-stack farming marketplace platform with AI-powered plant health analysis,
 - [Product Flow](#product-flow)
 - [Add to Cart to Checkout Flow](#add-to-cart-to-checkout-flow)
 - [Order Management](#order-management)
-- [Real-Time Chat (Socket.io)](#real-time-chat-socketio)
+- [Order Chat (Polling via REST)](#order-chat-polling-via-rest)
 - [AI Plant Health Prediction](#ai-plant-health-prediction)
 - [Redis Caching Strategy](#redis-caching-strategy)
 - [SQL & Database Optimizations](#sql--database-optimizations)
@@ -30,42 +30,42 @@ A full-stack farming marketplace platform with AI-powered plant health analysis,
 
 ### Backend
 
-| Technology | Version | Purpose |
-|---|---|---|
-| **Node.js** | 20.x | Runtime environment |
-| **Express.js** | 4.21.2 | Web framework |
-| **PostgreSQL** | - | Primary relational database |
-| **Redis (ioredis)** | 5.9.3 | Caching layer & token blacklisting |
-| **Socket.io** | 4.8.3 | Real-time bidirectional WebSocket communication |
-| **Supabase** | 2.96.0 | File storage (product images) |
-| **JSON Web Tokens** | 9.0.3 | Authentication (access + refresh tokens) |
-| **bcrypt** | 5.1.1 | Password hashing (10 salt rounds) |
-| **Zod** | 4.3.6 | Runtime schema validation |
-| **Multer** | 1.4.5 | Multipart file upload handling |
-| **Helmet** | 8.1.0 | HTTP security headers & CSP |
-| **express-rate-limit** | 8.2.1 | Rate limiting per endpoint |
-| **Morgan** | 1.10.1 | HTTP request logging |
-| **Compression** | 1.8.1 | Gzip response compression |
-| **Axios** | 1.8.3 | HTTP client for external API calls |
-| **dotenv** | 16.4.7 | Environment variable management |
-| **cors** | 2.8.5 | Cross-Origin Resource Sharing |
-| **pg** | 8.13.1 | PostgreSQL client with connection pooling |
+| Technology              | Version | Purpose                                           |
+| ----------------------- | ------- | ------------------------------------------------- |
+| **Node.js**             | 20.x    | Runtime environment                               |
+| **Express.js**          | 4.21.2  | Web framework                                     |
+| **PostgreSQL**          | -       | Primary relational database                       |
+| **Redis (ioredis)**     | 5.9.3   | Caching layer & token blacklisting                |
+| **REST Chat + Polling** | -       | Order messaging via HTTP APIs with client polling |
+| **Supabase**            | 2.96.0  | File storage (product images)                     |
+| **JSON Web Tokens**     | 9.0.3   | Authentication (access + refresh tokens)          |
+| **bcrypt**              | 5.1.1   | Password hashing (10 salt rounds)                 |
+| **Zod**                 | 4.3.6   | Runtime schema validation                         |
+| **Multer**              | 1.4.5   | Multipart file upload handling                    |
+| **Helmet**              | 8.1.0   | HTTP security headers & CSP                       |
+| **express-rate-limit**  | 8.2.1   | Rate limiting per endpoint                        |
+| **Morgan**              | 1.10.1  | HTTP request logging                              |
+| **Compression**         | 1.8.1   | Gzip response compression                         |
+| **Axios**               | 1.8.3   | HTTP client for external API calls                |
+| **dotenv**              | 16.4.7  | Environment variable management                   |
+| **cors**                | 2.8.5   | Cross-Origin Resource Sharing                     |
+| **pg**                  | 8.13.1  | PostgreSQL client with connection pooling         |
 
 ### Frontend
 
-| Technology | Purpose |
-|---|---|
+| Technology              | Purpose                              |
+| ----------------------- | ------------------------------------ |
 | **Vanilla HTML/CSS/JS** | 18 pages, 19 CSS files, 10+ JS files |
-| **Socket.io Client** | Real-time chat on frontend |
-| **CDN Libraries** | Font Awesome, Google Fonts |
+| **HTTP Polling**        | Periodic chat refresh on frontend    |
+| **CDN Libraries**       | Font Awesome, Google Fonts           |
 
 ### External Services
 
-| Service | Purpose |
-|---|---|
-| **Supabase** | PostgreSQL database hosting + file storage bucket |
-| **Hugging Face API** | AI plant disease detection model |
-| **Render** | Deployment platform |
+| Service              | Purpose                                           |
+| -------------------- | ------------------------------------------------- |
+| **Supabase**         | PostgreSQL database hosting + file storage bucket |
+| **Hugging Face API** | AI plant disease detection model                  |
+| **Render**           | Deployment platform                               |
 
 ---
 
@@ -132,7 +132,6 @@ AgriConnect/
 │   ├── config/
 │   │   ├── database.js              # PostgreSQL pool (max 3, SSL, keepalive)
 │   │   ├── redis.js                 # Redis client (ioredis, TLS, retry)
-│   │   ├── socket.js                # Socket.io init, auth, chat events
 │   │   └── supabase.js              # Supabase client for file storage
 │   │
 │   ├── middleware/
@@ -176,93 +175,93 @@ AgriConnect/
 
 ### Authentication (`/api/auth`)
 
-| Method | Endpoint | Auth | Role | Description |
-|---|---|---|---|---|
-| `POST` | `/api/auth/signup` | No | - | Register new user (farmer/customer) |
-| `POST` | `/api/auth/login` | No | - | Login with phone + password |
-| `POST` | `/api/auth/refresh` | No | - | Refresh access token using refresh token |
-| `POST` | `/api/auth/logout` | No | - | Logout and blacklist refresh token |
-| `GET` | `/api/auth/verify` | Yes | Any | Verify token and get user profile |
-| `PUT` | `/api/auth/profile` | Yes | Any | Update username and delivery address |
+| Method | Endpoint            | Auth | Role | Description                              |
+| ------ | ------------------- | ---- | ---- | ---------------------------------------- |
+| `POST` | `/api/auth/signup`  | No   | -    | Register new user (farmer/customer)      |
+| `POST` | `/api/auth/login`   | No   | -    | Login with phone + password              |
+| `POST` | `/api/auth/refresh` | No   | -    | Refresh access token using refresh token |
+| `POST` | `/api/auth/logout`  | No   | -    | Logout and blacklist refresh token       |
+| `GET`  | `/api/auth/verify`  | Yes  | Any  | Verify token and get user profile        |
+| `PUT`  | `/api/auth/profile` | Yes  | Any  | Update username and delivery address     |
 
 **Rate Limit:** 20 requests / 15 minutes
 
 ### Products (`/api/products`)
 
-| Method | Endpoint | Auth | Role | Description |
-|---|---|---|---|---|
-| `GET` | `/api/products` | No | - | List products with search, filter, pagination. **Cached 300s.** |
-| `POST` | `/api/products` | Yes | Farmer | Create product with image upload to Supabase |
-| `PUT` | `/api/products/:id` | Yes | Farmer | Update product (ownership verified) |
-| `DELETE` | `/api/products/:id` | Yes | Farmer | Delete product + cleanup Supabase image |
+| Method   | Endpoint            | Auth | Role   | Description                                                     |
+| -------- | ------------------- | ---- | ------ | --------------------------------------------------------------- |
+| `GET`    | `/api/products`     | No   | -      | List products with search, filter, pagination. **Cached 300s.** |
+| `POST`   | `/api/products`     | Yes  | Farmer | Create product with image upload to Supabase                    |
+| `PUT`    | `/api/products/:id` | Yes  | Farmer | Update product (ownership verified)                             |
+| `DELETE` | `/api/products/:id` | Yes  | Farmer | Delete product + cleanup Supabase image                         |
 
 **Query Params for GET:** `farmer_id`, `category`, `search` (ILIKE), `page`, `limit` (max 100)
 
 ### Cart (`/api/cart`)
 
-| Method | Endpoint | Auth | Role | Description |
-|---|---|---|---|---|
-| `POST` | `/api/cart` | Yes | Customer | Add to cart (upsert on conflict) |
-| `GET` | `/api/cart` | Yes | Customer | Get cart with subtotals. **Cached 60s.** |
-| `PUT` | `/api/cart/:id` | Yes | Customer | Update item quantity (max 9999) |
-| `DELETE` | `/api/cart/:id` | Yes | Customer | Remove single cart item |
-| `DELETE` | `/api/cart` | Yes | Customer | Clear entire cart |
-| `POST` | `/api/cart/checkout` | Yes | Customer | Checkout cart and create orders |
+| Method   | Endpoint             | Auth | Role     | Description                              |
+| -------- | -------------------- | ---- | -------- | ---------------------------------------- |
+| `POST`   | `/api/cart`          | Yes  | Customer | Add to cart (upsert on conflict)         |
+| `GET`    | `/api/cart`          | Yes  | Customer | Get cart with subtotals. **Cached 60s.** |
+| `PUT`    | `/api/cart/:id`      | Yes  | Customer | Update item quantity (max 9999)          |
+| `DELETE` | `/api/cart/:id`      | Yes  | Customer | Remove single cart item                  |
+| `DELETE` | `/api/cart`          | Yes  | Customer | Clear entire cart                        |
+| `POST`   | `/api/cart/checkout` | Yes  | Customer | Checkout cart and create orders          |
 
 ### Orders (`/api/orders`)
 
-| Method | Endpoint | Auth | Role | Description |
-|---|---|---|---|---|
-| `POST` | `/api/orders` | Yes | Customer | Create single direct order (stock deducted atomically) |
-| `GET` | `/api/orders` | Yes | Any | List orders (customer sees own, farmer sees orders for their products). **Cached 120s.** |
-| `GET` | `/api/orders/:id` | Yes | Any | Get order details (participant only) |
-| `PUT` | `/api/orders/:id` | Yes | Farmer | Update order status (validated transitions) |
-| `PUT` | `/api/orders/:id/cancel` | Yes | Customer | Cancel order + restore stock |
+| Method | Endpoint                 | Auth | Role     | Description                                                                              |
+| ------ | ------------------------ | ---- | -------- | ---------------------------------------------------------------------------------------- |
+| `POST` | `/api/orders`            | Yes  | Customer | Create single direct order (stock deducted atomically)                                   |
+| `GET`  | `/api/orders`            | Yes  | Any      | List orders (customer sees own, farmer sees orders for their products). **Cached 120s.** |
+| `GET`  | `/api/orders/:id`        | Yes  | Any      | Get order details (participant only)                                                     |
+| `PUT`  | `/api/orders/:id`        | Yes  | Farmer   | Update order status (validated transitions)                                              |
+| `PUT`  | `/api/orders/:id/cancel` | Yes  | Customer | Cancel order + restore stock                                                             |
 
 ### Reviews (`/api/reviews`)
 
-| Method | Endpoint | Auth | Role | Description |
-|---|---|---|---|---|
-| `POST` | `/api/reviews` | Yes | Customer | Submit review (order must be delivered) |
-| `GET` | `/api/reviews/product/:productId` | No | - | Get reviews + average rating |
-| `GET` | `/api/reviews/check/:orderId` | Yes | Customer | Check if order already reviewed |
+| Method | Endpoint                          | Auth | Role     | Description                             |
+| ------ | --------------------------------- | ---- | -------- | --------------------------------------- |
+| `POST` | `/api/reviews`                    | Yes  | Customer | Submit review (order must be delivered) |
+| `GET`  | `/api/reviews/product/:productId` | No   | -        | Get reviews + average rating            |
+| `GET`  | `/api/reviews/check/:orderId`     | Yes  | Customer | Check if order already reviewed         |
 
 ### Plant Health Prediction (`/api/predict`)
 
-| Method | Endpoint | Auth | Role | Description |
-|---|---|---|---|---|
-| `POST` | `/api/predict/analyze` | Yes | Farmer | Upload plant image for AI disease analysis |
-| `GET` | `/api/predict/:id` | Yes | Farmer | Get prediction result. **Cached 1800s.** |
+| Method | Endpoint               | Auth | Role   | Description                                |
+| ------ | ---------------------- | ---- | ------ | ------------------------------------------ |
+| `POST` | `/api/predict/analyze` | Yes  | Farmer | Upload plant image for AI disease analysis |
+| `GET`  | `/api/predict/:id`     | Yes  | Farmer | Get prediction result. **Cached 1800s.**   |
 
 ### Addresses (`/api/addresses`)
 
-| Method | Endpoint | Auth | Role | Description |
-|---|---|---|---|---|
-| `POST` | `/api/addresses` | Yes | Any | Add delivery address |
-| `GET` | `/api/addresses` | Yes | Any | List all user addresses |
-| `GET` | `/api/addresses/:id` | Yes | Any | Get specific address |
-| `PUT` | `/api/addresses/:id` | Yes | Any | Update address |
-| `DELETE` | `/api/addresses/:id` | Yes | Any | Delete address |
-| `PATCH` | `/api/addresses/:id/default` | Yes | Any | Set as default address |
+| Method   | Endpoint                     | Auth | Role | Description             |
+| -------- | ---------------------------- | ---- | ---- | ----------------------- |
+| `POST`   | `/api/addresses`             | Yes  | Any  | Add delivery address    |
+| `GET`    | `/api/addresses`             | Yes  | Any  | List all user addresses |
+| `GET`    | `/api/addresses/:id`         | Yes  | Any  | Get specific address    |
+| `PUT`    | `/api/addresses/:id`         | Yes  | Any  | Update address          |
+| `DELETE` | `/api/addresses/:id`         | Yes  | Any  | Delete address          |
+| `PATCH`  | `/api/addresses/:id/default` | Yes  | Any  | Set as default address  |
 
 ### Chat (`/api/chat`)
 
-| Method | Endpoint | Auth | Role | Description |
-|---|---|---|---|---|
-| `GET` | `/api/chat/:orderId` | Yes | Any | Get chat message history for order |
-| `GET` | `/api/chat/:orderId/info` | Yes | Any | Get chat metadata (participants, status) |
+| Method | Endpoint                  | Auth | Role | Description                              |
+| ------ | ------------------------- | ---- | ---- | ---------------------------------------- |
+| `GET`  | `/api/chat/:orderId`      | Yes  | Any  | Get chat message history for order       |
+| `GET`  | `/api/chat/:orderId/info` | Yes  | Any  | Get chat metadata (participants, status) |
 
 ### Health Checks (`/health`)
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/health` | Overall system health |
-| `GET` | `/health/db` | Database connection + latency |
-| `GET` | `/health/redis` | Redis connection + write/read test |
-| `GET` | `/health/auth` | JWT configuration check |
-| `GET` | `/health/storage` | Supabase storage configuration |
-| `GET` | `/health/env` | Environment variable check |
-| `GET` | `/health/all` | Comprehensive health check |
+| Method | Endpoint          | Description                        |
+| ------ | ----------------- | ---------------------------------- |
+| `GET`  | `/health`         | Overall system health              |
+| `GET`  | `/health/db`      | Database connection + latency      |
+| `GET`  | `/health/redis`   | Redis connection + write/read test |
+| `GET`  | `/health/auth`    | JWT configuration check            |
+| `GET`  | `/health/storage` | Supabase storage configuration     |
+| `GET`  | `/health/env`     | Environment variable check         |
+| `GET`  | `/health/all`     | Comprehensive health check         |
 
 ---
 
@@ -611,14 +610,14 @@ Frontend: Show success state -> "View Orders"
 
 ### Valid Status Transitions (enforced in code)
 
-| Current Status | Allowed Next Status | Who Can Update |
-|---|---|---|
-| `pending` | `accepted` | Farmer |
-| `accepted` | `shipped` | Farmer |
-| `shipped` | `delivered` | Farmer |
-| `pending`, `accepted` | `cancelled` | Customer |
-| `delivered` | - | Terminal state |
-| `cancelled` | - | Terminal state |
+| Current Status        | Allowed Next Status | Who Can Update |
+| --------------------- | ------------------- | -------------- |
+| `pending`             | `accepted`          | Farmer         |
+| `accepted`            | `shipped`           | Farmer         |
+| `shipped`             | `delivered`         | Farmer         |
+| `pending`, `accepted` | `cancelled`         | Customer       |
+| `delivered`           | -                   | Terminal state |
+| `cancelled`           | -                   | Terminal state |
 
 ### Order Cancellation (Stock Restoration)
 
@@ -637,43 +636,23 @@ Transaction (BEGIN):
 
 ---
 
-## Real-Time Chat (Socket.io)
+## Order Chat (Polling via REST)
 
-### Connection & Authentication
+### Request Flow
 
-```javascript
-// Client-side connection with JWT
-const socket = io({
-  auth: { token: accessToken }
-});
-
-// Server-side authentication middleware
-io.use((socket, next) => {
-  const token = socket.handshake.auth?.token;
-  const decoded = verifyAccessToken(token);
-  socket.user = { userId: decoded.userId, role: decoded.role };
-  next();
-});
+```text
+1. Client fetches chat list and messages via secured REST endpoints.
+2. Client polls chat endpoints at a fixed interval to refresh new messages.
+3. Send message requests are validated on the server and persisted.
+4. Access is restricted to participants of the related order.
 ```
-
-### WebSocket Events
-
-| Event | Direction | Payload | Description |
-|---|---|---|---|
-| `join_order` | Client -> Server | `{ orderId }` | Join order-specific chat room |
-| `joined` | Server -> Client | `{ orderId }` | Confirmation of room join |
-| `send_message` | Client -> Server | `{ orderId, message }` | Send chat message (1-300 chars) |
-| `new_message` | Server -> Client | `{ id, order_id, sender_id, sender_role, message, created_at }` | Broadcast to room |
-| `chat_error` | Server -> Client | `string` | Error notification |
 
 ### Chat Rules
 
-- **Access Control:** Only order participants (customer + farmer) can join/send
-- **Status Restriction:** Chat only available for `pending` orders
-- **Rate Limiting:** Customers limited to 1 message per hour per order
+- **Access Control:** Only order participants (customer + farmer) can read/send
+- **Status Restriction:** Chat unavailable for cancelled orders
 - **Message Validation:** 1-300 characters, trimmed
 - **Persistence:** All messages stored in `chat_messages` table
-- **Rooms:** `order_{orderId}` - isolated per order
 
 ---
 
@@ -708,15 +687,15 @@ GET /api/predict/:id (cached 1800s in Redis)
 
 ### Cache Keys & TTL
 
-| Key Pattern | TTL | Description |
-|---|---|---|
-| `products:{farmerId}:cat:{cat}:search:{s}:page:{p}:limit:{l}` | 300s | Product listings |
-| `cart:{customerId}` | 60s | Shopping cart contents |
-| `orders:{role}:{userId}:page:{p}:limit:{l}` | 120s | Order listings |
-| `reviews:product:{productId}` | 180s | Product reviews + avg rating |
-| `user:profile:{userId}` | 600s | User profile data |
-| `prediction:{predictionId}` | 1800s | AI prediction results |
-| `blacklist:{refreshToken}` | 604800s (7d) | Revoked refresh tokens |
+| Key Pattern                                                   | TTL          | Description                  |
+| ------------------------------------------------------------- | ------------ | ---------------------------- |
+| `products:{farmerId}:cat:{cat}:search:{s}:page:{p}:limit:{l}` | 300s         | Product listings             |
+| `cart:{customerId}`                                           | 60s          | Shopping cart contents       |
+| `orders:{role}:{userId}:page:{p}:limit:{l}`                   | 120s         | Order listings               |
+| `reviews:product:{productId}`                                 | 180s         | Product reviews + avg rating |
+| `user:profile:{userId}`                                       | 600s         | User profile data            |
+| `prediction:{predictionId}`                                   | 1800s        | AI prediction results        |
+| `blacklist:{refreshToken}`                                    | 604800s (7d) | Revoked refresh tokens       |
 
 ### Cache Invalidation
 
@@ -759,12 +738,12 @@ cacheMiddleware(keyFn, ttlSeconds)
 ```javascript
 const pool = new Pool({
   connectionString: DATABASE_URL,
-  max: 3,                            // Max concurrent connections
-  idleTimeoutMillis: 30000,          // Close idle connections after 30s
-  connectionTimeoutMillis: 10000,    // Connection timeout 10s
-  keepAlive: true,                   // TCP keepalive enabled
+  max: 3, // Max concurrent connections
+  idleTimeoutMillis: 30000, // Close idle connections after 30s
+  connectionTimeoutMillis: 10000, // Connection timeout 10s
+  keepAlive: true, // TCP keepalive enabled
   keepAliveInitialDelayMillis: 10000,
-  ssl: { rejectUnauthorized: false }
+  ssl: { rejectUnauthorized: false },
 });
 ```
 
@@ -934,16 +913,16 @@ CREATE TABLE IF NOT EXISTS addresses (
 
 ### What's Configured
 
-| Feature | Status | Details |
-|---|---|---|
-| **Database Hosting** | Active | PostgreSQL database hosted on Supabase |
-| **File Storage** | Active | `uploads` bucket for product images and prediction images |
-| **Client Init** | Basic | `createClient(SUPABASE_URL, SUPABASE_KEY)` |
-| **RLS Policies** | Not configured | No Row-Level Security policies defined |
-| **Database Functions** | Not used | All logic in Node.js application layer |
-| **Triggers** | Not used | No database triggers |
-| **Edge Functions** | Not used | - |
-| **Auth** | Not used | Custom JWT auth implemented instead |
+| Feature                | Status         | Details                                                   |
+| ---------------------- | -------------- | --------------------------------------------------------- |
+| **Database Hosting**   | Active         | PostgreSQL database hosted on Supabase                    |
+| **File Storage**       | Active         | `uploads` bucket for product images and prediction images |
+| **Client Init**        | Basic          | `createClient(SUPABASE_URL, SUPABASE_KEY)`                |
+| **RLS Policies**       | Not configured | No Row-Level Security policies defined                    |
+| **Database Functions** | Not used       | All logic in Node.js application layer                    |
+| **Triggers**           | Not used       | No database triggers                                      |
+| **Edge Functions**     | Not used       | -                                                         |
+| **Auth**               | Not used       | Custom JWT auth implemented instead                       |
 
 ### Storage Operations
 
@@ -953,7 +932,7 @@ const { error } = await supabase.storage
   .from("uploads")
   .upload(filename, fileBuffer, {
     contentType: mimetype,
-    upsert: false
+    upsert: false,
   });
 
 // Get public URL
@@ -1010,19 +989,19 @@ Example: products/10/1708843200000-483921.jpg
 
 ### HTTP Status Codes Used
 
-| Code | Usage |
-|---|---|
-| `200` | Successful requests |
+| Code  | Usage                                                      |
+| ----- | ---------------------------------------------------------- |
+| `200` | Successful requests                                        |
 | `201` | Resource created (signup, product, order, review, address) |
-| `400` | Validation errors, business logic violations |
-| `401` | Missing/invalid/expired token |
-| `403` | Insufficient permissions (wrong role, not owner) |
-| `404` | Resource not found |
-| `409` | Conflict (duplicate phone on signup) |
-| `413` | File too large (>5MB) |
-| `429` | Rate limit exceeded |
-| `500` | Unexpected server errors |
-| `503` | Service unavailable (health checks) |
+| `400` | Validation errors, business logic violations               |
+| `401` | Missing/invalid/expired token                              |
+| `403` | Insufficient permissions (wrong role, not owner)           |
+| `404` | Resource not found                                         |
+| `409` | Conflict (duplicate phone on signup)                       |
+| `413` | File too large (>5MB)                                      |
+| `429` | Rate limit exceeded                                        |
+| `500` | Unexpected server errors                                   |
+| `503` | Service unavailable (health checks)                        |
 
 ### Multer Error Handling
 
@@ -1042,7 +1021,14 @@ if (err.message.includes("Only image files")) {
 
 ```javascript
 // Transient errors (auto-recovery):
-const transientCodes = ["ECONNRESET", "ETIMEDOUT", "EPIPE", "ECONNREFUSED", "57P01", "57P03"];
+const transientCodes = [
+  "ECONNRESET",
+  "ETIMEDOUT",
+  "EPIPE",
+  "ECONNREFUSED",
+  "57P01",
+  "57P03",
+];
 // Only non-transient errors logged
 
 // Transaction pattern: always ROLLBACK on error, always release client
@@ -1111,37 +1097,37 @@ try {
 
 ### 1. Authentication Security
 
-| Measure | Implementation |
-|---|---|
-| Password hashing | bcrypt with 10 salt rounds |
-| Token expiry | Access: 15 min, Refresh: 7 days |
-| Token rotation | New pair on refresh, old token blacklisted |
-| Token blacklisting | Redis-based, 7-day TTL |
-| Separate secrets | JWT_SECRET and JWT_REFRESH_SECRET are different |
+| Measure                | Implementation                                     |
+| ---------------------- | -------------------------------------------------- |
+| Password hashing       | bcrypt with 10 salt rounds                         |
+| Token expiry           | Access: 15 min, Refresh: 7 days                    |
+| Token rotation         | New pair on refresh, old token blacklisted         |
+| Token blacklisting     | Redis-based, 7-day TTL                             |
+| Separate secrets       | JWT_SECRET and JWT_REFRESH_SECRET are different    |
 | Generic error messages | "Invalid phone or password" (prevents enumeration) |
 
 ### 2. Authorization Security
 
-| Measure | Implementation |
-|---|---|
-| Role enforcement | `requireRole("farmer"/"customer")` middleware |
-| Ownership verification | All update/delete verify resource ownership at service layer |
-| Self-purchase prevention | Cannot add own products to cart or order them |
-| Order access control | Only order participants can view/modify |
-| Chat access control | Only order participants can join chat room |
+| Measure                  | Implementation                                               |
+| ------------------------ | ------------------------------------------------------------ |
+| Role enforcement         | `requireRole("farmer"/"customer")` middleware                |
+| Ownership verification   | All update/delete verify resource ownership at service layer |
+| Self-purchase prevention | Cannot add own products to cart or order them                |
+| Order access control     | Only order participants can view/modify                      |
+| Chat access control      | Only order participants can join chat room                   |
 
 ### 3. Input Validation & Sanitization
 
-| Measure | Implementation |
-|---|---|
-| Schema validation | Zod schemas on every endpoint (body, query, params) |
-| String trimming | `.trim()` on all string inputs |
-| Length limits | Max lengths enforced (username: 50, address: 500, etc.) |
-| Numeric bounds | Price: 0-20000, Quantity: 0-2000, Rating: 1-5 |
-| Phone format | Regex `/^\d{10}$/` |
-| Enum validation | Role, order status restricted to valid values |
-| File type check | MIME type whitelist (jpeg, png, webp, gif) |
-| File size limit | 5MB maximum |
+| Measure           | Implementation                                          |
+| ----------------- | ------------------------------------------------------- |
+| Schema validation | Zod schemas on every endpoint (body, query, params)     |
+| String trimming   | `.trim()` on all string inputs                          |
+| Length limits     | Max lengths enforced (username: 50, address: 500, etc.) |
+| Numeric bounds    | Price: 0-20000, Quantity: 0-2000, Rating: 1-5           |
+| Phone format      | Regex `/^\d{10}$/`                                      |
+| Enum validation   | Role, order status restricted to valid values           |
+| File type check   | MIME type whitelist (jpeg, png, webp, gif)              |
+| File size limit   | 5MB maximum                                             |
 
 ### 4. SQL Injection Prevention
 
@@ -1169,46 +1155,45 @@ Content-Security-Policy (CSP):
 
 ### 6. Rate Limiting
 
-| Endpoint Group | Limit | Window |
-|---|---|---|
-| Auth (login, signup, refresh, logout) | 20 requests | 15 minutes |
-| API (products, cart, orders, chat, reviews, addresses, prediction) | 100 requests | 15 minutes |
-| Chat messages (customers) | 1 message | per hour per order |
+| Endpoint Group                                                     | Limit        | Window             |
+| ------------------------------------------------------------------ | ------------ | ------------------ |
+| Auth (login, signup, refresh, logout)                              | 20 requests  | 15 minutes         |
+| API (products, cart, orders, chat, reviews, addresses, prediction) | 100 requests | 15 minutes         |
+| Chat messages (customers)                                          | 1 message    | per hour per order |
 
 ### 8. CORS Configuration
 
 ```javascript
 // Production: restricted to specific origin
-origin: process.env.BASE_URL  // e.g., "https://agriconnect-wxuf.onrender.com"
+origin: process.env.BASE_URL; // e.g., "https://agriconnect-wxuf.onrender.com"
 
 // Development: allows all origins
-origin: true
+origin: true;
 
 // Credentials enabled for auth headers
-credentials: true
+credentials: true;
 ```
 
 ### 9. Data Protection
 
-| Measure | Implementation |
-|---|---|
-| Password storage | bcrypt hash only, never stored in plain text |
-| Token storage | localStorage on frontend |
-| SSL/TLS | Enabled for database and Redis connections |
+| Measure           | Implementation                                   |
+| ----------------- | ------------------------------------------------ |
+| Password storage  | bcrypt hash only, never stored in plain text     |
+| Token storage     | localStorage on frontend                         |
+| SSL/TLS           | Enabled for database and Redis connections       |
 | Production errors | Generic "Something went wrong" (no stack traces) |
-| Payload limits | 1MB body parser limit |
-| Compression | Gzip enabled to reduce data in transit |
+| Payload limits    | 1MB body parser limit                            |
+| Compression       | Gzip enabled to reduce data in transit           |
 
-### 10. Real-time Security (Socket.io)
+### 10. Chat Security (REST + Polling)
 
-| Measure | Implementation |
-|---|---|
-| Connection auth | JWT token required in handshake |
-| Room isolation | Separate room per order |
-| Access verification | Check user is order participant on every event |
-| Message validation | Length check (1-300 chars), trimming |
-| Rate limiting | 1 message/hour for customers |
-| Status check | Chat only for pending orders |
+| Measure             | Implementation                                   |
+| ------------------- | ------------------------------------------------ |
+| Request auth        | JWT token required on protected chat endpoints   |
+| Access isolation    | Messages scoped per order                        |
+| Access verification | Check user is order participant on every request |
+| Message validation  | Length check (1-300 chars), trimming             |
+| Status check        | Chat unavailable for cancelled orders            |
 
 ---
 
@@ -1292,7 +1277,7 @@ npm start
 4. Run auto-migrations (column additions, constraints, table creation)
 5. Connect to Redis (with retry strategy)
 6. Attach all route modules
-7. Initialize Socket.io for real-time chat
+7. Initialize chat REST routes (polling-based updates on client)
 8. Start HTTP server on PORT (default 8080)
 9. Register graceful shutdown handlers (SIGTERM, SIGINT)
 ```

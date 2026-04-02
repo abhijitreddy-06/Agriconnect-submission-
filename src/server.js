@@ -10,7 +10,6 @@ dotenv.config({ path: path.resolve(__dirname, "..", ".env") });
 const { default: app } = await import("./app.js");
 const { default: pool, testConnection, stopPoolMonitor } = await import("./config/database.js");
 const { closeRedis } = await import("./config/redis.js");
-const { initSocket } = await import("./config/socket.js");
 
 const port = process.env.PORT || 8080;
 
@@ -26,8 +25,6 @@ server.on("error", (error) => {
   process.exit(1);
 });
 
-const io = initSocket(server);
-
 const shutdown = async () => {
   const forceExitTimer = setTimeout(() => {
     process.exit(1);
@@ -35,7 +32,6 @@ const shutdown = async () => {
   forceExitTimer.unref();
 
   stopPoolMonitor();
-  io.close();
 
   server.close(() => {});
   try { await pool.end(); } catch {}
